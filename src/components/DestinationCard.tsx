@@ -1,37 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Destination, getCategoryLabel } from "@/data/destinations";
-
-function getActivityIcon(activity: string): string {
-  const a = activity.toLowerCase();
-  if (a.includes("trek") || a.includes("trail"))              return "🥾";
-  if (a.includes("hike") || a.includes("ice lake"))           return "🧗";
-  if (a.includes("paraglid") || a.includes("ultralight"))     return "🪂";
-  if (a.includes("photo"))                                     return "📸";
-  if (a.includes("boat") || a.includes("kayak"))              return "🛶";
-  if (a.includes("raft") || a.includes("river"))              return "🌊";
-  if (a.includes("zip"))                                       return "🎿";
-  if (a.includes("temple") || a.includes("stupa"))            return "🛕";
-  if (a.includes("monastery") || a.includes("gompa"))         return "⛩️";
-  if (a.includes("pilgrimage") || a.includes("meditation"))   return "🧘";
-  if (a.includes("cycl") || a.includes("bike"))               return "🚴";
-  if (a.includes("tea"))                                       return "🍵";
-  if (a.includes("cook") || a.includes("cuisin"))             return "🍽️";
-  if (a.includes("bird"))                                      return "🦅";
-  if (a.includes("wildlife"))                                  return "🐾";
-  if (a.includes("cave"))                                      return "🦇";
-  if (a.includes("camp"))                                      return "⛺";
-  if (a.includes("festival"))                                  return "🎊";
-  if (a.includes("jeep") || a.includes("safari"))             return "🚙";
-  if (a.includes("sunrise") || a.includes("viewpoint"))       return "🌄";
-  if (a.includes("glacier") || a.includes("lake"))            return "🏞️";
-  if (a.includes("market") || a.includes("bazaar"))           return "🛍️";
-  if (a.includes("museum") || a.includes("heritage"))         return "🏛️";
-  if (a.includes("walk") || a.includes("cultural"))           return "🚶";
-  if (a.includes("mountain flight") || a.includes("aircraft"))return "✈️";
-  return "✨";
-}
+import WeatherBadge from "./WeatherBadge";
+import { getActivityIcon } from "@/lib/activityIcons";
 
 const categoryStyles: Record<
   Destination["category"],
@@ -85,14 +58,22 @@ export default function DestinationCard({ destination }: { destination: Destinat
       {/* ── Content ───────────────────────────────────────── */}
       <div className="p-5 flex flex-col flex-1">
 
-        {/* Name + meta */}
-        <h2 className="text-xl font-bold text-gray-900 leading-snug mb-0.5">
-          {destination.name}
-        </h2>
-        <p className="text-xs text-gray-400 mb-3">
-          {destination.province} Province
-          {destination.elevation && <> · {destination.elevation}</>}
-        </p>
+        {/* Name + meta + live weather */}
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 leading-snug">
+              {destination.name}
+            </h2>
+            <p className="text-xs text-gray-400 mt-0.5">
+              {destination.province} Province
+              {destination.elevation && <> · {destination.elevation}</>}
+            </p>
+          </div>
+          <WeatherBadge
+            lat={destination.coordinates.lat}
+            lng={destination.coordinates.lng}
+          />
+        </div>
 
         {/* Description snippet */}
         <p className="text-gray-500 text-sm leading-relaxed line-clamp-2 mb-4">
@@ -115,14 +96,22 @@ export default function DestinationCard({ destination }: { destination: Destinat
           )}
         </div>
 
-        {/* Explore Activities button */}
-        <button
-          onClick={() => setExpanded((v) => !v)}
-          className={`mt-auto w-full ${s.btnBg} text-white text-sm font-semibold py-2.5 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2 cursor-pointer`}
-        >
-          <span className="text-base">{expanded ? "▲" : "🗺️"}</span>
-          {expanded ? "Hide Activities" : "Explore Activities"}
-        </button>
+        {/* Actions */}
+        <div className="mt-auto flex gap-2">
+          <button
+            onClick={() => setExpanded((v) => !v)}
+            className={`flex-1 ${s.btnBg} text-white text-sm font-semibold py-2.5 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2 cursor-pointer`}
+          >
+            <span className="text-base">{expanded ? "▲" : "🗺️"}</span>
+            {expanded ? "Hide" : "Activities"}
+          </button>
+          <Link
+            href={`/destinations/${destination.id}`}
+            className="flex-1 border border-gray-200 hover:border-gray-400 text-gray-600 hover:text-gray-900 text-sm font-semibold py-2.5 rounded-xl transition-colors duration-200 flex items-center justify-center gap-1"
+          >
+            Full Page →
+          </Link>
+        </div>
 
         {/* ── Expanded activity list ─────────────────────── */}
         {expanded && (
