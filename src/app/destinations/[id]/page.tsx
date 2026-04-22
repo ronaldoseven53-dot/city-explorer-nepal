@@ -1,21 +1,11 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import type { Metadata } from "next";
 import { destinations, getCategoryLabel } from "@/data/destinations";
 import Navbar from "@/components/Navbar";
 import WeatherBadge from "@/components/WeatherBadge";
 import { getActivityIcon, getWildlifeIcon } from "@/lib/activityIcons";
-
-const SingleDestinationMap = dynamic(
-  () => import("@/components/SingleDestinationMap"),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="h-72 sm:h-96 rounded-2xl bg-gray-100 animate-pulse" />
-    ),
-  }
-);
+import SingleDestinationMapLoader from "@/components/SingleDestinationMapLoader";
 
 const categoryStyles: Record<
   string,
@@ -180,10 +170,35 @@ export default async function DestinationPage(
           </div>
         </section>
 
+        {/* Getting There */}
+        <section>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Getting There</h2>
+          <div className={`flex items-start gap-4 p-5 rounded-2xl border ${s.border} ${s.lightBg}`}>
+            <span className="text-2xl flex-shrink-0">🚌</span>
+            <p className={`text-sm leading-relaxed ${s.lightText}`}>{d.gettingThere}</p>
+          </div>
+        </section>
+
+        {/* Travel Tips */}
+        <section>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Travel Tips</h2>
+          <ul className="space-y-3">
+            {d.travelTips.map((tip, i) => (
+              <li
+                key={i}
+                className={`flex items-start gap-3 p-4 rounded-xl border ${s.border} ${s.lightBg}`}
+              >
+                <span className={`text-base font-bold flex-shrink-0 ${s.lightText}`}>💡</span>
+                <span className={`text-sm leading-relaxed ${s.lightText}`}>{tip}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
         {/* Map */}
         <section>
           <h2 className="text-2xl font-bold text-gray-900 mb-5">Location</h2>
-          <SingleDestinationMap destination={d} />
+          <SingleDestinationMapLoader destination={d} />
           <p className="text-xs text-gray-400 mt-2 text-center">
             {d.coordinates.lat.toFixed(4)}° N, {d.coordinates.lng.toFixed(4)}° E
           </p>

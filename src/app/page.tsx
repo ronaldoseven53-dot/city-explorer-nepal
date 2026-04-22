@@ -1,17 +1,7 @@
-import dynamic from "next/dynamic";
 import Navbar from "@/components/Navbar";
+import MapLoader from "@/components/MapLoader";
 import SearchableGrid from "@/components/SearchableGrid";
 import { destinations } from "@/data/destinations";
-
-// Leaflet accesses `window` — must be client-only
-const MapSection = dynamic(() => import("@/components/MapSection"), {
-  ssr: false,
-  loading: () => (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="h-[420px] sm:h-[500px] rounded-2xl bg-gray-100 animate-pulse" />
-    </div>
-  ),
-});
 
 export default function Home() {
   return (
@@ -69,7 +59,7 @@ export default function Home() {
 
       <div className="bg-gray-50">
         {/* ── Interactive Map ───────────────────────────────────── */}
-        <MapSection />
+        <MapLoader />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <hr className="border-gray-200" />
