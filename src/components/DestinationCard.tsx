@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Destination, getCategoryLabel } from "@/data/destinations";
 import WeatherBadge from "./WeatherBadge";
@@ -32,11 +33,12 @@ export default function DestinationCard({ destination }: { destination: Destinat
 
       {/* ── Image ─────────────────────────────────────────── */}
       <div className="relative h-52 overflow-hidden bg-gradient-to-br from-slate-300 to-slate-500 flex-shrink-0">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src={destination.placeholderImage}
-          alt={destination.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          alt={`${destination.name} — ${destination.region}`}
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="object-cover group-hover:scale-105 transition-transform duration-500"
         />
 
         {/* Dark gradient so text is readable over any image */}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 interface WeatherData {
   temp: number;
@@ -34,13 +35,11 @@ export default function WeatherBadge({ lat, lng }: { lat: number; lng: number })
       className="flex items-center gap-1 bg-sky-50 text-sky-700 text-xs font-medium px-2 py-0.5 rounded-full"
       title={`Feels like ${weather.feels_like}°C · ${weather.description}`}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src={`https://openweathermap.org/img/wn/${weather.icon}.png`}
         alt={weather.description}
         width={20}
         height={20}
-        className="w-5 h-5"
       />
       <span>{weather.temp}°C</span>
     </div>

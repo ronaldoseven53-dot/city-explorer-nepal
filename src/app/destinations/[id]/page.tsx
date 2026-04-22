@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import { destinations, getCategoryLabel } from "@/data/destinations";
 import Navbar from "@/components/Navbar";
@@ -51,11 +52,13 @@ export default async function DestinationPage(
       {/* ── Hero ──────────────────────────────────────────── */}
       <div className="pt-16">
         <div className="relative h-72 sm:h-[420px] overflow-hidden bg-gradient-to-br from-slate-400 to-slate-600">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={d.placeholderImage}
-            alt={d.name}
-            className="w-full h-full object-cover"
+            alt={`${d.name} — ${d.region}`}
+            fill
+            sizes="100vw"
+            className="object-cover"
+            priority
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
