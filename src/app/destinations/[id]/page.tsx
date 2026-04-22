@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { destinations, getCategoryLabel } from "@/data/destinations";
 import Navbar from "@/components/Navbar";
 import WeatherBadge from "@/components/WeatherBadge";
+import ShareButton from "@/components/ShareButton";
 import { getActivityIcon, getWildlifeIcon } from "@/lib/activityIcons";
 import SingleDestinationMapLoader from "@/components/SingleDestinationMapLoader";
 
@@ -105,9 +106,12 @@ export default async function DestinationPage(
             <span className="text-gray-400 text-xs font-medium uppercase tracking-wide">Province</span>
             <p className="font-semibold text-gray-800">{d.province}</p>
           </div>
-          <div className="ml-auto">
-            <span className="text-gray-400 text-xs font-medium uppercase tracking-wide block mb-1">Live Weather</span>
-            <WeatherBadge lat={d.coordinates.lat} lng={d.coordinates.lng} />
+          <div className="ml-auto flex items-center gap-3">
+            <div>
+              <span className="text-gray-400 text-xs font-medium uppercase tracking-wide block mb-1">Live Weather</span>
+              <WeatherBadge lat={d.coordinates.lat} lng={d.coordinates.lng} />
+            </div>
+            <ShareButton name={d.name} />
           </div>
         </div>
       </div>
@@ -206,6 +210,51 @@ export default async function DestinationPage(
             {d.coordinates.lat.toFixed(4)}° N, {d.coordinates.lng.toFixed(4)}° E
           </p>
         </section>
+
+        {/* Related Destinations */}
+        {(() => {
+          const related = destinations
+            .filter((r) => r.id !== d.id && r.category === d.category)
+            .slice(0, 3);
+          if (related.length === 0) return null;
+          return (
+            <section>
+              <h2 className="text-2xl font-bold text-gray-900 mb-5">
+                More {getCategoryLabel(d.category)} Destinations
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {related.map((r) => {
+                  const rs = categoryStyles[r.category];
+                  return (
+                    <Link
+                      key={r.id}
+                      href={`/destinations/${r.id}`}
+                      className="group rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300"
+                    >
+                      <div className="relative h-36 bg-slate-200">
+                        <Image
+                          src={r.placeholderImage}
+                          alt={r.name}
+                          fill
+                          sizes="(max-width: 640px) 100vw, 33vw"
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                        <span className={`absolute bottom-2 left-2 ${rs.badge} text-white text-xs font-semibold px-2 py-0.5 rounded-full`}>
+                          {r.region.split(",")[0]}
+                        </span>
+                      </div>
+                      <div className="p-3 bg-white">
+                        <p className="font-bold text-gray-900 text-sm group-hover:text-blue-600 transition-colors">{r.name}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">{r.province} Province{r.elevation && ` · ${r.elevation}`}</p>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        })()}
       </main>
 
       {/* ── Footer ─────────────────────────────────────────── */}
