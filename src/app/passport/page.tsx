@@ -6,6 +6,7 @@ import { destinations } from "@/data/destinations";
 import Navbar from "@/components/Navbar";
 import PassportActions from "@/components/PassportActions";
 
+export const dynamic = "force-dynamic";
 export const metadata = { title: "My Passport — City Explorer Nepal" };
 
 export default async function PassportPage() {
