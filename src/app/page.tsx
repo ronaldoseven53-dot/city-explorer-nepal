@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import MapLoader from "@/components/MapLoader";
 import SearchableGrid from "@/components/SearchableGrid";
 import TravelChat from "@/components/TravelChat";
+import AIPlanner from "@/components/AIPlanner";
 import { destinations } from "@/data/destinations";
 
 export default function Home() {
@@ -87,6 +88,7 @@ export default function Home() {
       </footer>
 
       <TravelChat />
+      <AIPlanner />
     </>
   );
 }
