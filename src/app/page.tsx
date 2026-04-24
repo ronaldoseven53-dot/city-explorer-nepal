@@ -3,6 +3,7 @@ import MapLoader from "@/components/MapLoader";
 import SearchableGrid from "@/components/SearchableGrid";
 import TravelChat from "@/components/TravelChat";
 import AIPlanner from "@/components/AIPlanner";
+import AIPlannerTrigger from "@/components/AIPlannerTrigger";
 import { destinations } from "@/data/destinations";
 
 export default function Home() {
@@ -81,6 +82,38 @@ export default function Home() {
           <SearchableGrid />
         </main>
       </div>
+
+      {/* ── AI Planner CTA ────────────────────────────────────── */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-red-950 to-slate-900 py-20 px-4">
+        {/* Decorative blurred blobs */}
+        <div className="absolute -top-20 -left-20 w-72 h-72 bg-red-700/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-blue-800/20 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative max-w-2xl mx-auto text-center">
+          <p className="text-red-400 font-semibold text-xs tracking-widest uppercase mb-4">
+            ✨ Powered by Gemini AI
+          </p>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight mb-4">
+            Not sure where to go?
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-300">
+              Let AI plan your Nepal trip!
+            </span>
+          </h2>
+          <p className="text-slate-400 text-base sm:text-lg mb-8 leading-relaxed">
+            Tell our AI assistant your interests, budget, or travel dates — it will build a personalised itinerary from our {destinations.length} handpicked destinations.
+          </p>
+
+          <AIPlannerTrigger />
+
+          <div className="mt-8 flex flex-wrap justify-center gap-6 text-slate-500 text-xs">
+            {["Free to use", "Instant itineraries", "17 real destinations", "Streams in real-time"].map((f) => (
+              <span key={f} className="flex items-center gap-1.5">
+                <span className="text-red-500">✓</span> {f}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* ── Footer ────────────────────────────────────────────── */}
       <footer className="bg-slate-900 text-slate-400 py-8 text-center text-sm">

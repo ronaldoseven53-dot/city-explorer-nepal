@@ -106,6 +106,13 @@ export default function AIPlanner() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
+  // Allow external triggers (e.g. the CTA section) to open this panel
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    document.addEventListener("open-ai-planner", handler);
+    return () => document.removeEventListener("open-ai-planner", handler);
+  }, []);
+
   useEffect(() => {
     if (open) setTimeout(() => inputRef.current?.focus(), 150);
   }, [open]);
