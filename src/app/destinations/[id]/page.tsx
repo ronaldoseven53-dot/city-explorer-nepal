@@ -6,6 +6,8 @@ import { destinations, getCategoryLabel } from "@/data/destinations";
 import Navbar from "@/components/Navbar";
 import WeatherBadge from "@/components/WeatherBadge";
 import ShareButton from "@/components/ShareButton";
+import PackingList from "@/components/PackingList";
+import FavoriteButton from "@/components/FavoriteButton";
 import { getActivityIcon, getWildlifeIcon } from "@/lib/activityIcons";
 import SingleDestinationMapLoader from "@/components/SingleDestinationMapLoader";
 
@@ -111,6 +113,14 @@ export default async function DestinationPage(
               <span className="text-gray-400 text-xs font-medium uppercase tracking-wide block mb-1">Live Weather</span>
               <WeatherBadge lat={d.coordinates.lat} lng={d.coordinates.lng} />
             </div>
+            <PackingList
+              destination={d.name}
+              category={d.category}
+              elevation={d.elevation}
+              lat={d.coordinates.lat}
+              lng={d.coordinates.lng}
+            />
+            <FavoriteButton destinationId={d.id} />
             <ShareButton name={d.name} />
           </div>
         </div>

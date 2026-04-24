@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-b border-gray-100 shadow-sm">
@@ -38,9 +40,17 @@ export default function Navbar() {
               <span className="font-bold text-lg text-red-700">Nepal</span>
             </div>
           </div>
-          <p className="hidden sm:block text-sm text-gray-400 italic">
-            Discover the Himalayan Kingdom
-          </p>
+          <div className="flex items-center gap-3">
+            <p className="hidden sm:block text-sm text-gray-400 italic">
+              Discover the Himalayan Kingdom
+            </p>
+            <Link
+              href="/passport"
+              className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 hover:text-red-700 bg-gray-100 hover:bg-red-50 px-3 py-1.5 rounded-full transition-colors"
+            >
+              🛂 My Passport
+            </Link>
+          </div>
         </div>
       </div>
     </nav>

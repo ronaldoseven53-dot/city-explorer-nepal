@@ -107,6 +107,17 @@ export default function DestinationCard({ destination }: { destination: Destinat
             <span className="text-base">{expanded ? "▲" : "🗺️"}</span>
             {expanded ? "Hide" : "Activities"}
           </button>
+          <button
+            onClick={() => document.dispatchEvent(
+              new CustomEvent("map-fly-to", {
+                detail: { lat: destination.coordinates.lat, lng: destination.coordinates.lng, id: destination.id },
+              })
+            )}
+            title="Fly to on map"
+            className="border border-gray-200 hover:border-blue-400 hover:text-blue-600 text-gray-500 text-sm font-semibold px-3 py-2.5 rounded-xl transition-colors duration-200 flex items-center justify-center cursor-pointer"
+          >
+            📍
+          </button>
           <Link
             href={`/destinations/${destination.id}`}
             className="flex-1 border border-gray-200 hover:border-gray-400 text-gray-600 hover:text-gray-900 text-sm font-semibold py-2.5 rounded-xl transition-colors duration-200 flex items-center justify-center gap-1"
