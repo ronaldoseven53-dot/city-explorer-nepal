@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import MapLoader from "@/components/MapLoader";
 import SearchableGrid from "@/components/SearchableGrid";
+import TravelChat from "@/components/TravelChat";
 import { destinations } from "@/data/destinations";
 
 export default function Home() {
@@ -84,6 +85,8 @@ export default function Home() {
       <footer className="bg-slate-900 text-slate-400 py-8 text-center text-sm">
         <p>© 2025 City Explorer Nepal · Explore the Himalayas 🏔️</p>
       </footer>
+
+      <TravelChat />
     </>
   );
 }
