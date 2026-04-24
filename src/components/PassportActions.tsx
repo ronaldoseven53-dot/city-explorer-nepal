@@ -9,9 +9,9 @@ interface Props { userId: string; destinationId: string; saved: boolean; }
 export default function PassportActions({ userId, destinationId, saved }: Props) {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
-  const supabase = createClient();
 
   const toggle = () => startTransition(async () => {
+    const supabase = createClient();
     if (saved) {
       await supabase.from("favorites").delete()
         .eq("user_id", userId).eq("destination_id", destinationId);
