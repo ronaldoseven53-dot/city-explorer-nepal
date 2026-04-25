@@ -1,17 +1,18 @@
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import TransitionLink from "@/components/TransitionLink";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { destinations, getCategoryLabel } from "@/data/destinations";
 import Navbar from "@/components/Navbar";
-import WeatherBadge from "@/components/WeatherBadge";
+import WeatherBadgeServer from "@/components/WeatherBadgeServer";
 import ShareButton from "@/components/ShareButton";
 import PackingList from "@/components/PackingList";
 import FavoriteButton from "@/components/FavoriteButton";
 import { getActivityIcon, getWildlifeIcon } from "@/lib/activityIcons";
 import SingleDestinationMapLoader from "@/components/SingleDestinationMapLoader";
-import AIPlanButton from "@/components/AIPlanButton";
 import VisitTracker from "@/components/VisitTracker";
+import AIPlanButton from "@/components/AIPlanButtonLazy";
 
 const categoryStyles: Record<
   string,
@@ -116,7 +117,9 @@ export default async function DestinationPage(
           <div className="ml-auto flex items-center gap-3">
             <div>
               <span className="text-gray-400 text-xs font-medium uppercase tracking-wide block mb-1">Live Weather</span>
-              <WeatherBadge lat={d.coordinates.lat} lng={d.coordinates.lng} />
+              <Suspense fallback={<div className="h-6 w-20 bg-gray-100 rounded-full animate-pulse" />}>
+                <WeatherBadgeServer lat={d.coordinates.lat} lng={d.coordinates.lng} />
+              </Suspense>
             </div>
             <PackingList
               destination={d.name}
@@ -157,7 +160,9 @@ export default async function DestinationPage(
               <p className="text-white/50 text-sm mb-7 max-w-sm mx-auto leading-relaxed">
                 Get a personalised 2-day itinerary built around the best {getCategoryLabel(d.category).toLowerCase()} experiences here.
               </p>
-              <AIPlanButton name={d.name} category={getCategoryLabel(d.category)} />
+              <Suspense fallback={<div className="inline-flex items-center gap-3 h-14 w-56 bg-white/10 rounded-2xl animate-pulse" />}>
+                <AIPlanButton name={d.name} category={getCategoryLabel(d.category)} />
+              </Suspense>
             </div>
           </div>
         </section>

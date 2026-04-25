@@ -3,6 +3,7 @@ import MapLoader from "@/components/MapLoader";
 import CategoryGrid from "@/components/CategoryGrid";
 import AIPlanner from "@/components/AIPlanner";
 import AIPlannerTrigger from "@/components/AIPlannerTrigger";
+import SeasonalBanner from "@/components/SeasonalBanner";
 import { destinations, categoryGroups } from "@/data/destinations";
 
 export default function Home() {
@@ -66,6 +67,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <hr className="border-gray-200" />
         </div>
+
+        <SeasonalBanner />
 
         {/* ── Search + Destination Grid ─────────────────────────── */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
