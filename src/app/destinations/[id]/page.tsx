@@ -10,6 +10,8 @@ import PackingList from "@/components/PackingList";
 import FavoriteButton from "@/components/FavoriteButton";
 import { getActivityIcon, getWildlifeIcon } from "@/lib/activityIcons";
 import SingleDestinationMapLoader from "@/components/SingleDestinationMapLoader";
+import AIPlanButton from "@/components/AIPlanButton";
+import VisitTracker from "@/components/VisitTracker";
 
 const categoryStyles: Record<
   string,
@@ -19,7 +21,8 @@ const categoryStyles: Record<
   heritage:   { badge: "bg-amber-600",  lightBg: "bg-amber-50",  lightText: "text-amber-700",  border: "border-amber-100"  },
   nature:     { badge: "bg-green-600",  lightBg: "bg-green-50",  lightText: "text-green-700",  border: "border-green-100"  },
   pilgrimage: { badge: "bg-purple-600", lightBg: "bg-purple-50", lightText: "text-purple-700", border: "border-purple-100" },
-  hill:       { badge: "bg-teal-600",   lightBg: "bg-teal-50",   lightText: "text-teal-700",   border: "border-teal-100"   },
+  hill:        { badge: "bg-teal-600",   lightBg: "bg-teal-50",   lightText: "text-teal-700",   border: "border-teal-100"   },
+  agriculture: { badge: "bg-lime-600",   lightBg: "bg-lime-50",   lightText: "text-lime-700",   border: "border-lime-100"   },
 };
 
 export function generateStaticParams() {
@@ -50,6 +53,7 @@ export default async function DestinationPage(
 
   return (
     <>
+      <VisitTracker id={d.id} />
       <Navbar />
 
       {/* ── Hero ──────────────────────────────────────────── */}
@@ -134,6 +138,28 @@ export default async function DestinationPage(
         <section>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">About {d.name}</h2>
           <p className="text-gray-600 text-base leading-relaxed">{d.description}</p>
+        </section>
+
+        {/* AI Planner CTA */}
+        <section>
+          <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-slate-900 via-red-950 to-slate-900 px-8 py-10 text-center">
+            {/* Decorative glow blobs */}
+            <div className="absolute -top-10 -left-10 w-48 h-48 bg-red-700/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-10 -right-10 w-56 h-56 bg-orange-700/15 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative">
+              <p className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-3">
+                ✨ Powered by Gemini AI
+              </p>
+              <h3 className="text-white font-extrabold text-2xl sm:text-3xl mb-2">
+                Ready to explore {d.name}?
+              </h3>
+              <p className="text-white/50 text-sm mb-7 max-w-sm mx-auto leading-relaxed">
+                Get a personalised 2-day itinerary built around the best {getCategoryLabel(d.category).toLowerCase()} experiences here.
+              </p>
+              <AIPlanButton name={d.name} category={getCategoryLabel(d.category)} />
+            </div>
+          </div>
         </section>
 
         {/* Activities + Wildlife — side by side on desktop */}

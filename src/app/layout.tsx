@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import PWARegistrar from "@/components/PWARegistrar";
+import AIAssistant from "@/components/AIAssistant";
+import { UserPassportProvider } from "@/context/UserPassportContext";
+import MasterExplorerModal from "@/components/MasterExplorerModal";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,8 +39,12 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
       <body className="min-h-full flex flex-col">
-        {children}
-        <PWARegistrar />
+        <UserPassportProvider>
+          {children}
+          <PWARegistrar />
+          <AIAssistant />
+          <MasterExplorerModal />
+        </UserPassportProvider>
       </body>
     </html>
   );

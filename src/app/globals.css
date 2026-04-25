@@ -58,3 +58,26 @@ body {
     animation: none;
   }
 }
+
+/* ── 3-D Confetti ────────────────────────────────────────────── */
+
+@keyframes confetti-a {
+  from { transform: translateY(-20px) rotateX(0deg)    rotateY(0deg)   rotateZ(0deg);   opacity: 1; }
+  80%  { opacity: 1; }
+  to   { transform: translateY(110vh) rotateX(720deg)  rotateY(480deg) rotateZ(360deg); opacity: 0; }
+}
+@keyframes confetti-b {
+  from { transform: translateY(-20px) rotateX(0deg)    rotateY(0deg)    rotateZ(0deg);    opacity: 1; }
+  80%  { opacity: 1; }
+  to   { transform: translateY(110vh) rotateX(-480deg) rotateY(720deg)  rotateZ(-240deg); opacity: 0; }
+}
+@keyframes confetti-c {
+  0%   { transform: translateY(-20px)  rotateX(0deg)   rotateY(0deg)   rotateZ(0deg)    translateX(0px);   opacity: 1; }
+  40%  { transform: translateY(40vh)   rotateX(360deg) rotateY(240deg) rotateZ(120deg)  translateX(22px);  opacity: 1; }
+  80%  { opacity: 1; }
+  to   { transform: translateY(110vh)  rotateX(600deg) rotateY(900deg) rotateZ(-300deg) translateX(-22px); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [class*="confetti-"] { animation: none !important; opacity: 0 !important; }
+}

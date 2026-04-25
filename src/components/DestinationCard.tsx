@@ -16,7 +16,8 @@ const categoryStyles: Record<
   heritage:   { badge: "bg-amber-600",  btnBg: "bg-amber-600 hover:bg-amber-700",  iconChip: "bg-amber-50 text-amber-800",  border: "border-amber-100" },
   nature:     { badge: "bg-green-600",  btnBg: "bg-green-600 hover:bg-green-700",  iconChip: "bg-green-50 text-green-800",  border: "border-green-100" },
   pilgrimage: { badge: "bg-purple-600", btnBg: "bg-purple-600 hover:bg-purple-700",iconChip: "bg-purple-50 text-purple-800",border: "border-purple-100"},
-  hill:       { badge: "bg-teal-600",   btnBg: "bg-teal-600 hover:bg-teal-700",   iconChip: "bg-teal-50 text-teal-800",   border: "border-teal-100"  },
+  hill:        { badge: "bg-teal-600",   btnBg: "bg-teal-600 hover:bg-teal-700",   iconChip: "bg-teal-50 text-teal-800",   border: "border-teal-100"   },
+  agriculture: { badge: "bg-lime-600",   btnBg: "bg-lime-600 hover:bg-lime-700",   iconChip: "bg-lime-50 text-lime-800",   border: "border-lime-100"   },
 };
 
 export default function DestinationCard({ destination }: { destination: Destination }) {

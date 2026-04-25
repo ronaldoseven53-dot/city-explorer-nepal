@@ -3,6 +3,16 @@ import { google } from "@ai-sdk/google";
 import { z } from "zod";
 import { destinations } from "@/data/destinations";
 
+export const itineraryEventSchema = z.object({
+  id: z.string(),
+  day: z.number().int().min(1),
+  title: z.string(),
+  location: z.string(),
+  description: z.string(),
+  duration: z.string(),
+  type: z.enum(["travel", "activity", "accommodation", "meal"]),
+});
+
 const destinationList = JSON.stringify(
   destinations.map(({ id, name, province, region, category, description,
     activities, highlights, bestTimeToVisit, elevation, gettingThere, travelTips, basePrice, coordinates }) => ({
@@ -11,23 +21,22 @@ const destinationList = JSON.stringify(
   }))
 );
 
-const SYSTEM_PROMPT = `You are a friendly and knowledgeable Nepal Travel Assistant for City Explorer Nepal.
+const SYSTEM_PROMPT = `You are an expert Nepal Travel Agent for City Explorer Nepal.
 
-Plan trips and answer questions using ONLY the destinations listed below. Do not invent places not in this list.
+Plan trips using ONLY the locations and activities in this data. If a user asks for something not covered here, politely tell them you specialize in these specific Nepal experiences and suggest the closest match from the list.
 
 When suggesting an itinerary:
 - Recommend a logical order based on geography (group nearby destinations)
 - Mention the best time to visit each stop
 - Include 2–3 top activities per destination
 - Use the getTransportOptions tool whenever the user asks how to travel between two cities, or when building a multi-stop itinerary
-- After calling the tool, present the options in a clear formatted list
-- Keep the tone warm, enthusiastic, and helpful
+- ALWAYS call the buildItinerary tool when creating any multi-day trip plan or itinerary. Pass every activity, travel leg, meal stop, and accommodation as a separate event. Use sequential IDs like "e1", "e2", etc.
+- After calling buildItinerary, write a short warm summary paragraph (no bullet list needed — the timeline card UI handles the details)
+- Keep the tone warm, enthusiastic, and expert
 
 Budget guidance: each destination has a basePrice (NPR/day). Mention this when the user asks about cost.
 
-If the user asks about a place not in the list, politely say it is not covered yet and suggest the closest match.
-
-AVAILABLE DESTINATIONS:
+KNOWLEDGE BASE — YOUR ONLY SOURCES:
 ${destinationList}`;
 
 // ── Transport tool ────────────────────────────────────────────────
@@ -116,6 +125,18 @@ const getTransportOptions = tool({
   },
 });
 
+// ── Itinerary tool ───────────────────────────────────────────────
+const buildItinerary = tool({
+  description:
+    "Render a structured trip itinerary as a draggable timeline of events in the UI. Call this whenever you create any multi-day trip plan.",
+  inputSchema: z.object({
+    tripTitle: z.string().describe("Short title for the trip, e.g. '7-Day Nepal Highlights'"),
+    totalDays: z.number().int().min(1),
+    events: z.array(itineraryEventSchema),
+  }),
+  execute: async ({ tripTitle, totalDays, events }) => ({ tripTitle, totalDays, events }),
+});
+
 export async function POST(req: Request) {
   const { messages } = await req.json();
 
@@ -123,8 +144,8 @@ export async function POST(req: Request) {
     model:    google("gemini-2.0-flash"),
     system:   SYSTEM_PROMPT,
     messages,
-    tools:    { getTransportOptions },
-    stopWhen: stepCountIs(3), // allow up to 3 tool-call→response rounds
+    tools:    { getTransportOptions, buildItinerary },
+    stopWhen: stepCountIs(5),
   });
 
   return result.toUIMessageStreamResponse();

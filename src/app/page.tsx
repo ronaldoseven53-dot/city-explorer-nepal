@@ -1,10 +1,9 @@
 import Navbar from "@/components/Navbar";
 import MapLoader from "@/components/MapLoader";
-import SearchableGrid from "@/components/SearchableGrid";
-import TravelChat from "@/components/TravelChat";
+import CategoryGrid from "@/components/CategoryGrid";
 import AIPlanner from "@/components/AIPlanner";
 import AIPlannerTrigger from "@/components/AIPlannerTrigger";
-import { destinations } from "@/data/destinations";
+import { destinations, categoryGroups } from "@/data/destinations";
 
 export default function Home() {
   return (
@@ -33,7 +32,7 @@ export default function Home() {
           <div className="flex flex-wrap justify-center gap-4">
             {[
               { value: String(destinations.length), label: "Destinations" },
-              { value: "5",       label: "Categories"   },
+              { value: String(categoryGroups.length), label: "Categories" },
               { value: "8,848 m", label: "Highest Peak" },
             ].map((stat) => (
               <div
@@ -72,14 +71,14 @@ export default function Home() {
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center mb-10">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
-              All Destinations
+              Browse by Category
             </h2>
             <p className="text-gray-500 text-sm sm:text-base max-w-xl mx-auto">
-              Search by activity, wildlife, or city name — live weather shown on each card.
+              Choose a category to explore destinations — from high-altitude treks to rare agricultural wonders.
             </p>
           </div>
 
-          <SearchableGrid />
+          <CategoryGrid />
         </main>
       </div>
 
@@ -120,7 +119,6 @@ export default function Home() {
         <p>© 2025 City Explorer Nepal · Explore the Himalayas 🏔️</p>
       </footer>
 
-      <TravelChat />
       <AIPlanner />
     </>
   );

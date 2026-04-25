@@ -7,12 +7,13 @@ import DestinationCard from "./DestinationCard";
 type Category = "all" | Destination["category"];
 
 const categoryFilters: { value: Category; label: string; emoji: string; active: string; inactive: string }[] = [
-  { value: "all",        label: "All",        emoji: "🗺️", active: "bg-gray-900 text-white border-gray-900",       inactive: "bg-white text-gray-600 border-gray-200 hover:border-gray-400"    },
-  { value: "mountain",   label: "Mountain",   emoji: "🏔️", active: "bg-blue-600 text-white border-blue-600",        inactive: "bg-white text-blue-700 border-blue-200 hover:border-blue-400"    },
-  { value: "heritage",   label: "Heritage",   emoji: "🏛️", active: "bg-amber-600 text-white border-amber-600",      inactive: "bg-white text-amber-700 border-amber-200 hover:border-amber-400"  },
-  { value: "nature",     label: "Nature",     emoji: "🌿", active: "bg-green-600 text-white border-green-600",      inactive: "bg-white text-green-700 border-green-200 hover:border-green-400"  },
-  { value: "pilgrimage", label: "Pilgrimage", emoji: "🛕", active: "bg-purple-600 text-white border-purple-600",    inactive: "bg-white text-purple-700 border-purple-200 hover:border-purple-400"},
-  { value: "hill",       label: "Hill",       emoji: "🍃", active: "bg-teal-600 text-white border-teal-600",        inactive: "bg-white text-teal-700 border-teal-200 hover:border-teal-400"    },
+  { value: "all",         label: "All",         emoji: "🗺️", active: "bg-gray-900 text-white border-gray-900",       inactive: "bg-white text-gray-600 border-gray-200 hover:border-gray-400"    },
+  { value: "agriculture", label: "Agriculture", emoji: "🌾", active: "bg-lime-600 text-white border-lime-600",        inactive: "bg-white text-lime-700 border-lime-200 hover:border-lime-400"    },
+  { value: "mountain",    label: "Mountain",    emoji: "🏔️", active: "bg-blue-600 text-white border-blue-600",        inactive: "bg-white text-blue-700 border-blue-200 hover:border-blue-400"    },
+  { value: "heritage",    label: "Heritage",    emoji: "🏛️", active: "bg-amber-600 text-white border-amber-600",      inactive: "bg-white text-amber-700 border-amber-200 hover:border-amber-400"  },
+  { value: "nature",      label: "Nature",      emoji: "🌿", active: "bg-green-600 text-white border-green-600",      inactive: "bg-white text-green-700 border-green-200 hover:border-green-400"  },
+  { value: "pilgrimage",  label: "Pilgrimage",  emoji: "🛕", active: "bg-purple-600 text-white border-purple-600",    inactive: "bg-white text-purple-700 border-purple-200 hover:border-purple-400"},
+  { value: "hill",        label: "Hill",        emoji: "🍃", active: "bg-teal-600 text-white border-teal-600",        inactive: "bg-white text-teal-700 border-teal-200 hover:border-teal-400"    },
 ];
 
 const MIN_PRICE = 2000;
