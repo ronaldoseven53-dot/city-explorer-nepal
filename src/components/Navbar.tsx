@@ -1,4 +1,4 @@
-import Link from "next/link";
+import TransitionLink from "@/components/TransitionLink";
 
 export default function Navbar() {
   return (
@@ -44,12 +44,12 @@ export default function Navbar() {
             <p className="hidden sm:block text-sm text-gray-400 italic">
               Discover the Himalayan Kingdom
             </p>
-            <Link
+            <TransitionLink
               href="/passport"
               className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 hover:text-red-700 bg-gray-100 hover:bg-red-50 px-3 py-1.5 rounded-full transition-colors"
             >
               🛂 My Passport
-            </Link>
+            </TransitionLink>
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
+import TransitionLink from "@/components/TransitionLink";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { destinations, getCategoryLabel } from "@/data/destinations";
@@ -62,16 +62,17 @@ export default async function DestinationPage(
             sizes="100vw"
             className="object-cover"
             priority
+            style={{ viewTransitionName: `hero-${d.id}` }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
           {/* Back button */}
-          <Link
+          <TransitionLink
             href="/"
             className="absolute top-5 left-5 flex items-center gap-1.5 bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white text-sm font-medium px-3 py-1.5 rounded-full transition-colors"
           >
             ← Back
-          </Link>
+          </TransitionLink>
 
           {/* Name + badges */}
           <div className="absolute bottom-6 left-5 right-5">
@@ -236,7 +237,7 @@ export default async function DestinationPage(
                 {related.map((r) => {
                   const rs = categoryStyles[r.category];
                   return (
-                    <Link
+                    <TransitionLink
                       key={r.id}
                       href={`/destinations/${r.id}`}
                       className="group rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300"
@@ -248,6 +249,7 @@ export default async function DestinationPage(
                           fill
                           sizes="(max-width: 640px) 100vw, 33vw"
                           className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          style={{ viewTransitionName: `hero-${r.id}` }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                         <span className={`absolute bottom-2 left-2 ${rs.badge} text-white text-xs font-semibold px-2 py-0.5 rounded-full`}>
@@ -258,7 +260,7 @@ export default async function DestinationPage(
                         <p className="font-bold text-gray-900 text-sm group-hover:text-blue-600 transition-colors">{r.name}</p>
                         <p className="text-xs text-gray-400 mt-0.5">{r.province} Province{r.elevation && ` · ${r.elevation}`}</p>
                       </div>
-                    </Link>
+                    </TransitionLink>
                   );
                 })}
               </div>

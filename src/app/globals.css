@@ -25,3 +25,36 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ── View Transitions ────────────────────────────────────────── */
+
+/* Root: simple crossfade so the hero image morph is the focal point */
+@keyframes vt-fade-out {
+  to { opacity: 0; }
+}
+@keyframes vt-fade-in {
+  from { opacity: 0; }
+}
+
+::view-transition-old(root) {
+  animation: 300ms ease both vt-fade-out;
+}
+::view-transition-new(root) {
+  animation: 300ms ease both vt-fade-in;
+}
+
+/* Named hero images: browser handles position+size morph automatically.
+   We just slow it down a touch to feel more cinematic. */
+::view-transition-old(hero),
+::view-transition-new(hero) {
+  animation-duration: 400ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root),
+  ::view-transition-old(hero),
+  ::view-transition-new(hero) {
+    animation: none;
+  }
+}

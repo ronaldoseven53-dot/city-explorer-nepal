@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import TransitionLink from "@/components/TransitionLink";
 import { Destination, getCategoryLabel } from "@/data/destinations";
+import { PriceBadge } from "@/components/SearchableGrid";
 import WeatherBadge from "./WeatherBadge";
 import { getActivityIcon } from "@/lib/activityIcons";
 
@@ -39,6 +40,7 @@ export default function DestinationCard({ destination }: { destination: Destinat
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className="object-cover group-hover:scale-105 transition-transform duration-500"
+          style={{ viewTransitionName: `hero-${destination.id}` }}
         />
 
         {/* Dark gradient so text is readable over any image */}
@@ -70,6 +72,9 @@ export default function DestinationCard({ destination }: { destination: Destinat
               {destination.province} Province
               {destination.elevation && <> · {destination.elevation}</>}
             </p>
+            <div className="mt-1.5">
+              <PriceBadge price={destination.basePrice} />
+            </div>
           </div>
           <WeatherBadge
             lat={destination.coordinates.lat}
@@ -118,12 +123,12 @@ export default function DestinationCard({ destination }: { destination: Destinat
           >
             📍
           </button>
-          <Link
+          <TransitionLink
             href={`/destinations/${destination.id}`}
             className="flex-1 border border-gray-200 hover:border-gray-400 text-gray-600 hover:text-gray-900 text-sm font-semibold py-2.5 rounded-xl transition-colors duration-200 flex items-center justify-center gap-1"
           >
             Full Page →
-          </Link>
+          </TransitionLink>
         </div>
 
         {/* ── Expanded activity list ─────────────────────── */}

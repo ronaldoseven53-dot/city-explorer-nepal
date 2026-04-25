@@ -15,24 +15,47 @@ const categoryFilters: { value: Category; label: string; emoji: string; active: 
   { value: "hill",       label: "Hill",       emoji: "🍃", active: "bg-teal-600 text-white border-teal-600",        inactive: "bg-white text-teal-700 border-teal-200 hover:border-teal-400"    },
 ];
 
+const MIN_PRICE = 2000;
+const MAX_PRICE = 15000;
+const USD_RATE  = 133; // 1 USD ≈ 133 NPR
+
+function priceColor(price: number) {
+  if (price <= 3500) return "bg-green-50 text-green-700 border-green-200";
+  if (price <= 6000) return "bg-amber-50 text-amber-700 border-amber-200";
+  return "bg-red-50 text-red-700 border-red-200";
+}
+
+export function PriceBadge({ price }: { price: number }) {
+  return (
+    <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full border ${priceColor(price)}`}>
+      NPR {price.toLocaleString()}
+      <span className="opacity-60 font-normal">/ ~${Math.round(price / USD_RATE)}</span>
+    </span>
+  );
+}
+
 export default function SearchableGrid() {
-  const [query,    setQuery]    = useState("");
-  const [category, setCategory] = useState<Category>("all");
+  const [query,     setQuery]     = useState("");
+  const [category,  setCategory]  = useState<Category>("all");
+  const [maxBudget, setMaxBudget] = useState(MAX_PRICE);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return destinations.filter((d) => {
       const matchesCategory = category === "all" || d.category === category;
+      const matchesBudget   = d.basePrice <= maxBudget;
       const matchesQuery =
         !q ||
         d.name.toLowerCase().includes(q) ||
         d.region.toLowerCase().includes(q) ||
         d.category.toLowerCase().includes(q) ||
         d.activities.some((a) => a.toLowerCase().includes(q)) ||
-        d.wildlife.some((w) => w.toLowerCase().includes(q));
-      return matchesCategory && matchesQuery;
+        d.wildlife.some((w)  => w.toLowerCase().includes(q));
+      return matchesCategory && matchesBudget && matchesQuery;
     });
-  }, [query, category]);
+  }, [query, category, maxBudget]);
+
+  const budgetPct = ((maxBudget - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100;
 
   return (
     <div>
@@ -75,6 +98,46 @@ export default function SearchableGrid() {
         ))}
       </div>
 
+      {/* Budget slider */}
+      <div className="max-w-xl mx-auto mb-8 bg-white border border-gray-100 rounded-2xl shadow-sm px-6 py-4">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            Daily Budget
+          </span>
+          <div className="flex items-center gap-2">
+            <PriceBadge price={maxBudget} />
+            {maxBudget < MAX_PRICE && (
+              <button
+                onClick={() => setMaxBudget(MAX_PRICE)}
+                className="text-xs text-gray-400 hover:text-gray-600 underline cursor-pointer"
+              >
+                Reset
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="relative">
+          <input
+            type="range"
+            min={MIN_PRICE}
+            max={MAX_PRICE}
+            step={500}
+            value={maxBudget}
+            onChange={(e) => setMaxBudget(Number(e.target.value))}
+            className="w-full h-2 rounded-full appearance-none cursor-pointer"
+            style={{
+              background: `linear-gradient(to right, #dc2626 0%, #dc2626 ${budgetPct}%, #e5e7eb ${budgetPct}%, #e5e7eb 100%)`,
+            }}
+          />
+        </div>
+
+        <div className="flex justify-between mt-1.5 text-xs text-gray-400">
+          <span>NPR 2,000 / ~$15</span>
+          <span>NPR 15,000 / ~$113</span>
+        </div>
+      </div>
+
       {/* Result count */}
       <p className="text-xs text-gray-400 text-center mb-8">
         {filtered.length === destinations.length
@@ -92,10 +155,16 @@ export default function SearchableGrid() {
       ) : (
         <div className="text-center py-24">
           <p className="text-5xl mb-4">🏔️</p>
-          <p className="text-gray-600 font-semibold text-lg">No destinations found</p>
+          <p className="text-gray-600 font-semibold text-lg">No destinations in this budget</p>
           <p className="text-gray-400 text-sm mt-2">
-            Try clearing the search or selecting a different category
+            Try raising the slider or clearing the search
           </p>
+          <button
+            onClick={() => { setMaxBudget(MAX_PRICE); setQuery(""); setCategory("all"); }}
+            className="mt-4 text-sm text-red-600 hover:text-red-800 underline cursor-pointer"
+          >
+            Clear all filters
+          </button>
         </div>
       )}
     </div>

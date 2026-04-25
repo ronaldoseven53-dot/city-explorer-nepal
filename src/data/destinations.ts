@@ -14,6 +14,7 @@ export interface Destination {
   travelTips: string[];
   gettingThere: string;
   coordinates: { lat: number; lng: number };
+  basePrice: number; // estimated NPR per person per day (budget traveller)
 }
 
 export const destinations: Destination[] = [
@@ -54,6 +55,7 @@ export const destinations: Destination[] = [
     ],
     gettingThere: "Tribhuvan International Airport (KTM) is the main entry point, with direct flights from major Asian hubs. From the airport, taxis and ride apps reach the city centre in 20–40 minutes.",
     coordinates: { lat: 27.7172, lng: 85.324 },
+    basePrice: 3500,
   },
   {
     id: "pokhara",
@@ -94,6 +96,7 @@ export const destinations: Destination[] = [
     ],
     gettingThere: "Pokhara Regional International Airport (PKR) has domestic flights from Kathmandu (25 min). Tourist buses and private cars make the scenic 6–7 hour road journey from Kathmandu along the Prithvi Highway.",
     coordinates: { lat: 28.2096, lng: 83.9856 },
+    basePrice: 3000,
   },
   {
     id: "lumbini",
@@ -134,6 +137,7 @@ export const destinations: Destination[] = [
     ],
     gettingThere: "Fly to Bhairahawa Airport (BWA), 22 km from Lumbini, with daily flights from Kathmandu (30 min). From Bhairahawa, take a taxi or rickshaw directly to the sacred garden.",
     coordinates: { lat: 27.4833, lng: 83.2765 },
+    basePrice: 2500,
   },
   {
     id: "mustang",
@@ -174,6 +178,7 @@ export const destinations: Destination[] = [
     ],
     gettingThere: "Fly Kathmandu → Pokhara → Jomsom (Tenzing-Hillary Airport). From Jomsom, jeeps run to Kagbeni and onward to Lo Manthang. The full jeep journey from Jomsom to Lo Manthang takes 6–8 hours.",
     coordinates: { lat: 29.1851, lng: 83.9649 },
+    basePrice: 15000,
   },
   {
     id: "manang",
@@ -214,6 +219,7 @@ export const destinations: Destination[] = [
     ],
     gettingThere: "From Kathmandu, take a bus or jeep to Besisahar, then continue by jeep to Chame or Dharapani. From there, Manang is a 2–3 day walk on the Annapurna Circuit. Some jeeps reach Manang directly from Chame in the dry season.",
     coordinates: { lat: 28.6671, lng: 84.0221 },
+    basePrice: 4500,
   },
   {
     id: "ilam",
@@ -254,6 +260,7 @@ export const destinations: Destination[] = [
     ],
     gettingThere: "Fly to Bhadrapur Airport (BDP) in Jhapa, then take a local bus or taxi to Ilam (3–4 hours). Alternatively, overnight buses run from Kathmandu to Ilam directly (12–14 hours).",
     coordinates: { lat: 26.9099, lng: 87.9238 },
+    basePrice: 2500,
   },
   {
     id: "kanyam",
@@ -294,6 +301,7 @@ export const destinations: Destination[] = [
     ],
     gettingThere: "Take a bus or shared jeep from Ilam town to Kanyam (45 minutes). From Bhadrapur Airport in Jhapa, it is a 3-hour drive via Birtamod and Fikkal.",
     coordinates: { lat: 26.8618, lng: 87.9038 },
+    basePrice: 2200,
   },
   {
     id: "chitwan",
@@ -334,6 +342,7 @@ export const destinations: Destination[] = [
     ],
     gettingThere: "Tourist buses run daily from Kathmandu to Sauraha (5–6 hours). Alternatively, fly to Bharatpur Airport (BHR) — 30 minutes from Kathmandu — then take a taxi to Sauraha (30 min).",
     coordinates: { lat: 27.5291, lng: 84.3542 },
+    basePrice: 5500,
   },
   {
     id: "bhaktapur",
@@ -371,6 +380,7 @@ export const destinations: Destination[] = [
     ],
     gettingThere: "From Kathmandu, take a local bus or microbus from Bag Bazaar (40–50 minutes) or a taxi (30 minutes). Bhaktapur is 13 km east of Kathmandu city centre.",
     coordinates: { lat: 27.6710, lng: 85.4298 },
+    basePrice: 3200,
   },
   {
     id: "bandipur",
@@ -409,6 +419,7 @@ export const destinations: Destination[] = [
     ],
     gettingThere: "From Kathmandu or Pokhara, travel along the Prithvi Highway and turn off at Dumre. From Dumre, local buses and taxis climb the 8 km hill road to Bandipur in 20–30 minutes.",
     coordinates: { lat: 27.9333, lng: 84.4167 },
+    basePrice: 3500,
   },
   {
     id: "nagarkot",
@@ -445,6 +456,7 @@ export const destinations: Destination[] = [
     ],
     gettingThere: "From Kathmandu, take a taxi or local bus from Bhaktapur to Nagarkot (32 km, 1.5 hours). Many Kathmandu hotels arrange day-trip and overnight packages.",
     coordinates: { lat: 27.7167, lng: 85.5167 },
+    basePrice: 4000,
   },
   {
     id: "janakpur",
@@ -483,6 +495,7 @@ export const destinations: Destination[] = [
     ],
     gettingThere: "Fly from Kathmandu to Janakpur Airport (JKR) — 45 minutes with daily Tara Air and Shree Air flights. Overnight buses from Kathmandu take 8–9 hours via the East–West Highway.",
     coordinates: { lat: 26.7288, lng: 85.9280 },
+    basePrice: 2500,
   },
 
   // ── Trending 2024–2025 destinations ──────────────────────────────
@@ -532,6 +545,7 @@ export const destinations: Destination[] = [
     ],
     gettingThere: "Fly from Kathmandu to Nepalgunj (1 hr), then take a mountain flight to Talcha Airport in Mugu (30 min). From Talcha a scenic 3-hour hike brings you to the lakeshore. Alternatively, trek 10–14 days from Jumla.",
     coordinates: { lat: 29.5272, lng: 82.0955 },
+    basePrice: 9500,
   },
   {
     id: "kalinchowk",
@@ -578,6 +592,7 @@ export const destinations: Destination[] = [
     ],
     gettingThere: "From Kathmandu, take a tourist bus or drive (~150 km, 5–6 hrs) via the BP Highway to Charikot, then continue 20 km to Kuri village. The cable car from Kuri whisks you to the summit in minutes.",
     coordinates: { lat: 27.7980, lng: 86.0610 },
+    basePrice: 4000,
   },
   {
     id: "tsum-valley",
@@ -625,6 +640,7 @@ export const destinations: Destination[] = [
     ],
     gettingThere: "Drive from Kathmandu to Soti Khola or Machha Khola road-head (8–9 hrs via Arughat). The trek begins here and reaches the Tsum Valley turn-off at Lokpa after 4–5 walking days.",
     coordinates: { lat: 28.5700, lng: 85.0400 },
+    basePrice: 12000,
   },
   {
     id: "dhampus",
@@ -671,6 +687,7 @@ export const destinations: Destination[] = [
     ],
     gettingThere: "From Pokhara Lakeside take a taxi or local bus to Phedi village (30 min, ~NPR 500). The well-marked trail climbs steadily through forests to Dhampus in 2.5–3 hours.",
     coordinates: { lat: 28.2700, lng: 83.8800 },
+    basePrice: 3000,
   },
   {
     id: "gosaikunda",
@@ -717,6 +734,7 @@ export const destinations: Destination[] = [
     ],
     gettingThere: "Take a tourist bus or jeep from Kathmandu to Dhunche (7–8 hours, ~130 km via Trishuli). The trail from Dhunche to Gosaikunda takes 2 days of trekking through Langtang National Park.",
     coordinates: { lat: 28.0858, lng: 85.4167 },
+    basePrice: 5000,
   },
 ];
 
