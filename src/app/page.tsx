@@ -70,14 +70,17 @@ export default function Home() {
 
         <SeasonalBanner />
 
-        {/* ── Search + Destination Grid ─────────────────────────── */}
+        {/* ── Experience Cards Grid ─────────────────────────────── */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center mb-10">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+              What do you want to do?
+            </p>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
-              Browse by Category
+              Choose Your Experience
             </h2>
             <p className="text-gray-500 text-sm sm:text-base max-w-xl mx-auto">
-              Choose a category to explore destinations — from high-altitude treks to rare agricultural wonders.
+              From cliff-harvested mad honey to world-class bungee jumps — pick an experience type to see curated destinations and activities.
             </p>
           </div>
 

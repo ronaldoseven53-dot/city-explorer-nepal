@@ -150,7 +150,7 @@ const difficultyStyle: Record<Difficulty, string> = {
 // ═══════════════════════════════════════════════════════════════════
 
 // ── 1. Agriculture Feature Grid ───────────────────────────────────
-function AgricultureFeatureGrid({ spots }: { spots: Spot[] }) {
+function AgricultureFeatureGrid({ spots, category }: { spots: Spot[]; category: string }) {
   const featured = spots.find((s) => s.id === "lamjung") ?? spots[0];
   const secondary = spots.filter((s) => s.id !== featured.id);
   const featMeta = agriMeta[featured.id] ?? {};
@@ -250,12 +250,20 @@ function AgricultureFeatureGrid({ spots }: { spots: Spot[] }) {
                 <span className="text-gray-400 font-normal"> / ~${Math.round(featured.basePrice / 133)}</span>
               </p>
             </div>
-            <TransitionLink
-              href={`/destinations/${featured.id}`}
-              className="inline-flex items-center gap-1.5 text-sm font-bold px-5 py-2.5 rounded-xl bg-lime-600 text-white hover:bg-lime-700 transition-colors"
-            >
-              Full Guide →
-            </TransitionLink>
+            <div className="flex items-center gap-3">
+              <TransitionLink
+                href={`/experience/${category}/${featured.id}`}
+                className="inline-flex items-center gap-1.5 text-sm font-bold px-5 py-2.5 rounded-xl bg-lime-100 text-lime-700 hover:bg-lime-200 transition-colors border border-lime-200"
+              >
+                Activities →
+              </TransitionLink>
+              <TransitionLink
+                href={`/destinations/${featured.id}`}
+                className="inline-flex items-center gap-1.5 text-sm font-bold px-5 py-2.5 rounded-xl bg-lime-600 text-white hover:bg-lime-700 transition-colors"
+              >
+                Full Guide →
+              </TransitionLink>
+            </div>
           </div>
         </div>
       </div>
@@ -539,7 +547,7 @@ export default async function ExperiencePage(
       <main className="bg-gray-50 min-h-screen">
         <div className={`max-w-${group.id === "agriculture" || group.id === "adventure" ? "6xl" : "2xl"} mx-auto px-4 sm:px-6 py-12`}>
           {group.id === "agriculture" && (
-            <AgricultureFeatureGrid spots={group.spots} />
+            <AgricultureFeatureGrid spots={group.spots} category={group.id} />
           )}
           {group.id === "adventure" && (
             <AdventureGrid spots={group.spots} />

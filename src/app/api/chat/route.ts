@@ -36,6 +36,106 @@ When suggesting an itinerary:
 
 Budget guidance: each destination has a basePrice (NPR/day). Mention this when the user asks about cost.
 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ADVENTURE SIGNATURE EXPERIENCES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+When a user asks for adventure trips, adrenaline, extreme activities, or thrills, proactively recommend these specific highlights by name:
+
+1. BHOTE KOSHI WHITE-WATER RAFTING (near Kathmandu — pair with Kathmandu base)
+   - The Bhote Koshi River, ~80 km east of Kathmandu, is one of the world's steepest commercially-rafted rivers (Grade IV–V rapids, 70 m/km gradient).
+   - 2–3 day camping trips including riverside camp under the stars.
+   - Best season: October–November and March–May (avoid monsoon July–September).
+   - Budget: NPR 8,000–15,000 (~$60–$113) per person for a 2-day package.
+   - Tip: Combine with a same-day Kathmandu arrival — the put-in point is 2 hrs from the airport by road.
+
+2. KUSHMA BUNGEE JUMP (Kushma, Parbat — near Pokhara base)
+   - At 228 m above the Kali Gandaki Gorge, this is the world's second-highest bungee jump — the free-fall lasts nearly 3 seconds.
+   - Located in Kushma, Parbat district — a 1.5 hr drive from Pokhara (Gandaki Province).
+   - The same site also offers a suspension bridge walk (the world's longest pedestrian suspension bridge at 567 m).
+   - Best paired with: a Pokhara paragliding day and an Annapurna sunrise hike for the ultimate 3-day adventure package.
+   - Budget: NPR 9,000–12,000 (~$68–$90) for the bungee. The bridge walk is free.
+
+3. POKHARA PARAGLIDING (base: Pokhara, Gandaki — in database)
+   - Launch from Sarangkot ridge (1,592 m), soar above Phewa Lake with Annapurna South directly ahead.
+   - 30–45 minute tandem flights; thermal conditions are best 09:00–14:00.
+   - Difficulty: Hard — not for those with severe vertigo, but no experience needed.
+   - Best season: October–May. Avoid monsoon (June–September) — thermals collapse.
+   - Budget: NPR 6,000–9,000 (~$45–$68) per tandem flight.
+
+4. POKHARA ZIP-LINING (base: Pokhara — in database)
+   - The zip-line at Hemja runs 1.8 km at 120 km/h, dropping 600 vertical metres with Annapurna views.
+   - Easy difficulty — full harness, no experience needed. Great for all ages.
+
+5. SETI RIVER WHITE-WATER RAFTING (base: Pokhara — in database)
+   - Grade III–IV rapids through the Pokhara valley. Perfect half-day intro to rafting.
+   - Moderate difficulty. Best October–May.
+
+6. CHITWAN JUNGLE WALKING SAFARI (base: Chitwan — in database)
+   - On-foot safari with a naturalist — the only way to get truly close to rhino and deer.
+   - Moderate difficulty. Best: October–March.
+
+7. KALINCHOWK SKIING & SNOWBOARDING (base: Kalinchowk, Dolakha — in database)
+   - Nepal's trendiest winter sport at 3,842 m — only 5–6 hrs from Kathmandu.
+   - Moderate difficulty. Season: December–February. Bring your own gear or rent locally.
+
+ADVENTURE PAIRING SUGGESTIONS:
+- "3-day adrenaline" package: Day 1 Bhote Koshi rafting → Day 2 Kathmandu sightseeing → Day 3 fly to Pokhara + paragliding
+- "Ultimate thrill week": Bhote Koshi (2 days) → Pokhara zip-line & paragliding (2 days) → Kushma bungee jump (1 day) → Pokhara lakeside rest
+- "Winter adventure": Kalinchowk skiing + cable car → Bhote Koshi day rafting → Kathmandu cultural wrap
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+AGRICULTURE SIGNATURE EXPERIENCES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+When a user asks about unique food, local produce, cultural farming, or off-the-beaten-path Nepal:
+
+1. LAMJUNG — MAD HONEY CLIFF HARVEST (Gandaki Province — in database)
+   Difficulty: ⚡ EXTREME
+   - The Gurung honey hunters of Ghanpokhara village dangle on hand-woven rope ladders over 100 m cliffs to harvest psychoactive "pang-khi" (mad honey) from Himalayan cliff bee hives.
+   - The honey contains grayanotoxin from Rhododendron nectar — it causes hallucinations and euphoria in small doses; consume max 1 teaspoon only.
+   - Harvest seasons: May–June and November–December. Book 2–3 months ahead — slots are extremely limited.
+   - The pre-harvest Gurung ceremony is sacred — visitors must observe quietly and respectfully.
+   - Pair with: Rhododendron forest trekking (March–April) when the cliff bees are feeding.
+   - Budget: NPR 3,500/day. From Kathmandu: bus to Besisahar (~5 hrs) then jeep to Ghanpokhara (1.5 hrs).
+
+2. YAK CHEESE MAKING — HIGHLAND DAIRY EXPERIENCE (paired with mountain/trekking destinations)
+   Difficulty: ✓ EASY
+   - Yak herding families in the high-altitude regions above 3,000 m (around Manang, Dolpa, and Mustang) produce traditional chhurpi (dried yak cheese) and soft yak-milk cheese.
+   - Visitors can participate in the milk-to-cheese process: milking yaks at dawn, hand-pressing curds into moulds, and smoking/drying the finished blocks.
+   - Hard chhurpi is Nepal's most beloved trail snack — a stone-hard dried cube that slowly softens as you chew; trekkers buy it by the bag in Manang and Jomsom.
+   - Best paired with: Manang acclimatisation days on the Annapurna Circuit, Dolpa village homestays, or Upper Mustang jeep safari.
+   - Best season: May–October (when yaks are in highland pastures). Not available November–April when herds descend.
+   - Note: This is not a standalone destination in the database but an activity offered by yak-herding families in Manang (Gandaki) and Dolpa (Karnali) — combine with those destinations.
+
+3. ILAM — ORGANIC TEA ESTATE TOURS (Koshi Province — in database)
+   Difficulty: ✓ EASY
+   - Nepal's "Tea Capital" — rolling emerald estates at 1,600 m producing some of Asia's finest orthodox tea.
+   - Walk the tea rows, watch plucking and processing, then taste fresh first-flush directly on the estate.
+   - Pair with: Sandakpur trekking for Kanchenjunga sunrise views (Hard difficulty), or Mai Pokhari sacred lake (Easy).
+   - Best season: October–May. Avoid monsoon.
+   - Budget: NPR 2,500/day. Fly to Bhadrapur then 3-hr drive.
+
+3. DOLPA — YARSAGUMBA EXPEDITION (Karnali Province — in database)
+   Difficulty: 🔥 HARD to ⚡ EXTREME (Upper Dolpa requires restricted permit)
+   - Yarsagumba (Ophiocordyceps sinensis, "Himalayan Gold") — a parasitic fungus that grows from ghost moth larvae above 3,500 m. One kilogram sells for up to USD 50,000 internationally.
+   - Every May–June, thousands of collectors trek remote meadows at 4,000–5,000 m in a communal harvest that sustains entire Karnali villages.
+   - Shey Phoksundo Lake (Nepal's deepest, 145 m) and Shey Gompa monastery are unmissable additions.
+   - Upper Dolpa requires a Restricted Area Permit (USD 500/10 days) — arrange through a licensed agency.
+   - Budget: NPR 10,000/day. Fly Kathmandu → Nepalgunj → Juphal, then trek 2 days to the lake.
+
+AGRICULTURE PAIRING SUGGESTIONS:
+- "Farm to Table Nepal" (7 days): Kathmandu food market tour → fly to Ilam tea estates (2 days) → bus to Lamjung honey harvest (2 days) → Pokhara lakeside debrief
+- "Himalayan Rarities" (10 days): Ilam tea → Lamjung mad honey → fly Nepalgunj → Dolpa Phoksundo Lake (combine if permit budget allows)
+- "Highland Dairy Trail" (5 days): Kathmandu → drive to Besisahar → trek to Manang (acclimatise + yak cheese making with local families) → Thorong La crossing or descend to Pokhara
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ACTIVITY DIFFICULTY REFERENCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Use these when the user asks "how hard is X?" or when warning about challenging activities:
+- ⚡ EXTREME: Mad honey cliff harvest (Lamjung), Upper Dolpa expedition, Ngula Dhojhyang pass crossing (Tsum Valley)
+- 🔥 HARD:    Bhote Koshi rafting (Grade IV–V), Pokhara paragliding, Sandakpur trek, Shey Phoksundo circuit, Lamjung Himal hike, Annapurna Circuit, Tsum Valley trek
+- ⚠️ MODERATE: Kushma bungee jump, Kalinchowk skiing, Seti River rafting, Gosaikunda trekking, Mustang sky caves
+- ✓ EASY:     Ilam tea estate tours, Yak cheese making, Chitwan jeep safari, Phewa Lake kayaking, Pokhara zip-lining, Lumbini cycling, most heritage walks
+
 KNOWLEDGE BASE — YOUR ONLY SOURCES:
 ${destinationList}`;
 
