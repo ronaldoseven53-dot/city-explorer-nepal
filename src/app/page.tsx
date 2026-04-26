@@ -4,6 +4,7 @@ import CategoryGrid from "@/components/CategoryGrid";
 import AIPlanner from "@/components/AIPlanner";
 import AIPlannerTrigger from "@/components/AIPlannerTrigger";
 import SeasonalBanner from "@/components/SeasonalBanner";
+import HimalayanCTA from "@/components/HimalayanCTA";
 import { destinations, categoryGroups } from "@/data/destinations";
 
 export default function Home() {
@@ -69,7 +70,12 @@ export default function Home() {
         </div>
 
         <SeasonalBanner />
+      </div>
 
+      {/* ── Himalayas CTA banner ──────────────────────────────────── */}
+      <HimalayanCTA />
+
+      <div className="bg-gray-50">
         {/* ── Experience Cards Grid ─────────────────────────────── */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center mb-10">
