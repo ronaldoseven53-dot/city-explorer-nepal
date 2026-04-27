@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
@@ -127,6 +127,26 @@ export default function BentoDashboard() {
     return checkSeasonality(destinations, m).length;
   }, []);
 
+  const [heroImage, setHeroImage] = useState(HERO_IMAGE);
+
+  useEffect(() => {
+    let resetTimer: number | null = null;
+
+    const handler = (e: Event) => {
+      const image = (e as CustomEvent<{ image: string }>).detail.image;
+      if (!image) return;
+      setHeroImage(image);
+      if (resetTimer !== null) window.clearTimeout(resetTimer);
+      resetTimer = window.setTimeout(() => setHeroImage(HERO_IMAGE), 18000);
+    };
+
+    window.addEventListener("hero-image-change", handler);
+    return () => {
+      window.removeEventListener("hero-image-change", handler);
+      if (resetTimer !== null) window.clearTimeout(resetTimer);
+    };
+  }, []);
+
   const stats = [
     { value: String(destinations.length), label: "Destinations" },
     { value: String(categoryGroups.length), label: "Categories" },
@@ -154,7 +174,7 @@ export default function BentoDashboard() {
 
       {/* ── Layer 1a: Himalayas (fades out mid-scroll) ────────── */}
       <motion.div style={{ opacity: himalayanOpacity }} className="fixed inset-0 z-[-2] overflow-hidden pointer-events-none">
-        <div style={{ ...bgDivStyle, backgroundImage: `url('${HERO_IMAGE}')` }} />
+        <div style={{ ...bgDivStyle, backgroundImage: `url('${heroImage}')` }} />
       </motion.div>
 
       {/* ── Layer 1b: Golden Temple (fades in mid-scroll) ─────── */}
@@ -191,7 +211,7 @@ export default function BentoDashboard() {
         <BentoCard className="lg:col-span-3 sm:col-span-2 min-h-[320px]">
           {/* Background image */}
           <div className="absolute inset-0">
-            <Image src={HERO_IMAGE} alt="Himalayan peaks" fill className="object-cover object-center" priority />
+            <Image src={heroImage} alt="Himalayan peaks" fill className="object-cover object-center" priority />
             <div className="absolute inset-0 bg-gradient-to-br from-[#050505]/70 via-[#0f172a]/50 to-transparent" />
           </div>
 

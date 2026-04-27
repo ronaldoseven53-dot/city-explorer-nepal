@@ -3,15 +3,17 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import type { UIMessage } from "ai";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Timeline, { type ItineraryEvent } from "./Timeline";
+import { destinations } from "@/data/destinations";
+import { useUserPassport } from "@/context/UserPassportContext";
 
 const QUICK_PROMPTS = [
   "Plan a 7-day Nepal itinerary",
   "Best trekking destinations?",
-  "Where can I see wildlife?",
-  "Budget travel tips for Nepal",
+  "What should I do next?",
+  "Show me hidden cultural gems",
 ];
 
 const panelVariants = {
@@ -31,11 +33,87 @@ const bubbleVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.22, ease: "easeOut" as const } },
 };
 
+const NEPAL_CENTER = { lat: 28.3949, lng: 84.124 };
+
+function escapeRegExp(value: string) {
+  return value.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
+}
+
+function haversineDistance(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
+  const R = 6371;
+  const dLat = ((b.lat - a.lat) * Math.PI) / 180;
+  const dLng = ((b.lng - a.lng) * Math.PI) / 180;
+  const sinLat = Math.sin(dLat / 2);
+  const sinLng = Math.sin(dLng / 2);
+  const x = sinLat * sinLat + Math.cos((a.lat * Math.PI) / 180) * Math.cos((b.lat * Math.PI) / 180) * sinLng * sinLng;
+  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+}
+
+function findDestinationByText(text: string) {
+  const normalized = text.toLowerCase();
+  return destinations.find((destination) => {
+    const name = destination.name.toLowerCase();
+    return new RegExp(`\\b${escapeRegExp(name)}\\b`, "i").test(normalized);
+  });
+}
+
+function findNearestUnvisited(visitedIds: Set<string>) {
+  const unvisited = destinations.filter((destination) => !visitedIds.has(destination.id));
+  if (unvisited.length === 0) return null;
+
+  if (visitedIds.size === 0) {
+    return unvisited.reduce((closest, destination) => {
+      return haversineDistance(destination.coordinates, NEPAL_CENTER) < haversineDistance(closest.coordinates, NEPAL_CENTER)
+        ? destination
+        : closest;
+    }, unvisited[0]);
+  }
+
+  const visitedDestinations = destinations.filter((destination) => visitedIds.has(destination.id));
+  return unvisited.reduce((closest, destination) => {
+    const distanceToVisited = Math.min(
+      ...visitedDestinations.map((visited) => haversineDistance(destination.coordinates, visited.coordinates))
+    );
+    const currentDistanceToVisited = Math.min(
+      ...visitedDestinations.map((visited) => haversineDistance(closest.coordinates, visited.coordinates))
+    );
+    return distanceToVisited < currentDistanceToVisited ? destination : closest;
+  }, unvisited[0]);
+}
+
+function dispatchMapFly(destination: (typeof destinations)[number]) {
+  if (typeof window === "undefined") return;
+  document.dispatchEvent(new CustomEvent("map-fly-to", {
+    detail: {
+      lat: destination.coordinates.lat,
+      lng: destination.coordinates.lng,
+      id: destination.id,
+    },
+  }));
+}
+
+function dispatchHeroImage(destination: (typeof destinations)[number]) {
+  if (typeof window === "undefined") return;
+  document.dispatchEvent(new CustomEvent("hero-image-change", {
+    detail: {
+      image: destination.placeholderImage,
+      id: destination.id,
+    },
+  }));
+}
+
+function shouldSuggestNext(text: string) {
+  return /(what should I do next\??|what do I do next\??|what's next\??|what next\??|recommend my next|next experience)/i.test(text);
+}
+
 export default function AIAssistant() {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
+  const [passportSuggestion, setPassportSuggestion] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const lastAssistantId = useRef<string | null>(null);
 
+  const { visitedIds } = useUserPassport();
   const { messages, sendMessage, status, error } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
     onError: (err) => {
@@ -44,9 +122,15 @@ export default function AIAssistant() {
   });
   const isThinking = status === "streaming" || status === "submitted";
 
-  if (typeof window !== "undefined") {
-    console.log("[AIAssistant] Status:", status, "Messages count:", messages.length, "Error:", error);
-  }
+  const lastUserText = useMemo(() => {
+    const lastUserMessage = [...messages].reverse().find((message) => message.role === "user");
+    if (!lastUserMessage) return "";
+    return lastUserMessage.parts
+      .filter((part) => part.type === "text")
+      .map((part) => part.text)
+      .join(" ")
+      .trim();
+  }, [messages]);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -59,13 +143,55 @@ export default function AIAssistant() {
   }, [sendMessage]);
 
   useEffect(() => {
+    if (shouldSuggestNext(lastUserText)) {
+      const nextDestination = findNearestUnvisited(visitedIds);
+      if (nextDestination) {
+        setPassportSuggestion(
+          `Based on your My Collection progress, the nearest unvisited landmark is ${nextDestination.name}. I recommend exploring it next — it fits beautifully with your journey.`
+        );
+        dispatchMapFly(nextDestination);
+        dispatchHeroImage(nextDestination);
+      } else {
+        setPassportSuggestion(
+          "You have visited every landmark in My Collection — congratulations! Let me help you choose an epic new route next."
+        );
+      }
+    } else {
+      setPassportSuggestion(null);
+    }
+  }, [lastUserText, visitedIds]);
+
+  useEffect(() => {
+    const assistantMessage = [...messages].reverse().find((message) => message.role === "assistant");
+    if (!assistantMessage || assistantMessage.id === lastAssistantId.current) return;
+    lastAssistantId.current = assistantMessage.id;
+
+    const combinedText = assistantMessage.parts
+      .filter((part) => part.type === "text")
+      .map((part) => part.text)
+      .join(" ");
+
+    const destination = findDestinationByText(combinedText);
+    if (destination) {
+      dispatchMapFly(destination);
+      dispatchHeroImage(destination);
+    }
+  }, [messages]);
+
+  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isThinking]);
 
   const submit = () => {
     const text = input.trim();
     if (!text || isThinking) return;
+
     setInput("");
+    const destination = findDestinationByText(text);
+    if (destination) {
+      dispatchMapFly(destination);
+      dispatchHeroImage(destination);
+    }
     sendMessage({ text });
   };
 
@@ -101,7 +227,7 @@ export default function AIAssistant() {
           {open ? "✕" : "✨"}
         </motion.span>
         <span className="text-sm font-semibold hidden sm:inline select-none tracking-tight">
-          {open ? "Close" : "AI Assistant"}
+          {open ? "Close" : "Himalayan Concierge"}
         </span>
       </motion.button>
 
@@ -145,8 +271,14 @@ export default function AIAssistant() {
                 <span className="text-base" aria-hidden>✨</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-white font-semibold text-sm leading-none tracking-tight">Nepal AI Assistant</p>
-                <p className="text-amber-400/60 text-[11px] mt-0.5 font-medium">Expert Travel Agent · Gemini AI</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-white font-semibold text-sm leading-none tracking-tight">Himalayan Concierge</p>
+                  <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/25 bg-amber-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-amber-200">
+                    <span className="block w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                    live
+                  </span>
+                </div>
+                <p className="text-amber-400/70 text-[11px] mt-0.5 font-medium tracking-tight">Your sophisticated cultural guide through Nepal.</p>
               </div>
               <button
                 onClick={() => setOpen(false)}
@@ -211,14 +343,15 @@ export default function AIAssistant() {
                         variants={bubbleVariants}
                         initial="hidden"
                         animate="visible"
+                        transition={{ type: "spring", stiffness: 330, damping: 26, delay: 0.04 * segments.length }}
                         className={`flex ${isUser ? "justify-end" : "justify-start"}`}
                       >
                         <div
                           className={`
-                            max-w-[85%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap tracking-tight
+                            max-w-[85%] px-4 py-2.5 rounded-2xl text-sm font-bold leading-relaxed whitespace-pre-wrap tracking-tight
                             ${isUser
-                              ? "bg-amber-500/15 border border-amber-500/25 text-white rounded-br-sm"
-                              : "bg-white/[0.06] border border-white/[0.10] text-zinc-300 rounded-bl-sm"
+                              ? "bg-amber-500/10 border border-amber-500/20 text-white rounded-br-sm"
+                              : "bg-white/[0.05] border border-white/[0.08] text-zinc-300 rounded-bl-sm"
                             }
                           `}
                         >
@@ -251,6 +384,20 @@ export default function AIAssistant() {
                 if (segments.length === 0) return null;
                 return <div key={m.id} className="space-y-2">{segments}</div>;
               })}
+
+              {passportSuggestion && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.22, ease: "easeOut" }}
+                  className="flex justify-start"
+                >
+                  <div className="max-w-[85%] px-4 py-2.5 rounded-2xl bg-white/[0.06] border border-white/[0.10] text-zinc-300 text-sm leading-relaxed tracking-tight">
+                    <span className="block text-amber-200 text-xs uppercase tracking-[0.3em] mb-2">My Collection sync</span>
+                    <p>{passportSuggestion}</p>
+                  </div>
+                </motion.div>
+              )}
 
               {/* Typing indicator */}
               {isThinking && (
