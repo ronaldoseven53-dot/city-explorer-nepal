@@ -142,7 +142,6 @@ export default function AIAssistant() {
   const [input, setInput] = useState("");
   const [passportSuggestion, setPassportSuggestion] = useState<string | null>(null);
   const [glowingMessageId, setGlowingMessageId] = useState<string | null>(null);
-  const [rawError, setRawError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const lastAssistantId = useRef<string | null>(null);
 
@@ -177,10 +176,6 @@ export default function AIAssistant() {
   const { visitedIds } = useUserPassport();
   const { messages, sendMessage, status, error, setMessages } = useChat({
     transport,
-    onError: (err) => {
-      console.error("[AIAssistant] Chat error:", err);
-      setRawError(err?.message || err?.toString() || "Unknown error");
-    },
   });
   const isThinking = status === "streaming" || status === "submitted";
 
