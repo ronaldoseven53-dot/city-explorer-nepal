@@ -21,15 +21,26 @@ const TEMPLE_IMAGE =
   "https://images.unsplash.com/photo-1592285896110-8d88b5b3a5d8?w=2400&q=90";
 
 const GLASS_STYLE = {
-  background: "rgba(255,255,255,0.04)",
+  background: "rgba(10,20,80,0.06)",
   backdropFilter: "blur(40px)",
   WebkitBackdropFilter: "blur(40px)",
-  border: "1px solid rgba(255,255,255,0.08)",
-  boxShadow: "inset 0 1px 1px rgba(255,255,255,0.10)",
+  border: "1px solid rgba(255,255,255,0.07)",
+  // Top-left global light source: specular highlight top+left, drop shadow bottom-right
+  boxShadow: [
+    "inset 1px 1px 0 rgba(255,255,255,0.13)",
+    "inset -1px -1px 0 rgba(0,0,0,0.14)",
+    "0 20px 50px rgba(0,0,0,0.65)",
+    "0 4px 16px rgba(0,0,0,0.40)",
+  ].join(", "),
 };
 
-const HOVER_SHADOW =
-  "inset 0 1px 1px rgba(255,255,255,0.10), 0 0 0 1px rgba(255,255,255,0.30), 0 24px 48px rgba(0,0,0,0.55)";
+const HOVER_SHADOW = [
+  "inset 1px 1px 0 rgba(255,255,255,0.22)",
+  "inset -1px -1px 0 rgba(0,0,0,0.18)",
+  "0 0 0 1px rgba(255,255,255,0.13)",
+  "0 28px 60px rgba(0,0,0,0.80)",
+  "0 0 40px rgba(99,102,241,0.18)",
+].join(", ");
 
 // ── Animation variants ────────────────────────────────────────────────
 const containerVariants = {
@@ -64,7 +75,7 @@ function BentoCard({
       transition={hoverTransition}
       onClick={onClick}
       style={GLASS_STYLE}
-      className={`rounded-[2rem] overflow-hidden relative ${className}`}
+      className={`rounded-[24px] overflow-hidden relative ${className}`}
     >
       {children}
     </motion.div>
@@ -87,7 +98,7 @@ function ExperienceCard({
       whileHover={{ y: -8, boxShadow: HOVER_SHADOW }}
       transition={hoverTransition}
       style={GLASS_STYLE}
-      className={`group rounded-[2rem] overflow-hidden relative min-h-[280px] flex flex-col cursor-pointer ${className}`}
+      className={`group rounded-[24px] overflow-hidden relative min-h-[280px] flex flex-col cursor-pointer ${className}`}
     >
       {/* Full-bleed image background */}
       {cover && (
@@ -183,14 +194,17 @@ export default function BentoDashboard() {
         <motion.div style={{ ...bgLayerStyle, opacity: templeOpacity, y: backgroundY, backgroundImage: `url('${TEMPLE_IMAGE}')` }} />
       </div>
 
-      {/* ── Layer 2: Deep color grade ─────────────────────────── */}
-      <div className="fixed inset-0 z-[-1] bg-zinc-950/60 pointer-events-none" />
+      {/* ── Layer 2: Midnight Navy color grade ───────────────── */}
+      <div
+        className="fixed inset-0 z-[-1] pointer-events-none"
+        style={{ background: "rgba(4,7,27,0.68)" }}
+      />
 
-      {/* ── Layer 3: Cinematic vignette — transparent center, pure black rim ── */}
+      {/* ── Layer 3: Cinematic vignette — transparent center, deep navy rim ── */}
       <div
         aria-hidden
         className="fixed inset-0 z-[-1] pointer-events-none"
-        style={{ background: "radial-gradient(ellipse at 50% 40%, transparent 20%, rgba(0,0,0,0.65) 65%, rgba(0,0,0,1) 100%)" }}
+        style={{ background: "radial-gradient(ellipse at 50% 40%, transparent 20%, rgba(2,4,22,0.72) 65%, rgba(0,0,0,1) 100%)" }}
       />
 
       {/* ── Layer 4: Film grain noise ─────────────────────────── */}
@@ -200,7 +214,7 @@ export default function BentoDashboard() {
         style={{ backgroundImage: NOISE_BG, backgroundRepeat: "repeat", backgroundSize: "128px 128px" }}
       />
 
-      {/* ── Aurora 1: top-right amber/crimson lens flare ─────── */}
+      {/* ── Aurora 1: top-right electric blue lens flare ─────── */}
       <motion.div
         aria-hidden
         className="fixed pointer-events-none z-[1]"
@@ -208,32 +222,32 @@ export default function BentoDashboard() {
           top: "-15%", right: "-10%",
           width: "45vw", height: "45vw",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(251,191,36,0.14) 0%, rgba(220,38,38,0.09) 45%, transparent 70%)",
-          filter: "blur(60px)",
+          background: "radial-gradient(circle, rgba(59,130,246,0.20) 0%, rgba(99,102,241,0.13) 40%, transparent 70%)",
+          filter: "blur(70px)",
         }}
         animate={{
           scale:   [1, 1.18, 0.92, 1.10, 1],
-          opacity: [0.55, 0.85, 0.40, 0.95, 0.55],
+          opacity: [0.55, 0.90, 0.38, 0.95, 0.55],
           x: ["0%", "4%", "-2%", "2%", "0%"],
           y: ["0%", "3%", "-4%", "1%", "0%"],
         }}
         transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* ── Aurora 2: bottom-left indigo/teal counter-glow ───── */}
+      {/* ── Aurora 2: bottom-left violet/indigo counter-glow ─── */}
       <motion.div
         aria-hidden
         className="fixed pointer-events-none z-[1]"
         style={{
           bottom: "-10%", left: "-8%",
-          width: "35vw", height: "35vw",
+          width: "38vw", height: "38vw",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(99,102,241,0.10) 0%, rgba(20,184,166,0.06) 50%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(139,92,246,0.16) 0%, rgba(79,70,229,0.10) 50%, transparent 70%)",
           filter: "blur(80px)",
         }}
         animate={{
           scale:   [1, 1.25, 0.88, 1.15, 1],
-          opacity: [0.35, 0.65, 0.20, 0.55, 0.35],
+          opacity: [0.40, 0.70, 0.22, 0.60, 0.40],
         }}
         transition={{ duration: 19, repeat: Infinity, ease: "easeInOut", delay: 5 }}
       />
@@ -276,7 +290,7 @@ export default function BentoDashboard() {
               {stats.map((s) => (
                 <div
                   key={s.label}
-                  style={{ ...GLASS_STYLE, boxShadow: "inset 0 1px 1px rgba(255,255,255,0.12)" }}
+                  style={{ ...GLASS_STYLE, boxShadow: "inset 1px 1px 0 rgba(255,255,255,0.16), inset -1px -1px 0 rgba(0,0,0,0.12), 0 8px 24px rgba(0,0,0,0.5)" }}
                   className="rounded-2xl px-4 py-3 text-center min-w-[80px]"
                 >
                   <p className="text-2xl font-extrabold text-white tracking-tight">{s.value}</p>
@@ -301,14 +315,14 @@ export default function BentoDashboard() {
         {/* ── CELL 3: Season Stats — col-span-1 ─────────────── */}
         <BentoCard className="min-h-[420px] flex flex-col justify-between p-8">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-400 mb-1">Right Now</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-400 mb-1">Right Now</p>
             <h2 className="text-base font-bold text-white tracking-tight mb-6">Season Pulse</h2>
 
             {/* Animated stat bars */}
             {[
-              { label: "In season", value: inSeasonCount, total: destinations.length, color: "bg-emerald-400" },
-              { label: "Total destinations", value: destinations.length, total: destinations.length, color: "bg-blue-400" },
-              { label: "Categories", value: categoryGroups.length, total: 10, color: "bg-amber-400" },
+              { label: "In season", value: inSeasonCount, total: destinations.length, color: "bg-blue-500" },
+              { label: "Total destinations", value: destinations.length, total: destinations.length, color: "bg-violet-500" },
+              { label: "Categories", value: categoryGroups.length, total: 10, color: "bg-indigo-400" },
             ].map((bar) => (
               <div key={bar.label} className="mb-5">
                 <div className="flex justify-between text-xs mb-1.5">
@@ -331,10 +345,16 @@ export default function BentoDashboard() {
           <div className="flex flex-col items-center mt-4">
             <svg viewBox="0 0 80 80" className="w-24 h-24">
               <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="6" />
+              <defs>
+                <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#3b82f6" />
+                  <stop offset="100%" stopColor="#8b5cf6" />
+                </linearGradient>
+              </defs>
               <motion.circle
                 cx="40" cy="40" r="32"
                 fill="none"
-                stroke="#34d399"
+                stroke="url(#ringGrad)"
                 strokeWidth="6"
                 strokeLinecap="round"
                 strokeDasharray={`${2 * Math.PI * 32}`}
