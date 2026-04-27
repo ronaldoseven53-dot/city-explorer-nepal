@@ -270,7 +270,7 @@ export async function POST(req: Request) {
     console.log('KEY CHECK:', process.env.GOOGLE_GENERATIVE_AI_API_KEY ? 'Present' : 'MISSING');
 
     const result = streamText({
-      model:    google("gemini-2.0-flash"),
+      model:    google("gemini-1.5-flash"),
       system:   SYSTEM_PROMPT,
       messages,
       tools:    { getTransportOptions, buildItinerary },
