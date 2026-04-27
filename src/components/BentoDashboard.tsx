@@ -21,10 +21,10 @@ const TEMPLE_IMAGE =
   "https://images.unsplash.com/photo-1592285896110-8d88b5b3a5d8?w=2400&q=90";
 
 const GLASS_STYLE = {
-  background: "rgba(255,255,255,0.05)",
-  backdropFilter: "blur(24px)",
-  WebkitBackdropFilter: "blur(24px)",
-  border: "1px solid rgba(255,255,255,0.10)",
+  background: "rgba(255,255,255,0.04)",
+  backdropFilter: "blur(40px)",
+  WebkitBackdropFilter: "blur(40px)",
+  border: "1px solid rgba(255,255,255,0.08)",
   boxShadow: "inset 0 1px 1px rgba(255,255,255,0.10)",
 };
 
@@ -156,40 +156,41 @@ export default function BentoDashboard() {
 
   const sesonPct = Math.round((inSeasonCount / destinations.length) * 100);
 
-  const { scrollYProgress } = useScroll();
+  const { scrollY, scrollYProgress } = useScroll();
   const himalayanOpacity = useTransform(scrollYProgress, [0, 0.25, 0.55], [1, 1, 0]);
   const templeOpacity    = useTransform(scrollYProgress, [0, 0.25, 0.55], [0, 0, 1]);
+  const backgroundY      = useTransform(scrollY, [0, 4000], [0, -180]);
 
-  const bgDivStyle = {
-    position: "absolute" as const, inset: 0,
+  const bgLayerStyle = {
+    position: "absolute" as const,
+    inset: "-25%",
     backgroundSize: "cover",
     backgroundPosition: "center",
-    filter: "blur(2px)",
-    transform: "scale(1.05)",
+    filter: "blur(3px) saturate(1.2) contrast(1.1)",
   };
 
   return (
     // Full-page wrapper
     <div className="relative min-h-screen">
 
-      {/* ── Layer 1a: Himalayas (fades out mid-scroll) ────────── */}
-      <motion.div style={{ opacity: himalayanOpacity }} className="fixed inset-0 z-[-2] overflow-hidden pointer-events-none">
-        <div style={{ ...bgDivStyle, backgroundImage: `url('${heroImage}')` }} />
-      </motion.div>
+      {/* ── Layer 1a: Himalayas — clips overflow, inner carries parallax ── */}
+      <div className="fixed inset-0 z-[-2] overflow-hidden pointer-events-none">
+        <motion.div style={{ ...bgLayerStyle, opacity: himalayanOpacity, y: backgroundY, backgroundImage: `url('${heroImage}')` }} />
+      </div>
 
-      {/* ── Layer 1b: Golden Temple (fades in mid-scroll) ─────── */}
-      <motion.div style={{ opacity: templeOpacity }} className="fixed inset-0 z-[-2] overflow-hidden pointer-events-none">
-        <div style={{ ...bgDivStyle, backgroundImage: `url('${TEMPLE_IMAGE}')` }} />
-      </motion.div>
+      {/* ── Layer 1b: Golden Temple — same clip wrapper ───────── */}
+      <div className="fixed inset-0 z-[-2] overflow-hidden pointer-events-none">
+        <motion.div style={{ ...bgLayerStyle, opacity: templeOpacity, y: backgroundY, backgroundImage: `url('${TEMPLE_IMAGE}')` }} />
+      </div>
 
       {/* ── Layer 2: Deep color grade ─────────────────────────── */}
-      <div className="fixed inset-0 z-[-1] bg-zinc-950/55 pointer-events-none" />
+      <div className="fixed inset-0 z-[-1] bg-zinc-950/60 pointer-events-none" />
 
-      {/* ── Layer 3: Cinematic vignette ───────────────────────── */}
+      {/* ── Layer 3: Cinematic vignette — transparent center, pure black rim ── */}
       <div
         aria-hidden
         className="fixed inset-0 z-[-1] pointer-events-none"
-        style={{ background: "radial-gradient(ellipse at 50% 40%, transparent 30%, rgba(0,0,0,0.82) 100%)" }}
+        style={{ background: "radial-gradient(ellipse at 50% 40%, transparent 20%, rgba(0,0,0,0.65) 65%, rgba(0,0,0,1) 100%)" }}
       />
 
       {/* ── Layer 4: Film grain noise ─────────────────────────── */}
@@ -197,6 +198,44 @@ export default function BentoDashboard() {
         aria-hidden
         className="pointer-events-none fixed inset-0 z-[2] opacity-[0.030] mix-blend-overlay"
         style={{ backgroundImage: NOISE_BG, backgroundRepeat: "repeat", backgroundSize: "128px 128px" }}
+      />
+
+      {/* ── Aurora 1: top-right amber/crimson lens flare ─────── */}
+      <motion.div
+        aria-hidden
+        className="fixed pointer-events-none z-[1]"
+        style={{
+          top: "-15%", right: "-10%",
+          width: "45vw", height: "45vw",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(251,191,36,0.14) 0%, rgba(220,38,38,0.09) 45%, transparent 70%)",
+          filter: "blur(60px)",
+        }}
+        animate={{
+          scale:   [1, 1.18, 0.92, 1.10, 1],
+          opacity: [0.55, 0.85, 0.40, 0.95, 0.55],
+          x: ["0%", "4%", "-2%", "2%", "0%"],
+          y: ["0%", "3%", "-4%", "1%", "0%"],
+        }}
+        transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      {/* ── Aurora 2: bottom-left indigo/teal counter-glow ───── */}
+      <motion.div
+        aria-hidden
+        className="fixed pointer-events-none z-[1]"
+        style={{
+          bottom: "-10%", left: "-8%",
+          width: "35vw", height: "35vw",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(99,102,241,0.10) 0%, rgba(20,184,166,0.06) 50%, transparent 70%)",
+          filter: "blur(80px)",
+        }}
+        animate={{
+          scale:   [1, 1.25, 0.88, 1.15, 1],
+          opacity: [0.35, 0.65, 0.20, 0.55, 0.35],
+        }}
+        transition={{ duration: 19, repeat: Infinity, ease: "easeInOut", delay: 5 }}
       />
 
       {/* ── Bento grid ──────────────────────────────────────── */}
