@@ -140,7 +140,7 @@ export default function BentoDashboard() {
   return (
     // Full-page wrapper with deep radial background
     <div
-      className="relative min-h-screen pt-16"
+      className="relative min-h-screen"
       style={{
         background: "radial-gradient(ellipse at 50% 0%, #0f172a 0%, #050505 70%)",
       }}
