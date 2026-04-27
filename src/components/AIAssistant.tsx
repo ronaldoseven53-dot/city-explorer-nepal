@@ -115,14 +115,16 @@ export default function AIAssistant() {
             animate="visible"
             exit="exit"
             style={{
-              boxShadow: "0 0 0 1px rgba(255,255,255,0.08), 0 32px 64px -16px rgba(0,0,0,0.8), 0 8px 32px -8px rgba(245,158,11,0.08)",
+              background: "rgba(15, 15, 20, 0.7)",
+              backdropFilter: "blur(24px)",
+              WebkitBackdropFilter: "blur(24px)",
+              boxShadow: "0 20px 50px rgba(0, 0, 0, 0.5)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
             }}
             className="
               fixed bottom-20 right-6 z-50
               w-[92vw] sm:w-[400px] max-h-[75vh]
               flex flex-col rounded-2xl overflow-hidden
-              bg-[#09090b]/85 backdrop-blur-2xl
-              border border-white/[0.08]
               origin-bottom-right
             "
           >
