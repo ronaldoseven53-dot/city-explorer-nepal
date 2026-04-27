@@ -84,20 +84,14 @@ function ExperienceCard({
       whileHover={{ y: -8, boxShadow: HOVER_SHADOW }}
       transition={hoverTransition}
       style={GLASS_STYLE}
-      className={`rounded-[2rem] overflow-hidden relative min-h-[280px] flex flex-col cursor-pointer ${className}`}
+      className={`group rounded-[2rem] overflow-hidden relative min-h-[280px] flex flex-col cursor-pointer ${className}`}
     >
       {/* Full-bleed image background */}
       {cover && (
         <div className="absolute inset-0">
-          <Image src={cover} alt={group.name} fill className="object-cover" />
+          <Image src={cover} alt={group.name} fill className="object-cover group-hover:scale-110 transition-transform duration-500 ease-in-out" />
           {/* Image-to-glass: transparent at top 20%, blurs into dark glass */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(to bottom, transparent 0%, transparent 20%, rgba(5,5,5,0.82) 65%, rgba(5,5,5,0.96) 100%)",
-            }}
-          />
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
         </div>
       )}
 
@@ -106,10 +100,12 @@ function ExperienceCard({
         href={`/experience/${group.id}`}
         className="relative flex flex-col justify-end flex-1 p-6"
       >
-        <span className="text-2xl mb-2 drop-shadow-lg">{group.emoji}</span>
-        <h3 className="text-lg font-bold text-white tracking-tight leading-tight">
-          {group.name}
-        </h3>
+        <div className="border-l-4 border-amber-500/80 pl-3 mb-2">
+          <h3 className="text-xl font-bold text-white tracking-tight leading-tight"
+            style={{ textShadow: "0 1px 8px rgba(0,0,0,0.9)" }}>
+            {group.name}
+          </h3>
+        </div>
         <p className="text-white/50 text-xs mt-1 line-clamp-2 leading-relaxed">
           {group.description}
         </p>

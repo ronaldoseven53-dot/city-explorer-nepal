@@ -122,11 +122,11 @@ export default function CategoryGrid() {
                     alt={group.name}
                     fill
                     sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw"
-                    className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                    className="object-cover group-hover:scale-110 transition-transform duration-500 ease-in-out"
                     style={{ viewTransitionName: `category-cover-${group.id}` }}
                   />
                   {/* deep gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#09090b]/90 via-[#09090b]/30 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
 
                   {/* Spots pill */}
                   <div className="absolute top-3 right-3">
@@ -135,11 +135,11 @@ export default function CategoryGrid() {
                     </span>
                   </div>
 
-                  {/* Emoji + name */}
-                  <div className="absolute bottom-3 left-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl drop-shadow-lg">{group.emoji}</span>
-                      <h3 className="text-base font-semibold tracking-tight text-white drop-shadow leading-tight">
+                  {/* Title with amber accent bar */}
+                  <div className="absolute bottom-3 left-4 right-4">
+                    <div className="border-l-4 border-amber-500/80 pl-3">
+                      <h3 className="text-lg font-bold tracking-tight text-white leading-tight"
+                        style={{ textShadow: "0 1px 8px rgba(0,0,0,0.9)" }}>
                         {group.name}
                       </h3>
                     </div>
