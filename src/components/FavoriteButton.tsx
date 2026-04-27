@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { motion } from "motion/react";
+import { Star } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
@@ -37,15 +39,34 @@ export default function FavoriteButton({ destinationId }: { destinationId: strin
   };
 
   return (
-    <button
+    <motion.button
       onClick={toggle}
       disabled={pending}
-      title={saved ? "Remove from My Passport" : "Save to My Passport"}
-      className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full transition-colors cursor-pointer
-        bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-600 disabled:opacity-50"
+      whileTap={{ scale: 1.2, rotate: 10 }}
+      whileHover={{
+        boxShadow: saved
+          ? "0 0 12px rgba(251,191,36,0.6)"
+          : "0 0 10px rgba(255,255,255,0.15)",
+      }}
+      transition={{ type: "spring", stiffness: 500, damping: 15 }}
+      title={saved ? "Remove from My Collection" : "Add to My Collection"}
+      className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full transition-colors cursor-pointer disabled:opacity-50"
+      style={{
+        background: saved ? "rgba(251,191,36,0.15)" : "rgba(255,255,255,0.08)",
+        border: saved ? "1px solid rgba(251,191,36,0.35)" : "1px solid rgba(255,255,255,0.15)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+      }}
     >
-      <span>{saved ? "❤️" : "🤍"}</span>
-      <span>{saved ? "Saved" : "Save"}</span>
-    </button>
+      <Star
+        size={13}
+        className={`transition-colors duration-200 ${
+          saved ? "fill-amber-400 text-amber-400" : "text-zinc-400"
+        }`}
+      />
+      <span className={saved ? "text-amber-300" : "text-zinc-400"}>
+        {saved ? "Saved" : "Save"}
+      </span>
+    </motion.button>
   );
 }
