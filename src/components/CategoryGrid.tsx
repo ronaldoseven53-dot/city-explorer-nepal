@@ -82,7 +82,7 @@ const containerVariants = {
 
 const cardVariants = {
   hidden:  { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
+  visible: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 100, damping: 20 } },
 };
 
 export default function CategoryGrid() {
@@ -108,7 +108,7 @@ export default function CategoryGrid() {
                 boxShadow: `0 0 0 1px rgba(255,255,255,0.08), 0 24px 48px -12px ${glow}, 0 8px 24px -8px ${glow}`,
               }}
               transition={{ duration: 0.25, ease: "easeOut" }}
-              style={{ boxShadow: "0 0 0 1px rgba(255,255,255,0.06), 0 4px 24px -4px rgba(0,0,0,0.4)" }}
+              style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12), 0 0 0 1px rgba(255,255,255,0.06), 0 4px 24px -4px rgba(0,0,0,0.4)" }}
               className="rounded-2xl overflow-hidden will-change-transform"
             >
               <TransitionLink

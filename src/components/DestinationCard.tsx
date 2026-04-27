@@ -46,8 +46,8 @@ export default function DestinationCard({ destination }: { destination: Destinat
         boxShadow: `0 0 0 1px rgba(255,255,255,0.08), 0 24px 48px -12px ${glow}, 0 8px 24px -8px rgba(0,0,0,0.5)`,
       }}
       transition={{ duration: 0.25, ease: "easeOut" }}
-      style={{ boxShadow: "0 0 0 1px rgba(255,255,255,0.06), 0 4px 24px -4px rgba(0,0,0,0.5)" }}
-      className="bg-zinc-900/60 backdrop-blur-md border border-white/10 rounded-3xl overflow-hidden flex flex-col group will-change-transform"
+      style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12), 0 0 0 1px rgba(255,255,255,0.06), 0 4px 24px -4px rgba(0,0,0,0.5)" }}
+      className="bg-zinc-900/40 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden flex flex-col group will-change-transform"
     >
       {/* ── Image ─────────────────────────────────────────── */}
       <div className="relative h-52 overflow-hidden flex-shrink-0">

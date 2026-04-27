@@ -43,7 +43,7 @@ const gridContainerVariants = {
 
 const gridItemVariants = {
   hidden:  { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const } },
+  visible: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 100, damping: 20 } },
 };
 
 export default function SearchableGrid() {
@@ -109,7 +109,7 @@ export default function SearchableGrid() {
       </div>
 
       {/* Budget slider */}
-      <div className="max-w-xl mx-auto mb-8 bg-zinc-900/60 backdrop-blur-xl border border-white/[0.10] rounded-3xl px-6 py-5">
+      <div className="max-w-xl mx-auto mb-8 bg-zinc-900/40 backdrop-blur-xl border border-white/[0.10] rounded-3xl px-6 py-5" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12)" }}>
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">
             Daily Budget

@@ -22,7 +22,7 @@ const cardVariants = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.1, duration: 0.4, ease: "easeOut" as const },
+    transition: { delay: i * 0.1, type: "spring" as const, stiffness: 100, damping: 20 },
   }),
 };
 
@@ -76,13 +76,14 @@ export default function SeasonalBanner() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-40px" }}
-              whileHover={{ scale: 1.03, boxShadow: "0 0 0 1px rgba(255,255,255,0.08), 0 16px 40px -8px rgba(0,0,0,0.6)" }}
-              transition={{ duration: 0.2 }}
+              whileHover={{ scale: 1.03, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18), 0 0 0 1px rgba(255,255,255,0.08), 0 16px 40px -8px rgba(0,0,0,0.6)" }}
+              style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12), 0 0 0 1px rgba(255,255,255,0.06)" }}
+              transition={{ type: "spring" as const, stiffness: 300, damping: 25 }}
               className="flex-shrink-0 w-44 sm:w-52 snap-start"
             >
               <TransitionLink
                 href={`/destinations/${d.id}`}
-                className="group block bg-zinc-900/60 backdrop-blur-md border border-white/[0.10] rounded-3xl overflow-hidden"
+                className="group block bg-zinc-900/40 backdrop-blur-xl border border-white/[0.10] rounded-3xl overflow-hidden"
               >
                 <div className="relative h-28">
                   <Image
