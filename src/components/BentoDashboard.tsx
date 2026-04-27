@@ -134,17 +134,35 @@ export default function BentoDashboard() {
   const sesonPct = Math.round((inSeasonCount / destinations.length) * 100);
 
   return (
-    // Full-page wrapper with deep radial background
-    <div
-      className="relative min-h-screen"
-      style={{
-        background: "radial-gradient(ellipse at 50% 0%, #0f172a 0%, #050505 70%)",
-      }}
-    >
-      {/* ── Noise texture overlay (cinematic grain) ─────────── */}
+    // Full-page wrapper
+    <div className="relative min-h-screen">
+
+      {/* ── Layer 1: Nepal photo (fixed, blurred) ────────────── */}
+      <div className="fixed inset-0 z-[-2] overflow-hidden pointer-events-none">
+        <div style={{
+          position: "absolute", inset: 0,
+          backgroundImage: `url('${HERO_IMAGE}')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          filter: "blur(2px)",
+          transform: "scale(1.05)",
+        }} />
+      </div>
+
+      {/* ── Layer 2: Deep color grade ─────────────────────────── */}
+      <div className="fixed inset-0 z-[-1] bg-zinc-950/55 pointer-events-none" />
+
+      {/* ── Layer 3: Cinematic vignette ───────────────────────── */}
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 z-[2] opacity-[0.028] mix-blend-overlay"
+        className="fixed inset-0 z-[-1] pointer-events-none"
+        style={{ background: "radial-gradient(ellipse at 50% 40%, transparent 30%, rgba(0,0,0,0.82) 100%)" }}
+      />
+
+      {/* ── Layer 4: Film grain noise ─────────────────────────── */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-[2] opacity-[0.030] mix-blend-overlay"
         style={{ backgroundImage: NOISE_BG, backgroundRepeat: "repeat", backgroundSize: "128px 128px" }}
       />
 
