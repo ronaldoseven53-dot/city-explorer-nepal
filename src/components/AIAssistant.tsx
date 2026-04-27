@@ -126,6 +126,17 @@ export default function AIAssistant() {
               origin-bottom-right
             "
           >
+            {/* Noise texture overlay */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 z-10 rounded-2xl opacity-[0.035] mix-blend-overlay"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+                backgroundRepeat: "repeat",
+                backgroundSize: "128px 128px",
+              }}
+            />
+
             {/* Header */}
             <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.08] bg-white/[0.03] flex-shrink-0">
               <div className="w-8 h-8 rounded-full bg-amber-500/15 border border-amber-500/25 flex items-center justify-center flex-shrink-0">
