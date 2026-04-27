@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "motion/react";
 import Timeline, { type ItineraryEvent } from "./Timeline";
 import { destinations } from "@/data/destinations";
 import { useUserPassport } from "@/context/UserPassportContext";
+import { Wifi } from "lucide-react";
 
 const QUICK_PROMPTS = [
   "Plan a 7-day Nepal itinerary",
@@ -17,14 +18,14 @@ const QUICK_PROMPTS = [
 ];
 
 const panelVariants = {
-  hidden:  { opacity: 0, scale: 0.94, y: 12 },
+  hidden:  { opacity: 0, scale: 0.92, y: 16 },
   visible: {
     opacity: 1, scale: 1, y: 0,
-    transition: { type: "spring" as const, stiffness: 380, damping: 30 },
+    transition: { type: "spring" as const, stiffness: 420, damping: 25, mass: 0.8 },
   },
   exit: {
-    opacity: 0, scale: 0.94, y: 12,
-    transition: { duration: 0.18, ease: "easeIn" as const },
+    opacity: 0, scale: 0.92, y: 16,
+    transition: { duration: 0.2, ease: "easeIn" as const },
   },
 };
 
@@ -335,7 +336,7 @@ export default function AIAssistant() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="text-white font-semibold text-sm leading-none tracking-tight">Himalayan Concierge</p>
-                  <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/25 bg-amber-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-amber-200">
+                  <span className={`inline-flex items-center gap-1 rounded-full border border-amber-500/25 bg-amber-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-amber-200 ${isThinking ? 'animate-pulse' : ''}`}>
                     <span className="block w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                     live
                   </span>
@@ -360,8 +361,11 @@ export default function AIAssistant() {
                   transition={{ duration: 0.35, ease: "easeOut" }}
                   className="text-center py-6 space-y-4"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto">
-                    <span className="text-3xl" aria-hidden>🏔️</span>
+                  <div className="relative">
+                    <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto relative z-10">
+                      <span className="text-3xl" aria-hidden>🏔️</span>
+                    </div>
+                    <div className="absolute inset-0 rounded-2xl border-2 border-amber-400/40 animate-pulse" />
                   </div>
                   <div>
                   <p className="text-white/80 text-sm font-semibold tracking-tight">Namaste, traveler. I am your Himalayan Concierge.</p>
@@ -384,6 +388,7 @@ export default function AIAssistant() {
                           text-zinc-400 hover:text-white/80
                           px-4 py-2.5 rounded-xl
                           transition-all duration-200 cursor-pointer tracking-tight
+                          hover:scale-105 hover:brightness-110
                         "
                       >
                         {prompt}
@@ -412,8 +417,8 @@ export default function AIAssistant() {
                           className={`
                             max-w-[85%] px-4 py-2.5 rounded-2xl text-sm font-bold leading-relaxed whitespace-pre-wrap tracking-tight
                             ${isUser
-                              ? "bg-amber-500/10 border border-amber-500/20 text-white rounded-br-sm"
-                              : "bg-white/[0.05] border border-white/[0.08] text-zinc-300 rounded-bl-sm"
+                              ? "bg-amber-500/15 border border-amber-500/30 text-white rounded-br-sm"
+                              : "bg-zinc-900/60 backdrop-blur-xl text-zinc-300 font-light font-geist-sans tracking-wide rounded-bl-sm"
                             }
                           `}
                         >
@@ -454,7 +459,7 @@ export default function AIAssistant() {
                   transition={{ duration: 0.22, ease: "easeOut" }}
                   className="flex justify-start"
                 >
-                  <div className="max-w-[85%] px-4 py-2.5 rounded-2xl bg-white/[0.06] border border-white/[0.10] text-zinc-300 text-sm leading-relaxed tracking-tight">
+                  <div className="max-w-[85%] px-4 py-2.5 rounded-2xl bg-zinc-900/60 backdrop-blur-xl text-zinc-300 font-light font-geist-sans tracking-wide text-sm leading-relaxed">
                     <span className="block text-amber-200 text-xs uppercase tracking-[0.3em] mb-2">My Collection sync</span>
                     <p>{passportSuggestion}</p>
                   </div>
@@ -462,12 +467,13 @@ export default function AIAssistant() {
               )}
 
               {error && (
-                <div className="max-w-[85%] px-4 py-2 rounded-2xl bg-amber-500/10 border border-amber-400/20 text-amber-200 text-xs tracking-tight">
+                <div className="max-w-[85%] px-4 py-2 rounded-2xl bg-amber-500/10 border border-amber-400/20 text-amber-500/80 italic font-serif text-xs tracking-tight flex items-center gap-2">
+                  <Wifi className="w-3 h-3 animate-pulse" />
                   The mountain winds are heavy—trying to reconnect...
                 </div>
               )}
 
-              {/* Typing indicator */}
+              {/* Skeleton loader */}
               {isThinking && (
                 <motion.div
                   initial={{ opacity: 0, y: 6 }}
@@ -475,12 +481,11 @@ export default function AIAssistant() {
                   exit={{ opacity: 0, y: 6 }}
                   className="flex justify-start"
                 >
-                  <div className="bg-white/[0.06] border border-white/[0.10] rounded-2xl rounded-bl-sm px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-amber-200 text-[10px] tracking-wide mr-1 font-medium">thinking</span>
-                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-bounce [animation-delay:0ms]" />
-                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-bounce [animation-delay:150ms]" />
-                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-bounce [animation-delay:300ms]" />
+                  <div className="bg-zinc-900/60 backdrop-blur-xl rounded-2xl rounded-bl-sm px-4 py-3 animate-pulse">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-4 bg-amber-500/20 rounded animate-pulse" />
+                      <div className="w-6 h-4 bg-amber-500/15 rounded animate-pulse" />
+                      <div className="w-10 h-4 bg-amber-500/25 rounded animate-pulse" />
                     </div>
                   </div>
                 </motion.div>
@@ -497,13 +502,14 @@ export default function AIAssistant() {
                 onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(); } }}
                 placeholder="Ask about Nepal travel…"
                 disabled={isThinking}
-                className="
+                className={`
                   flex-1 text-sm px-4 py-2.5 rounded-xl
-                  bg-white/[0.06] border border-white/[0.10]
+                  bg-white/[0.06] border
                   text-white placeholder-zinc-600
                   focus:outline-none focus:ring-1 focus:ring-amber-500/40 focus:border-amber-500/30
                   disabled:opacity-40 transition-all tracking-tight
-                "
+                  ${input.trim() ? 'border-amber-500/50 shadow-lg shadow-amber-500/20' : 'border-white/[0.10]'}
+                `}
               />
               <motion.button
                 onClick={submit}
