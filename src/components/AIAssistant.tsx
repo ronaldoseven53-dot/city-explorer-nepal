@@ -36,6 +36,36 @@ const bubbleVariants = {
 
 const NEPAL_CENTER = { lat: 28.3949, lng: 84.124 };
 
+function TypewriterText({ text, speed = 30 }: { text: string; speed?: number }) {
+  const [displayText, setDisplayText] = useState("");
+  const [isComplete, setIsComplete] = useState(false);
+
+  useEffect(() => {
+    setDisplayText("");
+    setIsComplete(false);
+    
+    let i = 0;
+    const timer = setInterval(() => {
+      if (i < text.length) {
+        setDisplayText(text.slice(0, i + 1));
+        i++;
+      } else {
+        setIsComplete(true);
+        clearInterval(timer);
+      }
+    }, speed);
+
+    return () => clearInterval(timer);
+  }, [text, speed]);
+
+  return (
+    <span>
+      {displayText}
+      {!isComplete && <span className="animate-pulse">|</span>}
+    </span>
+  );
+}
+
 function escapeRegExp(value: string) {
   return value.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
 }
@@ -111,6 +141,7 @@ export default function AIAssistant() {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [passportSuggestion, setPassportSuggestion] = useState<string | null>(null);
+  const [glowingMessageId, setGlowingMessageId] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const lastAssistantId = useRef<string | null>(null);
 
@@ -256,6 +287,16 @@ export default function AIAssistant() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isThinking]);
 
+  // Trigger success glow for new AI messages
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage && lastMessage.role === "assistant" && lastMessage.id !== lastAssistantId.current) {
+      setGlowingMessageId(lastMessage.id);
+      const timer = setTimeout(() => setGlowingMessageId(null), 2000); // Glow for 2 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [messages]);
+
   const submit = () => {
     const text = input.trim();
     if (!text || isThinking) return;
@@ -331,7 +372,7 @@ export default function AIAssistant() {
             {/* Header */}
             <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.08] bg-white/[0.03] flex-shrink-0">
               <div className="w-8 h-8 rounded-full bg-amber-500/15 border border-amber-500/25 flex items-center justify-center flex-shrink-0">
-                <span className="text-base" aria-hidden>✨</span>
+                <span className="text-base animate-spin" style={{ animationDuration: '10s' }} aria-hidden>✨</span>
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
@@ -418,11 +459,13 @@ export default function AIAssistant() {
                             max-w-[85%] px-4 py-2.5 rounded-2xl text-sm font-bold leading-relaxed whitespace-pre-wrap tracking-tight
                             ${isUser
                               ? "bg-amber-500/15 border border-amber-500/30 text-white rounded-br-sm"
-                              : "bg-zinc-900/60 backdrop-blur-xl text-zinc-300 font-light font-geist-sans tracking-wide rounded-bl-sm"
+                              : `bg-zinc-900/60 backdrop-blur-xl text-zinc-300 font-light font-geist-sans tracking-wide rounded-bl-sm ${
+                                  glowingMessageId === m.id ? 'border-2 border-amber-400 shadow-lg shadow-amber-400/50 animate-pulse' : ''
+                                }`
                             }
                           `}
                         >
-                          {part.text}
+                          {isUser ? part.text : <TypewriterText text={part.text} />}
                         </div>
                       </motion.div>
                     );

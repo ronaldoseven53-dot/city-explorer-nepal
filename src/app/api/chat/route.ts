@@ -252,6 +252,8 @@ export async function POST(req: Request) {
 
     const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
+    console.log('Using Key:', apiKey ? 'Key Found' : 'Key Missing');
+
     if (!apiKey) {
       console.error("CRITICAL: No API Key found in Environment Variables");
       return new Response(
