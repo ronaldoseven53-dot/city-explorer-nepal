@@ -238,15 +238,37 @@ const buildItinerary = tool({
 });
 
 export async function POST(req: Request) {
-  const { messages } = await req.json();
+  try {
+    const { messages } = await req.json();
 
-  const result = streamText({
-    model:    google("gemini-2.0-flash"),
-    system:   SYSTEM_PROMPT,
-    messages,
-    tools:    { getTransportOptions, buildItinerary },
-    stopWhen: stepCountIs(5),
-  });
+    if (!messages || !Array.isArray(messages)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid messages format. Expected an array." }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
 
-  return result.toUIMessageStreamResponse();
+    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+      return new Response(
+        JSON.stringify({ error: "Missing Google API key" }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    const result = streamText({
+      model:    google("gemini-2.0-flash"),
+      system:   SYSTEM_PROMPT,
+      messages,
+      tools:    { getTransportOptions, buildItinerary },
+      stopWhen: stepCountIs(5),
+    });
+
+    return result.toUIMessageStreamResponse();
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    return new Response(
+      JSON.stringify({ error: errorMessage }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
+  }
 }
