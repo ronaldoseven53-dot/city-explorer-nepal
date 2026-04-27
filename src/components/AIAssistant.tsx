@@ -142,6 +142,7 @@ export default function AIAssistant() {
   const [input, setInput] = useState("");
   const [passportSuggestion, setPassportSuggestion] = useState<string | null>(null);
   const [glowingMessageId, setGlowingMessageId] = useState<string | null>(null);
+  const [rawError, setRawError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const lastAssistantId = useRef<string | null>(null);
 
@@ -149,6 +150,7 @@ export default function AIAssistant() {
     () =>
       new DefaultChatTransport({
         api: "/api/chat",
+        fetch: (url, options) => fetch(url, { ...options, signal: AbortSignal.timeout(30000) }),
         prepareSendMessagesRequest: async ({ messages, body }) => ({
           body: {
             ...body,
@@ -177,6 +179,7 @@ export default function AIAssistant() {
     transport,
     onError: (err) => {
       console.error("[AIAssistant] Chat error:", err);
+      setRawError(err?.message || err?.toString() || "Unknown error");
     },
   });
   const isThinking = status === "streaming" || status === "submitted";
@@ -510,9 +513,11 @@ export default function AIAssistant() {
               )}
 
               {error && (
-                <div className="max-w-[85%] px-4 py-2 rounded-2xl bg-amber-500/10 border border-amber-400/20 text-amber-500/80 italic font-serif text-xs tracking-tight flex items-center gap-2">
-                  <Wifi className="w-3 h-3 animate-pulse" />
-                  The mountain winds are heavy—trying to reconnect...
+                <div className="max-w-[85%] px-4 py-2 rounded-2xl bg-red-500/10 border border-red-400/20 text-red-400 text-xs tracking-tight">
+                  <div className="font-semibold text-red-300 mb-1">Error Details:</div>
+                  <div className="text-red-200/80 font-mono text-[11px] break-all">
+                    {rawError || "Unknown error occurred"}
+                  </div>
                 </div>
               )}
 

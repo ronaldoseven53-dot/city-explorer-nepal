@@ -267,6 +267,8 @@ export async function POST(req: Request) {
       process.env.GOOGLE_GENERATIVE_AI_API_KEY = apiKey;
     }
 
+    console.log('KEY CHECK:', process.env.GOOGLE_GENERATIVE_AI_API_KEY ? 'Present' : 'MISSING');
+
     const result = streamText({
       model:    google("gemini-2.0-flash"),
       system:   SYSTEM_PROMPT,
