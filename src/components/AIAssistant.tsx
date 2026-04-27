@@ -3,7 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import type { UIMessage } from "ai";
-import { useRef, useEffect, useMemo, useState } from "react";
+import { useRef, useEffect, useMemo, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Timeline, { type ItineraryEvent } from "./Timeline";
 import { destinations } from "@/data/destinations";
@@ -113,14 +113,86 @@ export default function AIAssistant() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const lastAssistantId = useRef<string | null>(null);
 
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/chat",
+        prepareSendMessagesRequest: async ({ messages, body }) => ({
+          body: {
+            ...body,
+            messages: messages
+              .map((message) => {
+                const content = message.parts
+                  .filter((part) => part.type === "text")
+                  .map((part) => part.text)
+                  .join(" ")
+                  .trim();
+
+                return {
+                  role: message.role,
+                  content,
+                };
+              })
+              .filter((message) => message.content.length > 0),
+          },
+        }),
+      }),
+    [],
+  );
+
   const { visitedIds } = useUserPassport();
-  const { messages, sendMessage, status, error } = useChat({
-    transport: new DefaultChatTransport({ api: "/api/chat" }),
+  const { messages, sendMessage, status, error, setMessages } = useChat({
+    transport,
     onError: (err) => {
       console.error("[AIAssistant] Chat error:", err);
     },
   });
   const isThinking = status === "streaming" || status === "submitted";
+
+  const appendMockResponse = useCallback(() => {
+    setMessages((current) => {
+      const lastMessage = current[current.length - 1];
+      if (lastMessage?.role === "assistant") return current;
+
+      return [
+        ...current,
+        {
+          id: `mock-${Date.now()}`,
+          role: "assistant",
+          parts: [
+            {
+              type: "text",
+              text: "Namaste! I am your Himalayan Concierge. My connection to the peaks is being restored, but I am here to help you explore Nepal.",
+            },
+          ],
+        } as UIMessage,
+      ];
+    });
+  }, [setMessages]);
+
+  const handleSend = useCallback(
+    async (text: string) => {
+      const trimmed = text.trim();
+      if (!trimmed || isThinking) return;
+
+      console.log("Agent Ready", { action: "send", text: trimmed });
+      setInput("");
+
+      const destination = findDestinationByText(trimmed);
+      if (destination) {
+        dispatchMapFly(destination);
+        dispatchHeroImage(destination);
+      }
+
+      try {
+        await Promise.resolve(sendMessage({ text: trimmed }));
+      } catch (err) {
+        console.error("[AIAssistant] sendMessage failed:", err);
+        appendMockResponse();
+      }
+    },
+    [appendMockResponse, isThinking, sendMessage],
+  );
 
   const lastUserText = useMemo(() => {
     const lastUserMessage = [...messages].reverse().find((message) => message.role === "user");
@@ -135,12 +207,13 @@ export default function AIAssistant() {
   useEffect(() => {
     const handler = (e: Event) => {
       const { message } = (e as CustomEvent<{ message: string }>).detail;
+      console.log("Agent Ready", { event: "ai-assistant-open", message });
       setOpen(true);
-      sendMessage({ text: message });
+      void handleSend(message);
     };
     window.addEventListener("ai-assistant-open", handler);
     return () => window.removeEventListener("ai-assistant-open", handler);
-  }, [sendMessage]);
+  }, [handleSend]);
 
   useEffect(() => {
     if (shouldSuggestNext(lastUserText)) {
@@ -185,14 +258,7 @@ export default function AIAssistant() {
   const submit = () => {
     const text = input.trim();
     if (!text || isThinking) return;
-
-    setInput("");
-    const destination = findDestinationByText(text);
-    if (destination) {
-      dispatchMapFly(destination);
-      dispatchHeroImage(destination);
-    }
-    sendMessage({ text });
+    void handleSend(text);
   };
 
   return (
@@ -212,10 +278,10 @@ export default function AIAssistant() {
         className={`
           fixed bottom-6 right-6 z-50
           flex items-center gap-2.5 px-4 py-3 rounded-full
-          bg-[#09090b]/90 backdrop-blur-xl
-          border border-white/[0.10]
+          bg-zinc-950/80 backdrop-blur-2xl
+          border border-white/[0.12]
           transition-colors duration-200 cursor-pointer
-          ${open ? "text-white/50 hover:text-white/80" : "text-white hover:border-white/20"}
+          ${open ? "text-white/70 hover:text-white" : "text-white hover:border-white/20"}
         `}
       >
         <motion.span
@@ -240,18 +306,14 @@ export default function AIAssistant() {
             initial="hidden"
             animate="visible"
             exit="exit"
-            style={{
-              background: "rgba(15, 15, 20, 0.7)",
-              backdropFilter: "blur(24px)",
-              WebkitBackdropFilter: "blur(24px)",
-              boxShadow: "0 20px 50px rgba(0, 0, 0, 0.5)",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
-            }}
             className="
               fixed bottom-20 right-6 z-50
               w-[92vw] sm:w-[400px] max-h-[75vh]
-              flex flex-col rounded-2xl overflow-hidden
+              flex flex-col rounded-3xl overflow-hidden
               origin-bottom-right
+              bg-zinc-950/80 backdrop-blur-2xl
+              border border-white/[0.10]
+              shadow-[0_20px_50px_rgba(0,0,0,0.45)]
             "
           >
             {/* Noise texture overlay */}
@@ -302,9 +364,9 @@ export default function AIAssistant() {
                     <span className="text-3xl" aria-hidden>🏔️</span>
                   </div>
                   <div>
-                    <p className="text-white/80 text-sm font-semibold tracking-tight">Namaste!</p>
-                    <p className="text-zinc-500 text-xs mt-1 leading-relaxed">
-                      I&apos;m your expert Nepal travel agent.<br />Ask me anything about these destinations.
+                  <p className="text-white/80 text-sm font-semibold tracking-tight">Namaste, traveler. I am your Himalayan Concierge.</p>
+                  <p className="text-zinc-500 text-xs mt-1 leading-relaxed">
+                    I&apos;m your sophisticated cultural guide through Nepal — ask me about temples, treks, traditions, and hidden mountain routes.
                     </p>
                   </div>
                   <div className="space-y-1.5">
@@ -399,6 +461,12 @@ export default function AIAssistant() {
                 </motion.div>
               )}
 
+              {error && (
+                <div className="max-w-[85%] px-4 py-2 rounded-2xl bg-amber-500/10 border border-amber-400/20 text-amber-200 text-xs tracking-tight">
+                  The mountain winds are heavy—trying to reconnect...
+                </div>
+              )}
+
               {/* Typing indicator */}
               {isThinking && (
                 <motion.div
@@ -408,11 +476,11 @@ export default function AIAssistant() {
                   className="flex justify-start"
                 >
                   <div className="bg-white/[0.06] border border-white/[0.10] rounded-2xl rounded-bl-sm px-4 py-3">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-zinc-500 text-[10px] tracking-wide mr-1 font-medium">thinking</span>
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400/60 animate-bounce [animation-delay:0ms]" />
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400/60 animate-bounce [animation-delay:150ms]" />
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400/60 animate-bounce [animation-delay:300ms]" />
+                    <div className="flex items-center gap-2">
+                      <span className="text-amber-200 text-[10px] tracking-wide mr-1 font-medium">thinking</span>
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-bounce [animation-delay:0ms]" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-bounce [animation-delay:150ms]" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-bounce [animation-delay:300ms]" />
                     </div>
                   </div>
                 </motion.div>
