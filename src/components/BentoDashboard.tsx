@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { motion } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import TransitionLink from "./TransitionLink";
@@ -15,7 +15,10 @@ const MapLoader = dynamic(() => import("./MapLoader"), { ssr: false });
 const NOISE_BG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`;
 
 const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1673505413397-0cd0dc4f5854?w=1600&q=85";
+  "https://images.unsplash.com/photo-1673505413397-0cd0dc4f5854?w=2400&q=90";
+
+const TEMPLE_IMAGE =
+  "https://images.unsplash.com/photo-1592285896110-8d88b5b3a5d8?w=2400&q=90";
 
 const GLASS_STYLE = {
   background: "rgba(255,255,255,0.05)",
@@ -133,21 +136,31 @@ export default function BentoDashboard() {
 
   const sesonPct = Math.round((inSeasonCount / destinations.length) * 100);
 
+  const { scrollYProgress } = useScroll();
+  const himalayanOpacity = useTransform(scrollYProgress, [0, 0.25, 0.55], [1, 1, 0]);
+  const templeOpacity    = useTransform(scrollYProgress, [0, 0.25, 0.55], [0, 0, 1]);
+
+  const bgDivStyle = {
+    position: "absolute" as const, inset: 0,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    filter: "blur(2px)",
+    transform: "scale(1.05)",
+  };
+
   return (
     // Full-page wrapper
     <div className="relative min-h-screen">
 
-      {/* ── Layer 1: Nepal photo (fixed, blurred) ────────────── */}
-      <div className="fixed inset-0 z-[-2] overflow-hidden pointer-events-none">
-        <div style={{
-          position: "absolute", inset: 0,
-          backgroundImage: `url('${HERO_IMAGE}')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          filter: "blur(2px)",
-          transform: "scale(1.05)",
-        }} />
-      </div>
+      {/* ── Layer 1a: Himalayas (fades out mid-scroll) ────────── */}
+      <motion.div style={{ opacity: himalayanOpacity }} className="fixed inset-0 z-[-2] overflow-hidden pointer-events-none">
+        <div style={{ ...bgDivStyle, backgroundImage: `url('${HERO_IMAGE}')` }} />
+      </motion.div>
+
+      {/* ── Layer 1b: Golden Temple (fades in mid-scroll) ─────── */}
+      <motion.div style={{ opacity: templeOpacity }} className="fixed inset-0 z-[-2] overflow-hidden pointer-events-none">
+        <div style={{ ...bgDivStyle, backgroundImage: `url('${TEMPLE_IMAGE}')` }} />
+      </motion.div>
 
       {/* ── Layer 2: Deep color grade ─────────────────────────── */}
       <div className="fixed inset-0 z-[-1] bg-zinc-950/55 pointer-events-none" />
