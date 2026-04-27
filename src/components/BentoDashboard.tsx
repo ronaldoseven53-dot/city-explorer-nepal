@@ -191,7 +191,7 @@ export default function BentoDashboard() {
                 <div
                   key={s.label}
                   style={{ ...GLASS_STYLE, boxShadow: "inset 0 1px 1px rgba(255,255,255,0.12)" }}
-                  className="rounded-2xl px-5 py-3 text-center min-w-[80px]"
+                  className="rounded-2xl px-4 py-3 text-center min-w-[80px]"
                 >
                   <p className="text-2xl font-extrabold text-white tracking-tight">{s.value}</p>
                   <p className="text-white/40 text-[11px] font-medium mt-0.5 uppercase tracking-wide">{s.label}</p>
@@ -203,7 +203,7 @@ export default function BentoDashboard() {
 
         {/* ── CELL 2: Interactive Map — col-span-2 ──────────── */}
         <BentoCard className="lg:col-span-2 min-h-[420px] flex flex-col">
-          <div className="p-5 pb-2 flex-shrink-0">
+          <div className="p-4 pb-2 flex-shrink-0">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500 mb-1">Live</p>
             <h2 className="text-base font-bold text-white tracking-tight">Interactive Map</h2>
           </div>
@@ -213,7 +213,7 @@ export default function BentoDashboard() {
         </BentoCard>
 
         {/* ── CELL 3: Season Stats — col-span-1 ─────────────── */}
-        <BentoCard className="min-h-[420px] flex flex-col justify-between p-7">
+        <BentoCard className="min-h-[420px] flex flex-col justify-between p-8">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-400 mb-1">Right Now</p>
             <h2 className="text-base font-bold text-white tracking-tight mb-6">Season Pulse</h2>
@@ -277,7 +277,7 @@ export default function BentoDashboard() {
         <ExperienceCard group={categoryGroups[5]} />
 
         {/* ── CELL 10: AI Planner CTA ────────────────────────── */}
-        <BentoCard className="min-h-[280px] flex flex-col justify-between p-7">
+        <BentoCard className="min-h-[280px] flex flex-col justify-between p-8">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-red-400 mb-1">✨ Gemini AI</p>
             <h2 className="text-xl font-extrabold text-white tracking-tight leading-tight mt-1 mb-3">

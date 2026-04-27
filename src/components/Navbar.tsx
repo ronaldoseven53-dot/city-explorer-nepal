@@ -70,7 +70,7 @@ export default function Navbar() {
 
   return (
     <nav
-      className="sticky top-0 z-50 border-b border-white/5"
+      className="sticky top-0 z-50 border-b border-white/10"
       style={{
         background: "rgba(9,9,11,0.40)",
         backdropFilter: "blur(20px)",
