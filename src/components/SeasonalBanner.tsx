@@ -82,7 +82,7 @@ export default function SeasonalBanner() {
             >
               <TransitionLink
                 href={`/destinations/${d.id}`}
-                className="group block bg-zinc-900/60 backdrop-blur-2xl border border-white/[0.10] rounded-3xl overflow-hidden"
+                className="group block bg-zinc-900/60 backdrop-blur-md border border-white/[0.10] rounded-3xl overflow-hidden"
               >
                 <div className="relative h-28">
                   <Image
