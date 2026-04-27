@@ -250,11 +250,19 @@ export async function POST(req: Request) {
       );
     }
 
-    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+
+    if (!apiKey) {
+      console.error("CRITICAL: No API Key found in Environment Variables");
       return new Response(
         JSON.stringify({ error: "Missing Google API key" }),
         { status: 500, headers: { "Content-Type": "application/json" } }
       );
+    }
+
+    // Ensure the SDK can find the API key
+    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+      process.env.GOOGLE_GENERATIVE_AI_API_KEY = apiKey;
     }
 
     const result = streamText({
