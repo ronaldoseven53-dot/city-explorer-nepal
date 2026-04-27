@@ -5,7 +5,7 @@ import Image from "next/image";
 import TransitionLink from "@/components/TransitionLink";
 import { destinations } from "@/data/destinations";
 import { checkSeasonality } from "@/lib/seasonality";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",

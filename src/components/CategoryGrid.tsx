@@ -3,7 +3,7 @@
 import Image from "next/image";
 import TransitionLink from "@/components/TransitionLink";
 import { categoryGroups } from "@/data/destinations";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 // ── Per-category curated highlights ──────────────────────────────
 const cardHighlights: Record<string, { icon: string; label: string; badge?: string }[]> = {

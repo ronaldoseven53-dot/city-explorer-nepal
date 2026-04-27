@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { destinations, Destination } from "@/data/destinations";
 import DestinationCard from "./DestinationCard";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 type Category = "all" | Destination["category"];
 
