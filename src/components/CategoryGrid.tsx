@@ -3,26 +3,27 @@
 import Image from "next/image";
 import TransitionLink from "@/components/TransitionLink";
 import { categoryGroups } from "@/data/destinations";
+import { motion } from "framer-motion";
 
 // ── Per-category curated highlights ──────────────────────────────
 const cardHighlights: Record<string, { icon: string; label: string; badge?: string }[]> = {
   agriculture: [
-    { icon: "🍯", label: "Mad Honey Hunting",   badge: "Extreme" },
-    { icon: "🧀", label: "Yak Cheese Making",   badge: "Easy"    },
-    { icon: "🍵", label: "Tea Estate Tours",    badge: "Easy"    },
-    { icon: "🍄", label: "Yarsagumba Harvest",  badge: "Hard"    },
+    { icon: "🍯", label: "Mad Honey Hunting",  badge: "Extreme" },
+    { icon: "🧀", label: "Yak Cheese Making",  badge: "Easy"    },
+    { icon: "🍵", label: "Tea Estate Tours",   badge: "Easy"    },
+    { icon: "🍄", label: "Yarsagumba Harvest", badge: "Hard"    },
   ],
   adventure: [
-    { icon: "🪂", label: "Kushma Bungee Jump",       badge: "Extreme" },
-    { icon: "🌊", label: "White Water Rafting",       badge: "Hard"    },
-    { icon: "🛩",  label: "Pokhara Paragliding",      badge: "Hard"    },
-    { icon: "⛷️", label: "Kalinchowk Skiing",         badge: "Moderate"},
+    { icon: "🪂", label: "Kushma Bungee Jump",  badge: "Extreme"  },
+    { icon: "🌊", label: "White Water Rafting", badge: "Hard"     },
+    { icon: "🛩",  label: "Pokhara Paragliding", badge: "Hard"     },
+    { icon: "⛷️", label: "Kalinchowk Skiing",   badge: "Moderate" },
   ],
   trekking: [
-    { icon: "🥾", label: "Annapurna Circuit" },
-    { icon: "🏔️", label: "Thorong La Pass (5,416 m)" },
-    { icon: "🏕️", label: "Rara Lake Wild Camping"    },
-    { icon: "🗺️", label: "Tsum Valley Trek"           },
+    { icon: "🥾", label: "Annapurna Circuit"       },
+    { icon: "🏔️", label: "Thorong La Pass (5,416m)" },
+    { icon: "🏕️", label: "Rara Lake Wild Camping"  },
+    { icon: "🗺️", label: "Tsum Valley Trek"         },
   ],
   heritage: [
     { icon: "🏛️", label: "UNESCO Durbar Squares" },
@@ -31,235 +32,185 @@ const cardHighlights: Record<string, { icon: string; label: string; badge?: stri
     { icon: "🌄", label: "Newari Hill Towns"       },
   ],
   nature: [
-    { icon: "🌿", label: "Tea Plantation Walks"  },
-    { icon: "🦜", label: "Himalayan Birdwatching" },
-    { icon: "🌅", label: "Nagarkot Sunrise"       },
-    { icon: "🦁", label: "Rhino & Tiger Safari"   },
+    { icon: "🌿", label: "Tea Plantation Walks"   },
+    { icon: "🦜", label: "Himalayan Birdwatching"  },
+    { icon: "🌅", label: "Nagarkot Sunrise"        },
+    { icon: "🦁", label: "Rhino & Tiger Safari"    },
   ],
   pilgrimage: [
-    { icon: "🛕", label: "Buddha's Birthplace"  },
-    { icon: "🕉️", label: "Janaki Mandir"         },
-    { icon: "🪷", label: "Maya Devi Temple"      },
-    { icon: "🚂", label: "Heritage Steam Train"  },
+    { icon: "🛕", label: "Buddha's Birthplace" },
+    { icon: "🕉️", label: "Janaki Mandir"        },
+    { icon: "🪷", label: "Maya Devi Temple"     },
+    { icon: "🚂", label: "Heritage Steam Train" },
   ],
 };
 
-// ── Per-category accent theme ─────────────────────────────────────
-const cardTheme: Record<string, {
-  gradient: string;
-  imageTint: string;
-  accent: string;
-  accentLight: string;
-  accentText: string;
-  badgeBg: string;
-  border: string;
-  chipBg: string;
-  chipText: string;
-}> = {
-  agriculture: {
-    gradient:    "from-green-600 to-emerald-700",
-    imageTint:   "from-green-900/70 via-green-800/30",
-    accent:      "bg-green-600",
-    accentLight: "bg-green-50",
-    accentText:  "text-green-700",
-    badgeBg:     "bg-green-500/20 text-green-200 border-green-400/30",
-    border:      "border-green-200",
-    chipBg:      "bg-green-50 border-green-200",
-    chipText:    "text-green-700",
-  },
-  adventure: {
-    gradient:    "from-red-600 to-orange-700",
-    imageTint:   "from-red-900/70 via-red-800/30",
-    accent:      "bg-red-600",
-    accentLight: "bg-red-50",
-    accentText:  "text-red-700",
-    badgeBg:     "bg-red-500/20 text-red-200 border-red-400/30",
-    border:      "border-red-200",
-    chipBg:      "bg-red-50 border-red-200",
-    chipText:    "text-red-700",
-  },
-  trekking: {
-    gradient:    "from-slate-600 to-slate-800",
-    imageTint:   "from-slate-900/70 via-slate-700/30",
-    accent:      "bg-slate-700",
-    accentLight: "bg-slate-50",
-    accentText:  "text-slate-700",
-    badgeBg:     "bg-slate-500/20 text-slate-200 border-slate-400/30",
-    border:      "border-slate-200",
-    chipBg:      "bg-slate-50 border-slate-200",
-    chipText:    "text-slate-700",
-  },
-  heritage: {
-    gradient:    "from-amber-500 to-yellow-700",
-    imageTint:   "from-amber-900/70 via-amber-800/30",
-    accent:      "bg-amber-600",
-    accentLight: "bg-amber-50",
-    accentText:  "text-amber-700",
-    badgeBg:     "bg-amber-500/20 text-amber-200 border-amber-400/30",
-    border:      "border-amber-200",
-    chipBg:      "bg-amber-50 border-amber-200",
-    chipText:    "text-amber-700",
-  },
-  nature: {
-    gradient:    "from-emerald-600 to-teal-700",
-    imageTint:   "from-emerald-900/70 via-emerald-800/30",
-    accent:      "bg-emerald-600",
-    accentLight: "bg-emerald-50",
-    accentText:  "text-emerald-700",
-    badgeBg:     "bg-emerald-500/20 text-emerald-200 border-emerald-400/30",
-    border:      "border-emerald-200",
-    chipBg:      "bg-emerald-50 border-emerald-200",
-    chipText:    "text-emerald-700",
-  },
-  pilgrimage: {
-    gradient:    "from-purple-600 to-violet-700",
-    imageTint:   "from-purple-900/70 via-purple-800/30",
-    accent:      "bg-purple-600",
-    accentLight: "bg-purple-50",
-    accentText:  "text-purple-700",
-    badgeBg:     "bg-purple-500/20 text-purple-200 border-purple-400/30",
-    border:      "border-purple-200",
-    chipBg:      "bg-purple-50 border-purple-200",
-    chipText:    "text-purple-700",
-  },
+// ── Accent glow colors per category (for hover glow) ─────────────
+const glowColor: Record<string, string> = {
+  agriculture: "rgba(34,197,94,0.25)",
+  adventure:   "rgba(239,68,68,0.25)",
+  trekking:    "rgba(148,163,184,0.20)",
+  heritage:    "rgba(245,158,11,0.25)",
+  nature:      "rgba(16,185,129,0.25)",
+  pilgrimage:  "rgba(168,85,247,0.25)",
+};
+
+// ── Accent text/border color per category ────────────────────────
+const accentClass: Record<string, { text: string; border: string; chip: string; dot: string }> = {
+  agriculture: { text: "text-green-400",  border: "border-green-500/30",  chip: "bg-green-500/10 text-green-300 border-green-500/20",  dot: "bg-green-400"  },
+  adventure:   { text: "text-red-400",    border: "border-red-500/30",    chip: "bg-red-500/10 text-red-300 border-red-500/20",         dot: "bg-red-400"    },
+  trekking:    { text: "text-slate-300",  border: "border-slate-500/30",  chip: "bg-slate-500/10 text-slate-300 border-slate-500/20",   dot: "bg-slate-400"  },
+  heritage:    { text: "text-amber-400",  border: "border-amber-500/30",  chip: "bg-amber-500/10 text-amber-300 border-amber-500/20",   dot: "bg-amber-400"  },
+  nature:      { text: "text-emerald-400",border: "border-emerald-500/30",chip: "bg-emerald-500/10 text-emerald-300 border-emerald-500/20", dot: "bg-emerald-400"},
+  pilgrimage:  { text: "text-purple-400", border: "border-purple-500/30", chip: "bg-purple-500/10 text-purple-300 border-purple-500/20", dot: "bg-purple-400" },
 };
 
 const difficultyStyle: Record<string, string> = {
-  Extreme:  "bg-rose-950 text-rose-200 border-rose-800",
-  Hard:     "bg-red-100  text-red-700  border-red-200",
-  Moderate: "bg-amber-100 text-amber-700 border-amber-200",
-  Easy:     "bg-green-100 text-green-700 border-green-200",
+  Extreme:  "bg-rose-500/15 text-rose-300 border-rose-500/30",
+  Hard:     "bg-red-500/15 text-red-300 border-red-500/30",
+  Moderate: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+  Easy:     "bg-green-500/15 text-green-300 border-green-500/30",
 };
 
-const fallbackTheme = cardTheme.trekking;
+// ── Animation variants ────────────────────────────────────────────
+const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.08 },
+  },
+};
+
+const cardVariants = {
+  hidden:  { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
+};
 
 export default function CategoryGrid() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <motion.div
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+      variants={containerVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-60px" }}
+    >
       {categoryGroups.map((group) => {
         const coverImage = group.spots[0].placeholderImage;
-        const theme      = cardTheme[group.id] ?? fallbackTheme;
+        const accent     = accentClass[group.id] ?? accentClass.trekking;
         const highlights = cardHighlights[group.id] ?? [];
+        const glow       = glowColor[group.id] ?? "rgba(255,255,255,0.1)";
 
         return (
-          <TransitionLink
-            key={group.id}
-            href={`/experience/${group.id}`}
-            className={`
-              group flex flex-col rounded-2xl overflow-hidden
-              bg-white border ${theme.border}
-              shadow-sm hover:shadow-xl
-              transition-all duration-300 hover:-translate-y-1
-            `}
-          >
-            {/* ── Image area ──────────────────────────────── */}
-            <div className="relative h-48 flex-shrink-0 overflow-hidden">
-              <Image
-                src={coverImage}
-                alt={group.name}
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className="object-cover group-hover:scale-105 transition-transform duration-500"
-                style={{ viewTransitionName: `category-cover-${group.id}` }}
-              />
-              {/* tinted gradient */}
-              <div className={`absolute inset-0 bg-gradient-to-t ${theme.imageTint} to-transparent`} />
+          <motion.div key={group.id} variants={cardVariants}>
+            <motion.div
+              whileHover={{
+                scale: 1.02,
+                boxShadow: `0 0 0 1px rgba(255,255,255,0.08), 0 24px 48px -12px ${glow}, 0 8px 24px -8px ${glow}`,
+              }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              style={{ boxShadow: "0 0 0 1px rgba(255,255,255,0.06), 0 4px 24px -4px rgba(0,0,0,0.4)" }}
+              className="rounded-2xl overflow-hidden will-change-transform"
+            >
+              <TransitionLink
+                href={`/experience/${group.id}`}
+                className="flex flex-col bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-2xl overflow-hidden group"
+              >
+                {/* ── Image area ──────────────────────────────── */}
+                <div className="relative h-44 flex-shrink-0 overflow-hidden">
+                  <Image
+                    src={coverImage}
+                    alt={group.name}
+                    fill
+                    sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                    style={{ viewTransitionName: `category-cover-${group.id}` }}
+                  />
+                  {/* deep gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#09090b]/90 via-[#09090b]/30 to-transparent" />
 
-              {/* Spot count badge — top right */}
-              <span className={`
-                absolute top-3 right-3
-                text-xs font-semibold px-2.5 py-1 rounded-full border backdrop-blur-sm
-                ${theme.badgeBg}
-              `}>
-                {group.spots.length} {group.spots.length === 1 ? "Spot" : "Spots"}
-              </span>
-
-              {/* Emoji + name over image */}
-              <div className="absolute bottom-3 left-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl drop-shadow-lg">{group.emoji}</span>
-                  <h3 className="text-lg font-extrabold text-white drop-shadow leading-tight">
-                    {group.name}
-                  </h3>
-                </div>
-              </div>
-            </div>
-
-            {/* ── Content area ────────────────────────────── */}
-            <div className="flex flex-col flex-1 p-4 gap-4">
-
-              {/* Short description */}
-              <p className="text-gray-500 text-xs leading-relaxed line-clamp-2">
-                {group.description}
-              </p>
-
-              {/* ── Highlight activity chips ──────────────── */}
-              <div className="flex flex-col gap-2">
-                <p className={`text-[10px] font-bold uppercase tracking-widest ${theme.accentText}`}>
-                  Featured Experiences
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {highlights.map((h) => (
-                    <span
-                      key={h.label}
-                      className={`
-                        inline-flex items-center gap-1 text-xs font-medium
-                        px-2.5 py-1 rounded-full border
-                        ${theme.chipBg} ${theme.chipText}
-                      `}
-                    >
-                      <span>{h.icon}</span>
-                      {h.label}
-                      {h.badge && (
-                        <span className={`
-                          ml-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full border
-                          ${difficultyStyle[h.badge] ?? "bg-gray-100 text-gray-600 border-gray-200"}
-                        `}>
-                          {h.badge}
-                        </span>
-                      )}
+                  {/* Spots pill */}
+                  <div className="absolute top-3 right-3">
+                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border backdrop-blur-md bg-black/30 text-white/70 border-white/10`}>
+                      {group.spots.length} {group.spots.length === 1 ? "Spot" : "Spots"}
                     </span>
-                  ))}
-                </div>
-              </div>
+                  </div>
 
-              {/* ── Footer ────────────────────────────────── */}
-              <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
-                <div className="flex gap-1">
-                  {group.spots.slice(0, 3).map((s) => (
-                    <div
-                      key={s.id}
-                      className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-white shadow-sm -ml-1 first:ml-0"
-                    >
-                      <Image
-                        src={s.placeholderImage}
-                        alt={s.name}
-                        fill
-                        sizes="28px"
-                        className="object-cover"
-                      />
+                  {/* Emoji + name */}
+                  <div className="absolute bottom-3 left-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl drop-shadow-lg">{group.emoji}</span>
+                      <h3 className="text-base font-semibold tracking-tight text-white drop-shadow leading-tight">
+                        {group.name}
+                      </h3>
                     </div>
-                  ))}
-                  {group.spots.length > 3 && (
-                    <div className="w-7 h-7 rounded-full bg-gray-100 border-2 border-white shadow-sm -ml-1 flex items-center justify-center">
-                      <span className="text-[9px] font-bold text-gray-500">+{group.spots.length - 3}</span>
-                    </div>
-                  )}
+                  </div>
                 </div>
 
-                <span className={`
-                  text-xs font-bold px-3 py-1.5 rounded-full
-                  ${theme.accentLight} ${theme.accentText}
-                  group-hover:${theme.accent} group-hover:text-white
-                  transition-colors duration-200
-                `}>
-                  Explore →
-                </span>
-              </div>
-            </div>
-          </TransitionLink>
+                {/* ── Content area ────────────────────────────── */}
+                <div className="flex flex-col flex-1 p-4 gap-4">
+
+                  {/* Description */}
+                  <p className="text-zinc-400 text-xs leading-relaxed line-clamp-2">
+                    {group.description}
+                  </p>
+
+                  {/* ── Highlight chips ───────────────────────── */}
+                  <div className="flex flex-col gap-2">
+                    <p className={`text-[10px] font-bold uppercase tracking-[0.12em] ${accent.text}`}>
+                      Featured Experiences
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {highlights.map((h) => (
+                        <span
+                          key={h.label}
+                          className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full border ${accent.chip}`}
+                        >
+                          <span className="text-xs">{h.icon}</span>
+                          {h.label}
+                          {h.badge && (
+                            <span className={`ml-0.5 text-[9px] font-bold px-1.5 py-px rounded-full border ${difficultyStyle[h.badge]}`}>
+                              {h.badge}
+                            </span>
+                          )}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* ── Footer ────────────────────────────────── */}
+                  <div className={`mt-auto pt-3 border-t ${accent.border} flex items-center justify-between`}>
+                    {/* Stacked avatars */}
+                    <div className="flex">
+                      {group.spots.slice(0, 3).map((s, i) => (
+                        <div
+                          key={s.id}
+                          className="relative w-6 h-6 rounded-full overflow-hidden border border-white/10 shadow-sm"
+                          style={{ marginLeft: i === 0 ? 0 : -6 }}
+                        >
+                          <Image src={s.placeholderImage} alt={s.name} fill sizes="24px" className="object-cover" />
+                        </div>
+                      ))}
+                      {group.spots.length > 3 && (
+                        <div
+                          className="w-6 h-6 rounded-full bg-white/10 border border-white/10 flex items-center justify-center"
+                          style={{ marginLeft: -6 }}
+                        >
+                          <span className="text-[8px] font-bold text-zinc-400">+{group.spots.length - 3}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <span className={`text-[11px] font-semibold tracking-tight ${accent.text} flex items-center gap-1`}>
+                      Explore
+                      <span className="opacity-60 group-hover:translate-x-0.5 transition-transform duration-200 inline-block">→</span>
+                    </span>
+                  </div>
+                </div>
+              </TransitionLink>
+            </motion.div>
+          </motion.div>
         );
       })}
-    </div>
+    </motion.div>
   );
 }

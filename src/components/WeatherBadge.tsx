@@ -25,14 +25,14 @@ export default function WeatherBadge({ lat, lng }: { lat: number; lng: number })
   }, [lat, lng]);
 
   if (loading) {
-    return <div className="h-6 w-20 bg-gray-100 rounded-full animate-pulse" />;
+    return <div className="h-6 w-20 bg-white/[0.08] rounded-full animate-pulse" />;
   }
 
   if (!weather) return null;
 
   return (
     <div
-      className="flex items-center gap-1 bg-sky-50 text-sky-700 text-xs font-medium px-2 py-0.5 rounded-full"
+      className="flex items-center gap-1 bg-white/[0.08] border border-white/[0.12] text-white/70 text-xs font-medium px-2 py-0.5 rounded-full"
       title={`Feels like ${weather.feels_like}°C · ${weather.description}`}
     >
       <Image

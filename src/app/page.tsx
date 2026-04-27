@@ -61,12 +61,12 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="bg-gray-50">
+      <div className="bg-[#09090b]">
         {/* ── Interactive Map ───────────────────────────────────── */}
         <MapLoader />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <hr className="border-gray-200" />
+          <hr className="border-white/[0.08]" />
         </div>
 
         <SeasonalBanner />
@@ -75,17 +75,17 @@ export default function Home() {
       {/* ── Himalayas CTA banner ──────────────────────────────────── */}
       <HimalayanCTA />
 
-      <div className="bg-gray-50">
+      <div className="bg-[#09090b]">
         {/* ── Experience Cards Grid ─────────────────────────────── */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center mb-10">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+            <p className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">
               What do you want to do?
             </p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3">
               Choose Your Experience
             </h2>
-            <p className="text-gray-500 text-sm sm:text-base max-w-xl mx-auto">
+            <p className="text-zinc-400 text-sm sm:text-base max-w-xl mx-auto">
               From cliff-harvested mad honey to world-class bungee jumps — pick an experience type to see curated destinations and activities.
             </p>
           </div>
