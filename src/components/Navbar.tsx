@@ -32,7 +32,7 @@ function MagneticLink({ href, label }: { href: string; label: string }) {
       <TransitionLink href={href}>
         <motion.span
           style={{ x: springX, y: springY, display: "inline-block" }}
-          className="text-sm font-medium text-zinc-400 hover:text-white transition-colors duration-300 ease-out cursor-pointer select-none"
+          className="text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors duration-300 ease-out cursor-pointer select-none"
         >
           {label}
         </motion.span>
@@ -48,17 +48,17 @@ function HamburgerIcon({ open }: { open: boolean }) {
       <motion.span
         animate={open ? { rotate: 45, y: 7 } : { rotate: 0, y: 0 }}
         transition={{ duration: 0.25, ease: "easeOut" }}
-        className="block h-px w-full bg-white/70 rounded-full origin-center"
+        className="block h-px w-full bg-zinc-700/80 rounded-full origin-center"
       />
       <motion.span
         animate={open ? { opacity: 0, scaleX: 0 } : { opacity: 1, scaleX: 1 }}
         transition={{ duration: 0.2 }}
-        className="block h-px w-full bg-white/70 rounded-full"
+        className="block h-px w-full bg-zinc-700/80 rounded-full"
       />
       <motion.span
         animate={open ? { rotate: -45, y: -7 } : { rotate: 0, y: 0 }}
         transition={{ duration: 0.25, ease: "easeOut" }}
-        className="block h-px w-full bg-white/70 rounded-full origin-center"
+        className="block h-px w-full bg-zinc-700/80 rounded-full origin-center"
       />
     </div>
   );
@@ -70,9 +70,9 @@ export default function Navbar() {
 
   return (
     <nav
-      className="sticky top-0 z-50 border-b border-white/10"
+      className="sticky top-0 z-50 border-b border-black/[0.08]"
       style={{
-        background: "rgba(9,9,11,0.40)",
+        background: "rgba(250,247,242,0.92)",
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
       }}
@@ -85,8 +85,8 @@ export default function Navbar() {
             <svg width="34" height="34" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <defs>
                 <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#1e3a5f" />
-                  <stop offset="100%" stopColor="#4a90c4" />
+                  <stop offset="0%" stopColor="#e8dcc8" />
+                  <stop offset="100%" stopColor="#c8b898" />
                 </linearGradient>
                 <linearGradient id="snowG" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#ffffff" />
@@ -94,14 +94,14 @@ export default function Navbar() {
                 </linearGradient>
               </defs>
               <rect width="36" height="36" rx="8" fill="url(#skyG)" />
-              <path d="M0 28 L8 16 L14 22 L20 12 L26 20 L36 28 Z" fill="#2a5f8a" opacity="0.6" />
-              <path d="M6 30 L18 8 L30 30 Z" fill="#3a7abf" />
+              <path d="M0 28 L8 16 L14 22 L20 12 L26 20 L36 28 Z" fill="#b8a888" opacity="0.6" />
+              <path d="M6 30 L18 8 L30 30 Z" fill="#a0896a" />
               <path d="M18 8 L13.5 18 L18 16 L22.5 18 Z" fill="url(#snowG)" />
-              <path d="M0 30 L6 24 L12 28 L18 22 L24 27 L30 23 L36 28 L36 36 L0 36 Z" fill="#1a3050" />
+              <path d="M0 30 L6 24 L12 28 L18 22 L24 27 L30 23 L36 28 L36 36 L0 36 Z" fill="#8c7658" />
             </svg>
 
             <div className="flex items-baseline gap-1 tracking-tight">
-              <span className="font-bold text-[17px] text-white">City Explorer</span>
+              <span className="font-bold text-[17px] text-zinc-800">City Explorer</span>
               <span
                 className="font-bold text-[17px] text-amber-400"
                 style={{ textShadow: "0 0 18px rgba(251,191,36,0.55), 0 0 40px rgba(251,191,36,0.25)" }}
@@ -125,7 +125,7 @@ export default function Navbar() {
             <button
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               onClick={() => setMenuOpen((v) => !v)}
-              className="p-2 rounded-xl bg-white/[0.06] border border-white/[0.10] hover:bg-white/[0.10] transition-colors"
+              className="p-2 rounded-xl bg-black/[0.05] border border-black/[0.10] hover:bg-black/[0.09] transition-colors"
             >
               <HamburgerIcon open={menuOpen} />
             </button>
@@ -142,8 +142,8 @@ export default function Navbar() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.28, ease: "easeOut" }}
-            className="sm:hidden overflow-hidden border-t border-white/[0.06]"
-            style={{ background: "rgba(9,9,11,0.92)", backdropFilter: "blur(20px)" }}
+            className="sm:hidden overflow-hidden border-t border-black/[0.07]"
+            style={{ background: "rgba(250,247,242,0.97)", backdropFilter: "blur(20px)" }}
           >
             <div className="px-4 py-4 flex flex-col gap-1">
               {NAV_LINKS.map((l, i) => (
@@ -156,7 +156,7 @@ export default function Navbar() {
                   <a
                     href={l.href}
                     onClick={() => setMenuOpen(false)}
-                    className="block px-3 py-2.5 text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/[0.06] rounded-xl transition-all duration-300 ease-out"
+                    className="block px-3 py-2.5 text-sm font-medium text-zinc-600 hover:text-zinc-900 hover:bg-black/[0.05] rounded-xl transition-all duration-300 ease-out"
                   >
                     {l.label}
                   </a>
