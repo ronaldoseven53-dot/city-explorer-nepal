@@ -1,20 +1,27 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { destinations, Destination } from "@/data/destinations";
+import { destinations, Destination, type DestinationTag } from "@/data/destinations";
 import DestinationCard from "./DestinationCard";
 import { motion } from "motion/react";
 
-type Category = "all" | Destination["category"];
+type FilterValue = "all" | Destination["category"] | DestinationTag;
 
-const categoryFilters: { value: Category; label: string; emoji: string; active: string; inactive: string }[] = [
-  { value: "all",         label: "All",         emoji: "🗺️", active: "bg-white/15 text-white border-white/30",           inactive: "bg-white/[0.05] text-zinc-400 border-white/[0.10] hover:bg-white/[0.10] hover:text-white"     },
-  { value: "agriculture", label: "Agriculture", emoji: "🌾", active: "bg-lime-500/25 text-lime-200 border-lime-500/40",   inactive: "bg-white/[0.05] text-zinc-400 border-white/[0.10] hover:bg-white/[0.10] hover:text-white"     },
-  { value: "mountain",    label: "Mountain",    emoji: "🏔️", active: "bg-blue-500/25 text-blue-200 border-blue-500/40",   inactive: "bg-white/[0.05] text-zinc-400 border-white/[0.10] hover:bg-white/[0.10] hover:text-white"     },
-  { value: "heritage",    label: "Heritage",    emoji: "🏛️", active: "bg-amber-500/25 text-amber-200 border-amber-500/40",inactive: "bg-white/[0.05] text-zinc-400 border-white/[0.10] hover:bg-white/[0.10] hover:text-white"     },
-  { value: "nature",      label: "Nature",      emoji: "🌿", active: "bg-green-500/25 text-green-200 border-green-500/40",inactive: "bg-white/[0.05] text-zinc-400 border-white/[0.10] hover:bg-white/[0.10] hover:text-white"     },
-  { value: "pilgrimage",  label: "Pilgrimage",  emoji: "🛕", active: "bg-purple-500/25 text-purple-200 border-purple-500/40", inactive: "bg-white/[0.05] text-zinc-400 border-white/[0.10] hover:bg-white/[0.10] hover:text-white" },
-  { value: "hill",        label: "Hill",        emoji: "🍃", active: "bg-teal-500/25 text-teal-200 border-teal-500/40",   inactive: "bg-white/[0.05] text-zinc-400 border-white/[0.10] hover:bg-white/[0.10] hover:text-white"     },
+const INACTIVE = "bg-white/[0.05] text-zinc-400 border-white/[0.10] hover:bg-white/[0.10] hover:text-white";
+
+const categoryFilters: { value: FilterValue; label: string; emoji: string; active: string; inactive: string }[] = [
+  { value: "all",            label: "All",            emoji: "🗺️", active: "bg-white/15 text-white border-white/30",                 inactive: INACTIVE },
+  { value: "agriculture",    label: "Agriculture",    emoji: "🌾", active: "bg-lime-500/25 text-lime-200 border-lime-500/40",         inactive: INACTIVE },
+  { value: "mountain",       label: "Mountain",       emoji: "🏔️", active: "bg-blue-500/25 text-blue-200 border-blue-500/40",         inactive: INACTIVE },
+  { value: "heritage",       label: "Heritage",       emoji: "🏛️", active: "bg-amber-500/25 text-amber-200 border-amber-500/40",      inactive: INACTIVE },
+  { value: "nature",         label: "Nature",         emoji: "🌿", active: "bg-green-500/25 text-green-200 border-green-500/40",      inactive: INACTIVE },
+  { value: "pilgrimage",     label: "Pilgrimage",     emoji: "🛕", active: "bg-purple-500/25 text-purple-200 border-purple-500/40",   inactive: INACTIVE },
+  { value: "hill",           label: "Hill Station",   emoji: "🍃", active: "bg-teal-500/25 text-teal-200 border-teal-500/40",         inactive: INACTIVE },
+  { value: "park",           label: "Public Park",    emoji: "🌳", active: "bg-emerald-500/25 text-emerald-200 border-emerald-500/40",inactive: INACTIVE },
+  { value: "children-park",  label: "Children Park",  emoji: "🎠", active: "bg-yellow-500/25 text-yellow-200 border-yellow-500/40",   inactive: INACTIVE },
+  { value: "museum",         label: "Museums",        emoji: "🏺", active: "bg-indigo-500/25 text-indigo-200 border-indigo-500/40",   inactive: INACTIVE },
+  { value: "water-park",     label: "Water Park",     emoji: "💦", active: "bg-cyan-500/25 text-cyan-200 border-cyan-500/40",         inactive: INACTIVE },
+  { value: "zoo",            label: "Zoo",            emoji: "🦁", active: "bg-orange-500/25 text-orange-200 border-orange-500/40",   inactive: INACTIVE },
 ];
 
 const MIN_PRICE = 2000;
@@ -48,14 +55,17 @@ const gridItemVariants = {
 
 export default function SearchableGrid() {
   const [query,     setQuery]     = useState("");
-  const [category,  setCategory]  = useState<Category>("all");
+  const [category,  setCategory]  = useState<FilterValue>("all");
   const [maxBudget, setMaxBudget] = useState(MAX_PRICE);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return destinations.filter((d) => {
-      const matchesCategory = category === "all" || d.category === category;
-      const matchesBudget   = d.basePrice <= maxBudget;
+      const matchesCategory =
+        category === "all" ||
+        d.category === category ||
+        (d.tags?.includes(category as DestinationTag) ?? false);
+      const matchesBudget  = d.basePrice <= maxBudget;
       const matchesQuery =
         !q ||
         d.name.toLowerCase().includes(q) ||

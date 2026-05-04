@@ -1,5 +1,7 @@
 // ── Core types ────────────────────────────────────────────────────
 
+export type DestinationTag = "park" | "children-park" | "museum" | "water-park" | "zoo";
+
 export interface Destination {
   id: string;
   name: string;
@@ -17,6 +19,7 @@ export interface Destination {
   gettingThere: string;
   coordinates: { lat: number; lng: number };
   basePrice: number; // estimated NPR per person per day (budget traveller)
+  tags?: DestinationTag[];
 }
 
 /** A Spot is structurally identical to a Destination — the alias signals it
@@ -217,6 +220,7 @@ const pokhara: Spot = {
   gettingThere: "Pokhara Regional International Airport (PKR) has domestic flights from Kathmandu (25 min). Tourist buses and private cars make the scenic 6–7 hour road journey from Kathmandu along the Prithvi Highway.",
   coordinates: { lat: 28.2096, lng: 83.9856 },
   basePrice: 3000,
+  tags: ["museum", "park", "water-park", "children-park"],
 };
 
 const mustang: Spot = {
@@ -301,6 +305,7 @@ const chitwan: Spot = {
   gettingThere: "Tourist buses run daily from Kathmandu to Sauraha (5–6 hours). Alternatively, fly to Bharatpur Airport (BHR) — 30 minutes from Kathmandu — then take a taxi to Sauraha (30 min).",
   coordinates: { lat: 27.5291, lng: 84.3542 },
   basePrice: 5500,
+  tags: ["zoo", "park", "children-park"],
 };
 
 const kalinchowk: Spot = {
@@ -442,6 +447,7 @@ const raraLake: Spot = {
   gettingThere: "Fly from Kathmandu to Nepalgunj (1 hr), then take a mountain flight to Talcha Airport in Mugu (30 min). From Talcha a scenic 3-hour hike brings you to the lakeshore. Alternatively, trek 10–14 days from Jumla.",
   coordinates: { lat: 29.5272, lng: 82.0955 },
   basePrice: 9500,
+  tags: ["park"],
 };
 
 const tsumValley: Spot = {
@@ -539,6 +545,7 @@ const dhampus: Spot = {
   gettingThere: "From Pokhara Lakeside take a taxi or local bus to Phedi village (30 min, ~NPR 500). The well-marked trail climbs steadily through forests to Dhampus in 2.5–3 hours.",
   coordinates: { lat: 28.2700, lng: 83.8800 },
   basePrice: 3000,
+  tags: ["park"],
 };
 
 const gosaikunda: Spot = {
@@ -629,6 +636,7 @@ const kathmandu: Spot = {
   gettingThere: "Tribhuvan International Airport (KTM) is the main entry point, with direct flights from major Asian hubs. From the airport, taxis and ride apps reach the city centre in 20–40 minutes.",
   coordinates: { lat: 27.7172, lng: 85.324 },
   basePrice: 3500,
+  tags: ["museum", "zoo", "park", "children-park"],
 };
 
 const bhaktapur: Spot = {
@@ -668,6 +676,7 @@ const bhaktapur: Spot = {
   gettingThere: "From Kathmandu, take a local bus or microbus from Bag Bazaar (40–50 minutes) or a taxi (30 minutes). Bhaktapur is 13 km east of Kathmandu city centre.",
   coordinates: { lat: 27.6710, lng: 85.4298 },
   basePrice: 3200,
+  tags: ["museum", "park"],
 };
 
 const bandipur: Spot = {
@@ -708,6 +717,7 @@ const bandipur: Spot = {
   gettingThere: "From Kathmandu or Pokhara, travel along the Prithvi Highway and turn off at Dumre. From Dumre, local buses and taxis climb the 8 km hill road to Bandipur in 20–30 minutes.",
   coordinates: { lat: 27.9333, lng: 84.4167 },
   basePrice: 3500,
+  tags: ["museum"],
 };
 
 // ── Nature ────────────────────────────────────────────────────────
@@ -752,6 +762,7 @@ const kanyam: Spot = {
   gettingThere: "Take a bus or shared jeep from Ilam town to Kanyam (45 minutes). From Bhadrapur Airport in Jhapa, it is a 3-hour drive via Birtamod and Fikkal.",
   coordinates: { lat: 26.8618, lng: 87.9038 },
   basePrice: 2200,
+  tags: ["park"],
 };
 
 const nagarkot: Spot = {
@@ -790,6 +801,7 @@ const nagarkot: Spot = {
   gettingThere: "From Kathmandu, take a taxi or local bus from Bhaktapur to Nagarkot (32 km, 1.5 hours). Many Kathmandu hotels arrange day-trip and overnight packages.",
   coordinates: { lat: 27.7167, lng: 85.5167 },
   basePrice: 4000,
+  tags: ["park"],
 };
 
 // ── Pilgrimage ────────────────────────────────────────────────────
@@ -834,6 +846,7 @@ const lumbini: Spot = {
   gettingThere: "Fly to Bhairahawa Airport (BWA), 22 km from Lumbini, with daily flights from Kathmandu (30 min). From Bhairahawa, take a taxi or rickshaw directly to the sacred garden.",
   coordinates: { lat: 27.4833, lng: 83.2765 },
   basePrice: 2500,
+  tags: ["museum", "park"],
 };
 
 const janakpur: Spot = {
@@ -874,6 +887,7 @@ const janakpur: Spot = {
   gettingThere: "Fly from Kathmandu to Janakpur Airport (JKR) — 45 minutes with daily Tara Air and Shree Air flights. Overnight buses from Kathmandu take 8–9 hours via the East–West Highway.",
   coordinates: { lat: 26.7288, lng: 85.9280 },
   basePrice: 2500,
+  tags: ["museum", "park"],
 };
 
 // ── Category groups (the new primary structure) ───────────────────
@@ -947,3 +961,21 @@ export const getCategoryLabel = (category: Destination["category"]): string => {
   };
   return labels[category];
 };
+
+export const TAG_LABELS: Record<DestinationTag, string> = {
+  "park":          "Public Park",
+  "children-park": "Children Park",
+  "museum":        "Museums",
+  "water-park":    "Water Park",
+  "zoo":           "Zoo",
+};
+
+export const TAG_COLORS: Record<DestinationTag, string> = {
+  "park":          "#059669",
+  "children-park": "#eab308",
+  "museum":        "#6366f1",
+  "water-park":    "#0891b2",
+  "zoo":           "#ea580c",
+};
+
+export const getTagLabel = (tag: DestinationTag): string => TAG_LABELS[tag];
