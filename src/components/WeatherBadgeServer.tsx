@@ -41,8 +41,9 @@ export default async function WeatherBadgeServer({
 
   return (
     <div
-      className="flex items-center gap-1 bg-sky-50 text-sky-700 text-xs font-medium px-2 py-0.5 rounded-full"
+      className="flex items-center gap-1.5 bg-sky-50 border border-sky-200/80 text-sky-700 text-xs font-semibold px-2.5 py-1 rounded-full"
       title={`Feels like ${weather.feels_like}°C · ${weather.description}`}
+      style={{ boxShadow: "0 1px 4px rgba(14,165,233,0.12)" }}
     >
       <Image
         src={`https://openweathermap.org/img/wn/${weather.icon}.png`}

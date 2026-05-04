@@ -13,6 +13,7 @@ import { getActivityIcon, getWildlifeIcon } from "@/lib/activityIcons";
 import SingleDestinationMapLoader from "@/components/SingleDestinationMapLoader";
 import VisitTracker from "@/components/VisitTracker";
 import AIPlanButton from "@/components/AIPlanButtonLazy";
+import { Mountain, Calendar, MapPin } from "lucide-react";
 
 const categoryStyles: Record<
   string,
@@ -98,26 +99,44 @@ export default async function DestinationPage(
       </div>
 
       {/* ── Quick-stats bar ────────────────────────────────── */}
-      <div className="bg-white border-b border-gray-100 shadow-sm sticky top-16 z-30">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center gap-x-8 gap-y-2 text-sm">
+      <div
+        className="bg-white/85 backdrop-blur-xl border-b border-black/[0.06] sticky top-16 z-30"
+        style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.95)" }}
+      >
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center gap-x-8 gap-y-3">
           {d.elevation && (
-            <div>
-              <span className="text-gray-400 text-xs font-medium uppercase tracking-wide">Elevation</span>
-              <p className="font-semibold text-gray-800">⛰ {d.elevation}</p>
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center flex-shrink-0">
+                <Mountain className="w-4 h-4 text-blue-500" strokeWidth={1.75} />
+              </div>
+              <div>
+                <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Elevation</p>
+                <p className="text-sm font-semibold text-zinc-800">{d.elevation}</p>
+              </div>
             </div>
           )}
-          <div>
-            <span className="text-gray-400 text-xs font-medium uppercase tracking-wide">Best Time</span>
-            <p className="font-semibold text-gray-800">📅 {d.bestTimeToVisit}</p>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center flex-shrink-0">
+              <Calendar className="w-4 h-4 text-amber-500" strokeWidth={1.75} />
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Best Time</p>
+              <p className="text-sm font-semibold text-zinc-800">{d.bestTimeToVisit}</p>
+            </div>
           </div>
-          <div>
-            <span className="text-gray-400 text-xs font-medium uppercase tracking-wide">Province</span>
-            <p className="font-semibold text-gray-800">{d.province}</p>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center flex-shrink-0">
+              <MapPin className="w-4 h-4 text-emerald-500" strokeWidth={1.75} />
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Province</p>
+              <p className="text-sm font-semibold text-zinc-800">{d.province}</p>
+            </div>
           </div>
           <div className="ml-auto flex items-center gap-3">
             <div>
-              <span className="text-gray-400 text-xs font-medium uppercase tracking-wide block mb-1">Live Weather</span>
-              <Suspense fallback={<div className="h-6 w-20 bg-gray-100 rounded-full animate-pulse" />}>
+              <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider mb-1">Live Weather</p>
+              <Suspense fallback={<div className="h-7 w-24 bg-sky-50 rounded-full animate-pulse" />}>
                 <WeatherBadgeServer lat={d.coordinates.lat} lng={d.coordinates.lng} />
               </Suspense>
             </div>
@@ -167,53 +186,82 @@ export default async function DestinationPage(
           </div>
         </section>
 
-        {/* Activities + Wildlife — side by side on desktop */}
+        {/* Activities + Wildlife — bento grid */}
         <div className="grid sm:grid-cols-2 gap-8">
 
           {/* Activities */}
           <section>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Activities</h2>
-            <ul className="space-y-3">
+            <div className="flex items-center gap-2.5 mb-4">
+              <h2 className="text-xl font-bold text-zinc-900">Activities</h2>
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200/80 uppercase tracking-wide">
+                Adventure
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
               {d.activities.map((activity) => (
-                <li
+                <div
                   key={activity}
-                  className={`flex items-start gap-3 p-3 rounded-xl ${s.lightBg}`}
+                  className="flex items-center gap-2.5 p-3 rounded-2xl border border-white/80 hover:border-white hover:shadow-md transition-all duration-200"
+                  style={{
+                    background: "rgba(255,255,255,0.65)",
+                    backdropFilter: "blur(12px)",
+                    WebkitBackdropFilter: "blur(12px)",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.95)",
+                  }}
                 >
                   <span className="text-xl flex-shrink-0">{getActivityIcon(activity)}</span>
-                  <span className={`text-sm font-medium ${s.lightText}`}>{activity}</span>
-                </li>
+                  <span className="text-xs font-semibold text-zinc-700 leading-tight">{activity}</span>
+                </div>
               ))}
-            </ul>
+            </div>
           </section>
 
           {/* Wildlife */}
           <section>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Wildlife</h2>
-            <ul className="space-y-3">
+            <div className="flex items-center gap-2.5 mb-4">
+              <h2 className="text-xl font-bold text-zinc-900">Wildlife</h2>
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200/80 uppercase tracking-wide">
+                Nature
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
               {d.wildlife.map((animal) => (
-                <li
+                <div
                   key={animal}
-                  className="flex items-start gap-3 p-3 rounded-xl bg-emerald-50"
+                  className="flex items-center gap-2.5 p-3 rounded-2xl border border-white/80 hover:border-white hover:shadow-md transition-all duration-200"
+                  style={{
+                    background: "rgba(255,255,255,0.65)",
+                    backdropFilter: "blur(12px)",
+                    WebkitBackdropFilter: "blur(12px)",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.95)",
+                  }}
                 >
                   <span className="text-xl flex-shrink-0">{getWildlifeIcon(animal)}</span>
-                  <span className="text-sm font-medium text-emerald-800">{animal}</span>
-                </li>
+                  <span className="text-xs font-semibold text-zinc-700 leading-tight">{animal}</span>
+                </div>
               ))}
-            </ul>
+            </div>
           </section>
         </div>
 
         {/* Highlights */}
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 mb-5">Must-See Highlights</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <h2 className="text-2xl font-bold text-zinc-900 mb-5">Must-See Highlights</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {d.highlights.map((highlight) => (
               <div
                 key={highlight}
-                className={`flex items-center gap-3 p-4 rounded-xl border ${s.border} ${s.lightBg}`}
+                className="relative h-36 rounded-2xl overflow-hidden group"
+                style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.12)" }}
               >
-                <span className={`text-lg font-bold ${s.lightText}`}>✦</span>
-                <span className={`text-sm font-medium ${s.lightText}`}>{highlight}</span>
+                <div
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-500 ease-out group-hover:scale-110"
+                  style={{ backgroundImage: `url('${d.placeholderImage}')` }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-4">
+                  <p className="text-white font-bold text-sm leading-tight drop-shadow-sm">{highlight}</p>
+                </div>
               </div>
             ))}
           </div>

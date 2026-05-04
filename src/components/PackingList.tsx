@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { motion } from "motion/react";
 
 interface Props {
   destination: string;
@@ -74,12 +75,24 @@ export default function PackingList({ destination, category, elevation, lat, lng
 
   return (
     <>
-      <button
+      <motion.button
         onClick={generate}
-        className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors cursor-pointer"
+        animate={{
+          boxShadow: [
+            "0 0 0 0px rgba(34,197,94,0.45), 0 2px 8px rgba(0,0,0,0.06)",
+            "0 0 0 7px rgba(34,197,94,0), 0 2px 8px rgba(0,0,0,0.06)",
+          ],
+        }}
+        transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+        className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl cursor-pointer transition-colors hover:bg-white"
+        style={{
+          background: "rgba(255,255,255,0.85)",
+          border: "1.5px solid rgba(34,197,94,0.45)",
+          color: "#16a34a",
+        }}
       >
         <span>🎒</span> Smart Packing List
-      </button>
+      </motion.button>
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
