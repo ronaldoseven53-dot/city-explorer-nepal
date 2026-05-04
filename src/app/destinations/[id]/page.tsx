@@ -13,7 +13,8 @@ import { getActivityIcon, getWildlifeIcon } from "@/lib/activityIcons";
 import SingleDestinationMapLoader from "@/components/SingleDestinationMapLoader";
 import VisitTracker from "@/components/VisitTracker";
 import AIPlanButton from "@/components/AIPlanButtonLazy";
-import { Mountain, Calendar, MapPin } from "lucide-react";
+import { Mountain, Calendar, MapPin, Sparkles } from "lucide-react";
+import DestinationJourney from "@/components/DestinationJourney";
 
 const categoryStyles: Record<
   string,
@@ -269,31 +270,47 @@ export default async function DestinationPage(
 
         {/* Getting There */}
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Getting There</h2>
-          <div className={`flex items-start gap-4 p-5 rounded-2xl border ${s.border} ${s.lightBg}`}>
-            <span className="text-2xl flex-shrink-0">🚌</span>
-            <p className={`text-sm leading-relaxed ${s.lightText}`}>{d.gettingThere}</p>
-          </div>
+          <h2
+            className="text-2xl font-bold text-zinc-900 mb-4"
+            style={{ fontFamily: "var(--font-playfair)" }}
+          >
+            Getting There
+          </h2>
+          <DestinationJourney text={d.gettingThere} />
         </section>
 
         {/* Travel Tips */}
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Travel Tips</h2>
+          <h2
+            className="text-2xl font-bold text-zinc-900 mb-4"
+            style={{ fontFamily: "var(--font-playfair)" }}
+          >
+            Travel Tips
+          </h2>
           <ul className="space-y-3">
             {d.travelTips.map((tip, i) => (
               <li
                 key={i}
-                className={`flex items-start gap-3 p-4 rounded-xl border ${s.border} ${s.lightBg}`}
+                className="flex items-start gap-3 p-4 rounded-2xl"
+                style={{
+                  background: "rgba(255,255,255,0.60)",
+                  backdropFilter: "blur(24px)",
+                  WebkitBackdropFilter: "blur(24px)",
+                  border: "1px solid rgba(255,255,255,0.20)",
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.90)",
+                }}
               >
-                <span className={`text-base font-bold flex-shrink-0 ${s.lightText}`}>💡</span>
-                <span className={`text-sm leading-relaxed ${s.lightText}`}>{tip}</span>
+                <div className="w-7 h-7 rounded-lg bg-amber-50 border border-amber-200/80 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" strokeWidth={1.75} />
+                </div>
+                <span className="text-sm leading-relaxed text-zinc-600">{tip}</span>
               </li>
             ))}
           </ul>
         </section>
 
         {/* Map */}
-        <section>
+        <section id="location-map">
           <h2 className="text-2xl font-bold text-gray-900 mb-5">Location</h2>
           <SingleDestinationMapLoader destination={d} />
           <p className="text-xs text-gray-400 mt-2 text-center">
