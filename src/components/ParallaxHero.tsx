@@ -14,20 +14,13 @@ const PHOTO =
 export default function ParallaxHero() {
   const heroRef = useRef<HTMLDivElement>(null);
 
-  // scrollYProgress: 0 = hero at viewport top, 1 = hero fully scrolled out
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"],
   });
 
-  // Sky layer — barely moves (10 vh net upward), feels far away
-  const skyY = useTransform(scrollYProgress, [0, 1], ["0%", "90%"]);
-
-  // Mid layer — rises fast (96 vh net), covers "Wonders" at p ≈ 0.20
-  const midY = useTransform(scrollYProgress, [0, 1], ["0%", "5%"]);
-
-  // "Wonders" and title locked to the same rate → zero positional drift
-  const wondersY     = useTransform(scrollYProgress, [0, 1], ["0%", "38%"]);
+  const skyY         = useTransform(scrollYProgress, [0, 1], ["0%", "90%"]);
+  const midY         = useTransform(scrollYProgress, [0, 1], ["0%", "5%"]);
   const titleY       = useTransform(scrollYProgress, [0, 1], ["0%", "38%"]);
   const titleOpacity = useTransform(scrollYProgress, [0, 0.38, 0.52], [1, 1, 0]);
 
@@ -38,10 +31,8 @@ export default function ParallaxHero() {
       style={{ height: "100svh", isolation: "isolate" }}
     >
 
-      {/* ── Sky layer ── z=0, nearly stationary ─────────────────────────── */}
+      {/* ── Sky layer ── z=0 ─────────────────────────────────────────────── */}
       <motion.div style={{ y: skyY, willChange: "transform" }} className="absolute inset-0" aria-hidden>
-
-        {/* Full-bleed photo — 3 K quality, slow Ken Burns zoom */}
         <motion.div
           className="absolute inset-0"
           style={{
@@ -53,8 +44,6 @@ export default function ParallaxHero() {
           animate={{ scale: [1, 1.06, 1] }}
           transition={{ duration: 32, ease: "easeInOut", repeat: Infinity }}
         />
-
-        {/* Cinematic depth-of-field vignette */}
         <div
           className="absolute inset-0"
           style={{
@@ -62,8 +51,6 @@ export default function ParallaxHero() {
               "radial-gradient(ellipse 130% 110% at 50% 48%, transparent 42%, rgba(6,14,24,0.48) 100%)",
           }}
         />
-
-        {/* Subtle top-darkness + warm ground toning */}
         <div
           className="absolute inset-0"
           style={{
@@ -73,42 +60,7 @@ export default function ParallaxHero() {
         />
       </motion.div>
 
-      {/* ── "Wonders of Nepal" ── z=5, behind mid mountain photo ─────────── */}
-      {/* Same y-transform as title layer → zero drift at all scroll positions */}
-      <motion.div
-        style={{ y: wondersY, zIndex: 5, willChange: "transform" }}
-        className="absolute inset-0 pointer-events-none select-none"
-        aria-hidden
-      >
-        {/* Absolutely positioned below "Explore the" — same flex geometry */}
-        <h1
-          style={{
-            position: "absolute",
-            top: "calc(24% + clamp(2.6rem, 8vw, 6rem) * 1.1)",
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: "max-content",
-            maxWidth: "90vw",
-            textAlign: "center",
-            fontFamily: "var(--font-playfair)",
-            fontStyle: "italic",
-            fontSize: "clamp(2.6rem, 8vw, 6rem)",
-            lineHeight: 1.1,
-            fontWeight: 700,
-            margin: 0,
-            background:
-              "linear-gradient(135deg, #f0c060 0%, #e07040 50%, #b83820 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
-            filter: "drop-shadow(0 3px 18px rgba(190,90,20,0.55))",
-          }}
-        >
-          Wonders of Nepal
-        </h1>
-      </motion.div>
-
-      {/* ── Mid mountain layer ── z=10, rises fast, covers Wonders ──────── */}
+      {/* ── Mid mountain layer ── z=10 ───────────────────────────────────── */}
       <motion.div
         style={{
           y: midY,
@@ -188,12 +140,12 @@ export default function ParallaxHero() {
         }}
       />
 
-      {/* ── Title layer ── z=30 ─────────────────────────────────────────── */}
+      {/* ── Title layer ── z=30 ──────────────────────────────────────────── */}
       <motion.div
         style={{ y: titleY, opacity: titleOpacity, zIndex: 30, willChange: "transform, opacity" }}
         className="absolute inset-0 pointer-events-none select-none"
       >
-        {/* Tagline — top-left, small caps, charcoal */}
+        {/* Tagline — top-left */}
         <p
           style={{
             position: "absolute",
@@ -211,138 +163,277 @@ export default function ParallaxHero() {
           🇳🇵 &nbsp;Himalayan Kingdom
         </p>
 
-        {/* "Explore the" — premium Playfair italic, white, centered */}
-        <h1
-          style={{
-            position: "absolute",
-            top: "24%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: "max-content",
-            maxWidth: "90vw",
-            textAlign: "center",
-            fontFamily: "var(--font-playfair)",
-            fontStyle: "italic",
-            fontSize: "clamp(2.6rem, 8vw, 6rem)",
-            lineHeight: 1.1,
-            fontWeight: 700,
-            color: "#ffffff",
-            textShadow:
-              "0 2px 6px rgba(0,0,0,0.28), 0 10px 48px rgba(0,0,0,0.22)",
-            margin: 0,
-            whiteSpace: "nowrap",
-          }}
-        >
-          Explore the
-        </h1>
-
-        {/* Subtitle — crimson with white halo for legibility on photo */}
-        <p
-          style={{
-            position: "absolute",
-            top: "calc(24% + clamp(2.6rem, 8vw, 6rem) * 1.1 * 2 + 1.1rem)",
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: "max-content",
-            maxWidth: "min(28rem, 88vw)",
-            textAlign: "center",
-            fontSize: "clamp(0.875rem, 1.7vw, 1rem)",
-            lineHeight: 1.7,
-            letterSpacing: "0.08em",
-            fontWeight: 700,
-            color: "#DC143C",
-            textShadow:
-              "0 0 24px rgba(255,255,255,0.95), 0 0 8px rgba(255,255,255,0.90), 0 0 32px rgba(220,20,60,0.30)",
-          }}
-        >
-          From the birthplace of Buddha to the roof of the world
-        </p>
-
-        {/* CTA Buttons — centered, frosted glass */}
+        {/* Centered title + subtitle + buttons column */}
         <div
-          className="pointer-events-auto"
           style={{
             position: "absolute",
-            top: "calc(24% + clamp(2.6rem, 8vw, 6rem) * 1.1 * 2 + 5rem)",
+            top: "17%",
             left: "50%",
             transform: "translateX(-50%)",
             display: "flex",
-            flexWrap: "wrap",
-            gap: "0.75rem",
-            justifyContent: "center",
-            whiteSpace: "nowrap",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "1.25rem",
+            width: "max-content",
+            maxWidth: "95vw",
           }}
         >
-          {/* AI Trip Planner */}
-          <motion.button
-            onClick={() =>
-              document.dispatchEvent(new CustomEvent("open-ai-planner"))
-            }
-            whileHover={{
-              scale: 1.04,
-              boxShadow: "0 0 32px rgba(0,56,147,0.55), 0 0 12px rgba(220,20,60,0.28), inset 0 1px 0 rgba(255,255,255,0.28)",
-            }}
-            whileTap={{ scale: 0.96 }}
-            transition={BTN_TRANSITION}
-            className="btn-flag"
-            style={{
-              position: "relative",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.42rem",
-              background: "#DC143C",
-              border: "1px solid rgba(0,56,147,0.40)",
-              boxShadow:
-                "0 0 20px rgba(220,20,60,0.30), inset 0 1px 0 rgba(255,255,255,0.22)",
-              color: "#fff",
-              padding: "0.62rem 1.4rem",
-              borderRadius: "9999px",
-              fontWeight: 600,
-              fontSize: "0.875rem",
-              cursor: "pointer",
-              letterSpacing: "0.03em",
-              willChange: "transform",
-            }}
-          >
-            <Sparkles size={13} strokeWidth={2.2} />
-            AI Trip Planner
-          </motion.button>
 
-          {/* Himalayan Concierge */}
-          <motion.button
-            onClick={() =>
-              document
-                .getElementById("discover")
-                ?.scrollIntoView({ behavior: "smooth" })
-            }
-            whileHover={{
-              scale: 1.04,
-              boxShadow: "0 0 32px rgba(0,56,147,0.50), 0 4px 20px rgba(0,56,147,0.30), inset 0 1px 0 rgba(255,255,255,0.28)",
-            }}
-            whileTap={{ scale: 0.96 }}
-            transition={BTN_TRANSITION}
-            className="btn-flag"
+          {/* ── "NEPAL" floating with elegant quotes ── */}
+          <motion.div
+            animate={{ y: [0, -10, 0] }}
+            transition={{ duration: 5, ease: "easeInOut", repeat: Infinity }}
             style={{
-              position: "relative",
               display: "flex",
               alignItems: "center",
-              gap: "0.42rem",
-              background: "#003893",
-              border: "1px solid rgba(255,255,255,0.24)",
-              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 12px rgba(0,56,147,0.25)",
-              color: "#ffffff",
-              padding: "0.62rem 1.4rem",
-              borderRadius: "9999px",
-              fontWeight: 600,
-              fontSize: "0.875rem",
-              cursor: "pointer",
-              letterSpacing: "0.03em",
-              willChange: "transform",
+              gap: "clamp(0.15rem, 0.7vw, 0.55rem)",
             }}
           >
-            <Compass size={13} strokeWidth={2.2} />
-            Himalayan Concierge
-          </motion.button>
+            {/* Opening guillemet */}
+            <span
+              style={{
+                fontFamily: "Georgia, 'Times New Roman', serif",
+                fontSize: "clamp(1.8rem, 4.5vw, 3.8rem)",
+                color: "rgba(255,255,255,0.90)",
+                lineHeight: 0.85,
+                fontStyle: "italic",
+                textShadow:
+                  "0 2px 24px rgba(220,20,60,0.60), 0 0 48px rgba(0,56,147,0.38)",
+                userSelect: "none",
+              }}
+            >
+              &ldquo;
+            </span>
+
+            {/* ── SVG NEPAL — mandala clipping-mask pattern fill ── */}
+            <svg
+              viewBox="0 0 750 135"
+              style={{
+                width: "clamp(190px, 52vw, 590px)",
+                height: "auto",
+                overflow: "visible",
+                display: "block",
+              }}
+              role="img"
+              aria-label="NEPAL"
+            >
+              <defs>
+                {/*
+                  90×90 mandala tile:
+                  - Deep royal-blue base (#002b7a)
+                  - 8-pointed white star
+                  - Crimson center disc (#DC143C)
+                  - White inner ring + centre dot
+                  - Crimson cardinal diamonds
+                  - White corner accent dots
+                */}
+                <pattern
+                  id="nepalMandala"
+                  x="0"
+                  y="0"
+                  width="90"
+                  height="90"
+                  patternUnits="userSpaceOnUse"
+                >
+                  <rect width="90" height="90" fill="#002b7a" />
+
+                  {/* 8-pointed star */}
+                  <polygon
+                    points="45,7 51,30 68,19 59,39 78,45 59,51 68,71 51,60 45,83 39,60 22,71 31,51 12,45 31,39 22,19 39,30"
+                    fill="rgba(255,255,255,0.84)"
+                  />
+
+                  {/* Crimson centre disc */}
+                  <circle cx="45" cy="45" r="20" fill="#DC143C" />
+
+                  {/* White inner ring */}
+                  <circle
+                    cx="45"
+                    cy="45"
+                    r="13"
+                    fill="none"
+                    stroke="rgba(255,255,255,0.88)"
+                    strokeWidth="2"
+                  />
+
+                  {/* White centre dot */}
+                  <circle cx="45" cy="45" r="5.5" fill="white" />
+
+                  {/* Cardinal crimson diamonds */}
+                  <polygon points="45,0 49,4 45,8 41,4" fill="#DC143C" />
+                  <polygon points="90,45 86,49 82,45 86,41" fill="#DC143C" />
+                  <polygon points="45,90 49,86 45,82 41,86" fill="#DC143C" />
+                  <polygon points="0,45 4,49 8,45 4,41" fill="#DC143C" />
+
+                  {/* Corner accent dots */}
+                  <circle cx="9"  cy="9"  r="3" fill="rgba(255,255,255,0.50)" />
+                  <circle cx="81" cy="9"  r="3" fill="rgba(255,255,255,0.50)" />
+                  <circle cx="9"  cy="81" r="3" fill="rgba(255,255,255,0.50)" />
+                  <circle cx="81" cy="81" r="3" fill="rgba(255,255,255,0.50)" />
+                </pattern>
+
+                <filter id="nepalShadow" x="-8%" y="-25%" width="116%" height="150%">
+                  <feDropShadow
+                    dx="0"
+                    dy="6"
+                    stdDeviation="14"
+                    floodColor="rgba(0,0,0,0.55)"
+                    floodOpacity="1"
+                  />
+                </filter>
+              </defs>
+
+              {/* Patterned fill */}
+              <text
+                x="375"
+                y="118"
+                textAnchor="middle"
+                fontFamily="'Arial Black', Impact, 'Franklin Gothic Heavy', sans-serif"
+                fontSize="124"
+                fontWeight="900"
+                fill="url(#nepalMandala)"
+                filter="url(#nepalShadow)"
+                style={{ letterSpacing: "8px" }}
+              >
+                NEPAL
+              </text>
+
+              {/* Crisp white outline */}
+              <text
+                x="375"
+                y="118"
+                textAnchor="middle"
+                fontFamily="'Arial Black', Impact, 'Franklin Gothic Heavy', sans-serif"
+                fontSize="124"
+                fontWeight="900"
+                fill="none"
+                stroke="rgba(255,255,255,0.30)"
+                strokeWidth="1.5"
+                style={{ letterSpacing: "8px" }}
+              >
+                NEPAL
+              </text>
+            </svg>
+
+            {/* Closing guillemet */}
+            <span
+              style={{
+                fontFamily: "Georgia, 'Times New Roman', serif",
+                fontSize: "clamp(1.8rem, 4.5vw, 3.8rem)",
+                color: "rgba(255,255,255,0.90)",
+                lineHeight: 0.85,
+                fontStyle: "italic",
+                textShadow:
+                  "0 2px 24px rgba(220,20,60,0.60), 0 0 48px rgba(0,56,147,0.38)",
+                userSelect: "none",
+              }}
+            >
+              &rdquo;
+            </span>
+          </motion.div>
+
+          {/* Subtitle — sharp black */}
+          <p
+            style={{
+              textAlign: "center",
+              fontSize: "clamp(0.875rem, 1.7vw, 1rem)",
+              lineHeight: 1.7,
+              letterSpacing: "0.04em",
+              fontWeight: 600,
+              color: "#000000",
+              textShadow:
+                "0 0 20px rgba(255,255,255,0.98), 0 0 10px rgba(255,255,255,0.90), 0 1px 2px rgba(255,255,255,0.85)",
+              maxWidth: "min(28rem, 88vw)",
+            }}
+          >
+            From the birthplace of Buddha to the roof of the world
+          </p>
+
+          {/* CTA Buttons */}
+          <div
+            className="pointer-events-auto"
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "0.75rem",
+              justifyContent: "center",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {/* AI Trip Planner */}
+            <motion.button
+              onClick={() =>
+                document.dispatchEvent(new CustomEvent("open-ai-planner"))
+              }
+              whileHover={{
+                scale: 1.04,
+                boxShadow:
+                  "0 0 32px rgba(0,56,147,0.55), 0 0 12px rgba(220,20,60,0.28), inset 0 1px 0 rgba(255,255,255,0.28)",
+              }}
+              whileTap={{ scale: 0.96 }}
+              transition={BTN_TRANSITION}
+              className="btn-flag"
+              style={{
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.42rem",
+                background: "#DC143C",
+                border: "1px solid rgba(0,56,147,0.40)",
+                boxShadow:
+                  "0 0 20px rgba(220,20,60,0.30), inset 0 1px 0 rgba(255,255,255,0.22)",
+                color: "#fff",
+                padding: "0.62rem 1.4rem",
+                borderRadius: "9999px",
+                fontWeight: 600,
+                fontSize: "0.875rem",
+                cursor: "pointer",
+                letterSpacing: "0.03em",
+                willChange: "transform",
+              }}
+            >
+              <Sparkles size={13} strokeWidth={2.2} />
+              AI Trip Planner
+            </motion.button>
+
+            {/* Himalayan Concierge */}
+            <motion.button
+              onClick={() =>
+                document
+                  .getElementById("discover")
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
+              whileHover={{
+                scale: 1.04,
+                boxShadow:
+                  "0 0 32px rgba(0,56,147,0.50), 0 4px 20px rgba(0,56,147,0.30), inset 0 1px 0 rgba(255,255,255,0.28)",
+              }}
+              whileTap={{ scale: 0.96 }}
+              transition={BTN_TRANSITION}
+              className="btn-flag"
+              style={{
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.42rem",
+                background: "#003893",
+                border: "1px solid rgba(255,255,255,0.24)",
+                boxShadow:
+                  "inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 12px rgba(0,56,147,0.25)",
+                color: "#ffffff",
+                padding: "0.62rem 1.4rem",
+                borderRadius: "9999px",
+                fontWeight: 600,
+                fontSize: "0.875rem",
+                cursor: "pointer",
+                letterSpacing: "0.03em",
+                willChange: "transform",
+              }}
+            >
+              <Compass size={13} strokeWidth={2.2} />
+              Himalayan Concierge
+            </motion.button>
+          </div>
         </div>
       </motion.div>
 
