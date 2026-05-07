@@ -1,7 +1,9 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useScroll, useTransform } from "motion/react";
+import { motion, useScroll, useTransform, type Transition } from "motion/react";
+
+const BTN_TRANSITION: Transition = { type: "tween", duration: 0.15, ease: "easeInOut" };
 import { Sparkles, Compass } from "lucide-react";
 
 // ── Photo: same image, cropped at two positions for depth layers ──────
@@ -37,7 +39,7 @@ export default function ParallaxHero() {
     >
 
       {/* ── Sky layer ── z=0, nearly stationary ─────────────────────────── */}
-      <motion.div style={{ y: skyY }} className="absolute inset-0" aria-hidden>
+      <motion.div style={{ y: skyY, willChange: "transform" }} className="absolute inset-0" aria-hidden>
 
         {/* Full-bleed photo — 3 K quality, slow Ken Burns zoom */}
         <motion.div
@@ -46,6 +48,7 @@ export default function ParallaxHero() {
             backgroundImage: `url('${PHOTO}')`,
             backgroundSize: "cover",
             backgroundPosition: "center 18%",
+            willChange: "transform",
           }}
           animate={{ scale: [1, 1.06, 1] }}
           transition={{ duration: 32, ease: "easeInOut", repeat: Infinity }}
@@ -73,7 +76,7 @@ export default function ParallaxHero() {
       {/* ── "Wonders of Nepal" ── z=5, behind mid mountain photo ─────────── */}
       {/* Same y-transform as title layer → zero drift at all scroll positions */}
       <motion.div
-        style={{ y: wondersY, zIndex: 5 }}
+        style={{ y: wondersY, zIndex: 5, willChange: "transform" }}
         className="absolute inset-0 pointer-events-none select-none"
         aria-hidden
       >
@@ -115,6 +118,7 @@ export default function ParallaxHero() {
           left: 0,
           right: 0,
           zIndex: 10,
+          willChange: "transform",
         }}
         aria-hidden
       >
@@ -186,7 +190,7 @@ export default function ParallaxHero() {
 
       {/* ── Title layer ── z=30 ─────────────────────────────────────────── */}
       <motion.div
-        style={{ y: titleY, opacity: titleOpacity, zIndex: 30 }}
+        style={{ y: titleY, opacity: titleOpacity, zIndex: 30, willChange: "transform, opacity" }}
         className="absolute inset-0 pointer-events-none select-none"
       >
         {/* Tagline — top-left, small caps, charcoal */}
@@ -232,7 +236,7 @@ export default function ParallaxHero() {
           Explore the
         </h1>
 
-        {/* Subtitle — charcoal, below Wonders line */}
+        {/* Subtitle — solid black, white halo for legibility on photo */}
         <p
           style={{
             position: "absolute",
@@ -244,10 +248,11 @@ export default function ParallaxHero() {
             textAlign: "center",
             fontSize: "clamp(0.875rem, 1.7vw, 1rem)",
             lineHeight: 1.7,
-            letterSpacing: "0.01em",
-            color: "rgba(24,30,38,0.85)",
+            letterSpacing: "0.015em",
+            fontWeight: 500,
+            color: "#000000",
             textShadow:
-              "0 0 20px rgba(205,222,238,1.0), 0 1px 4px rgba(205,222,238,0.95)",
+              "0 0 24px rgba(255,255,255,1.0), 0 0 8px rgba(255,255,255,0.95), 0 1px 2px rgba(255,255,255,0.9)",
           }}
         >
           From the birthplace of Buddha to the roof of the world
@@ -269,10 +274,16 @@ export default function ParallaxHero() {
           }}
         >
           {/* AI Trip Planner */}
-          <button
+          <motion.button
             onClick={() =>
               document.dispatchEvent(new CustomEvent("open-ai-planner"))
             }
+            whileHover={{
+              scale: 1.04,
+              boxShadow: "0 0 32px rgba(220,75,55,0.42), inset 0 1px 0 rgba(255,255,255,0.28)",
+            }}
+            whileTap={{ scale: 0.96 }}
+            transition={BTN_TRANSITION}
             style={{
               display: "flex",
               alignItems: "center",
@@ -282,7 +293,7 @@ export default function ParallaxHero() {
               WebkitBackdropFilter: "blur(20px)",
               border: "1px solid rgba(220,75,55,0.52)",
               boxShadow:
-                "0 0 20px rgba(220,75,55,0.24), 0 0 0 0.5px rgba(255,255,255,0.08) inset, inset 0 1px 0 rgba(255,255,255,0.18)",
+                "0 0 20px rgba(220,75,55,0.24), inset 0 1px 0 rgba(255,255,255,0.18)",
               color: "#fff",
               padding: "0.62rem 1.4rem",
               borderRadius: "9999px",
@@ -290,19 +301,26 @@ export default function ParallaxHero() {
               fontSize: "0.875rem",
               cursor: "pointer",
               letterSpacing: "0.03em",
+              willChange: "transform",
             }}
           >
             <Sparkles size={13} strokeWidth={2.2} />
             AI Trip Planner
-          </button>
+          </motion.button>
 
           {/* Himalayan Concierge */}
-          <button
+          <motion.button
             onClick={() =>
               document
                 .getElementById("discover")
                 ?.scrollIntoView({ behavior: "smooth" })
             }
+            whileHover={{
+              scale: 1.04,
+              boxShadow: "0 4px 24px rgba(255,255,255,0.18), inset 0 1px 0 rgba(255,255,255,0.28)",
+            }}
+            whileTap={{ scale: 0.96 }}
+            transition={BTN_TRANSITION}
             style={{
               display: "flex",
               alignItems: "center",
@@ -311,8 +329,7 @@ export default function ParallaxHero() {
               backdropFilter: "blur(20px)",
               WebkitBackdropFilter: "blur(20px)",
               border: "1px solid rgba(255,255,255,0.24)",
-              boxShadow:
-                "inset 0 1px 0 rgba(255,255,255,0.14), 0 1px 12px rgba(0,0,0,0.15)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.14), 0 1px 12px rgba(0,0,0,0.15)",
               color: "rgba(255,255,255,0.92)",
               padding: "0.62rem 1.4rem",
               borderRadius: "9999px",
@@ -320,11 +337,12 @@ export default function ParallaxHero() {
               fontSize: "0.875rem",
               cursor: "pointer",
               letterSpacing: "0.03em",
+              willChange: "transform",
             }}
           >
             <Compass size={13} strokeWidth={2.2} />
             Himalayan Concierge
-          </button>
+          </motion.button>
         </div>
       </motion.div>
 

@@ -44,18 +44,19 @@ const HOVER_SHADOW = [
 // ── Animation variants ────────────────────────────────────────────────
 const containerVariants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.08 } },
+  visible: { transition: { staggerChildren: 0.05 } },
 };
 
 const itemVariants = {
-  hidden:  { opacity: 0, scale: 0.95, y: 20 },
+  hidden:  { opacity: 0, scale: 0.96, y: 16 },
   visible: {
     opacity: 1, scale: 1, y: 0,
-    transition: { type: "spring" as const, stiffness: 120, damping: 14 },
+    transition: { type: "spring" as const, stiffness: 260, damping: 20 },
   },
 };
 
-const hoverTransition = { type: "spring" as const, stiffness: 300, damping: 25 };
+// High-tension spring → feels native at 120 Hz
+const hoverTransition = { type: "spring" as const, stiffness: 480, damping: 28 };
 
 // ── Reusable glass card ───────────────────────────────────────────────
 function BentoCard({
@@ -70,10 +71,10 @@ function BentoCard({
   return (
     <motion.div
       variants={itemVariants}
-      whileHover={{ y: -8, boxShadow: HOVER_SHADOW }}
+      whileHover={{ y: -6, boxShadow: HOVER_SHADOW }}
       transition={hoverTransition}
       onClick={onClick}
-      style={GLASS_STYLE}
+      style={{ ...GLASS_STYLE, willChange: "transform" }}
       className={`rounded-[24px] overflow-hidden relative ${className}`}
     >
       {children}
@@ -94,15 +95,15 @@ function ExperienceCard({
   return (
     <motion.div
       variants={itemVariants}
-      whileHover={{ y: -8, boxShadow: HOVER_SHADOW }}
+      whileHover={{ y: -6, boxShadow: HOVER_SHADOW }}
       transition={hoverTransition}
-      style={GLASS_STYLE}
+      style={{ ...GLASS_STYLE, willChange: "transform" }}
       className={`group rounded-[24px] overflow-hidden relative min-h-[280px] flex flex-col cursor-pointer ${className}`}
     >
       {/* Full-bleed image background */}
       {cover && (
         <div className="absolute inset-0">
-          <Image src={cover} alt={group.name} fill className="object-cover group-hover:scale-110 transition-transform duration-500 ease-in-out" />
+          <Image src={cover} alt={group.name} fill className="object-cover group-hover:scale-105 transition-transform duration-300 ease-out" style={{ willChange: "transform" }} />
           {/* Image-to-glass: transparent at top 20%, blurs into dark glass */}
           <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
         </div>
@@ -177,6 +178,7 @@ export default function BentoDashboard() {
     backgroundSize: "cover",
     backgroundPosition: "center",
     filter: "blur(3px) saturate(0.22) brightness(1.65) contrast(0.82)",
+    willChange: "transform, opacity",
   };
 
   return (
@@ -327,7 +329,7 @@ export default function BentoDashboard() {
                     className={`h-full ${bar.color} rounded-full`}
                     initial={{ width: 0 }}
                     animate={{ width: `${(bar.value / bar.total) * 100}%` }}
-                    transition={{ duration: 1.5, ease: "easeOut", delay: 0.4 }}
+                    transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1], delay: 0.25 }}
                   />
                 </div>
               </div>
@@ -353,7 +355,7 @@ export default function BentoDashboard() {
                 strokeDasharray={`${2 * Math.PI * 32}`}
                 initial={{ strokeDashoffset: 2 * Math.PI * 32 }}
                 animate={{ strokeDashoffset: 2 * Math.PI * 32 * (1 - sesonPct / 100) }}
-                transition={{ duration: 1.5, ease: "easeOut", delay: 0.6 }}
+                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.35 }}
                 style={{ rotate: "-90deg", transformOrigin: "40px 40px" }}
               />
               <text x="40" y="44" textAnchor="middle" fill="#1e293b" fontSize="14" fontWeight="bold">{sesonPct}%</text>
