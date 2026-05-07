@@ -268,19 +268,13 @@ export default function BentoDashboard() {
           </div>
 
           <div className="relative z-10 p-8 sm:p-10 flex flex-col sm:flex-row sm:items-end justify-between gap-8 h-full">
-            {/* Text block */}
+            {/* Left: tagline only */}
             <div>
-              <p className="text-red-700 text-xs font-bold uppercase tracking-[0.2em] mb-3">
+              <p className="text-red-700 text-xs font-bold uppercase tracking-[0.2em] mb-2">
                 🇳🇵 Himalayan Kingdom
               </p>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-zinc-900 tracking-tight leading-tight mb-3">
-                Explore the{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-700 to-amber-600">
-                  Wonders of Nepal
-                </span>
-              </h1>
-              <p className="text-zinc-600 text-sm sm:text-base max-w-lg leading-relaxed">
-                From the birthplace of Buddha to the roof of the world — discover Nepal&apos;s most breathtaking destinations.
+              <p className="text-zinc-700 text-sm sm:text-base max-w-md leading-relaxed">
+                Discover Nepal&apos;s most breathtaking destinations — from sacred pilgrimage sites to remote Himalayan trails.
               </p>
             </div>
 
