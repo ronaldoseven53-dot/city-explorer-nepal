@@ -4,14 +4,15 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
 
 // ── Images ────────────────────────────────────────────────────────────
+// Same photo used at two crop positions — sky shows upper half, mid shows lower ridges
 const SKY_IMAGE =
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=2400&q=90";
+  "https://images.unsplash.com/photo-1525784451128-d1488f52f03e?w=2400&q=90";
 const MID_IMAGE =
-  "https://images.unsplash.com/photo-1478432780021-b8d273730d8c?w=2400&q=90";
+  "https://images.unsplash.com/photo-1525784451128-d1488f52f03e?w=2400&q=90";
 
-// ── Alpenglow sky gradient ─────────────────────────────────────────────
+// ── Sky gradient — cool blue matching the photo's palette ─────────────
 const ALPENGLOW =
-  "linear-gradient(to bottom, #2d1b4e 0%, #6b2d6b 10%, #c4527a 22%, #e8825a 35%, #f2b07a 50%, #f5d5a8 65%, #e8e4d8 80%, #c8dce8 92%, #b8ccd8 100%)";
+  "linear-gradient(to bottom, #0a1520 0%, #1a3a5a 15%, #3a6a8a 35%, #7aaaba 55%, #d8c8a0 72%, #c4a878 88%, #8a6840 100%)";
 
 // ── Foreground SVG mountain silhouette ────────────────────────────────
 // Upgraded with SVG gradient fills for premium look.
@@ -156,15 +157,22 @@ export default function ParallaxHero() {
         className="absolute inset-0"
         aria-hidden
       >
-        <div className="absolute inset-0" style={{ background: ALPENGLOW }} />
+        {/* Photo as primary backdrop — shows sky + distant peaks */}
         <div
           className="absolute inset-0"
           style={{
             backgroundImage: `url('${SKY_IMAGE}')`,
             backgroundSize: "cover",
-            backgroundPosition: "center 30%",
-            opacity: 0.55,
-            mixBlendMode: "luminosity",
+            backgroundPosition: "center 20%",
+          }}
+        />
+        {/* Subtle gradient overlay for depth and warm ground tones */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: ALPENGLOW,
+            opacity: 0.35,
+            mixBlendMode: "overlay",
           }}
         />
       </motion.div>
@@ -232,12 +240,12 @@ export default function ParallaxHero() {
             bottom: 0,
             backgroundImage: `url('${MID_IMAGE}')`,
             backgroundSize: "cover",
-            backgroundPosition: "center 60%",
+            backgroundPosition: "center 72%",
             maskImage:
               "linear-gradient(to bottom, transparent 0%, black 22%, black 100%)",
             WebkitMaskImage:
               "linear-gradient(to bottom, transparent 0%, black 22%, black 100%)",
-            filter: "saturate(0.8) brightness(0.88)",
+            filter: "saturate(0.9) brightness(0.82)",
           }}
         />
       </motion.div>
@@ -300,7 +308,7 @@ export default function ParallaxHero() {
         style={{
           zIndex: 26,
           background:
-            "linear-gradient(to bottom, rgba(45,27,78,0.08) 0%, transparent 35%, rgba(180,140,80,0.10) 100%)",
+            "linear-gradient(to bottom, rgba(10,20,35,0.15) 0%, transparent 40%, rgba(80,50,20,0.18) 100%)",
         }}
       />
 
