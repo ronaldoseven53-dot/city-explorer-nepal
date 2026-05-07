@@ -181,7 +181,7 @@ export default function BentoDashboard() {
 
   return (
     // Full-page wrapper
-    <div className="relative min-h-screen">
+    <div id="discover" className="relative min-h-screen">
 
       {/* ── Layer 1a: Himalayas — clips overflow, inner carries parallax ── */}
       <div className="fixed inset-0 z-[-2] overflow-hidden pointer-events-none">

@@ -9,9 +9,14 @@ const SKY_IMAGE =
 const MID_IMAGE =
   "https://images.unsplash.com/photo-1478432780021-b8d273730d8c?w=2400&q=90";
 
+// ── Alpenglow sky gradient ─────────────────────────────────────────────
+const ALPENGLOW =
+  "linear-gradient(to bottom, #2d1b4e 0%, #6b2d6b 10%, #c4527a 22%, #e8825a 35%, #f2b07a 50%, #f5d5a8 65%, #e8e4d8 80%, #c8dce8 92%, #b8ccd8 100%)";
+
 // ── Foreground SVG mountain silhouette ────────────────────────────────
-// Covers the bottom ~55 % of the hero; title (positioned at ~42 % from top)
-// sits BEHIND these peaks thanks to z-index ordering.
+// Upgraded with SVG gradient fills for premium look.
+// Title "Wonders of Nepal" (z=5) is behind the mid layer (z=10);
+// "Explore the" (z=30) stays in front of everything.
 function MountainSVG() {
   return (
     <svg
@@ -21,7 +26,30 @@ function MountainSVG() {
       aria-hidden
       style={{ display: "block", width: "100%", height: "60vh", minHeight: 280 }}
     >
-      {/* ── Back ridge — lighter warm stone ── */}
+      <defs>
+        <linearGradient id="ridgeDistant" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stopColor="#7090b8" stopOpacity="0.6" />
+          <stop offset="60%"  stopColor="#5a7296" stopOpacity="0.7" />
+          <stop offset="100%" stopColor="#3d5578" stopOpacity="0.85" />
+        </linearGradient>
+        <linearGradient id="ridgeMain" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stopColor="#6a4828" stopOpacity="0.9" />
+          <stop offset="40%"  stopColor="#7a5530" stopOpacity="0.95" />
+          <stop offset="100%" stopColor="#3d2810" stopOpacity="1.0" />
+        </linearGradient>
+        <linearGradient id="ridgeHighlight" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stopColor="#c89060" stopOpacity="0.7" />
+          <stop offset="50%"  stopColor="#9a6840" stopOpacity="0.75" />
+          <stop offset="100%" stopColor="#7a5030" stopOpacity="0.65" />
+        </linearGradient>
+        <linearGradient id="snowCap" x1="0" y1="0" x2="0.3" y2="1">
+          <stop offset="0%"   stopColor="#ffffff" stopOpacity="1.0" />
+          <stop offset="70%"  stopColor="#e8f0f8" stopOpacity="0.95" />
+          <stop offset="100%" stopColor="#c8d8e8" stopOpacity="0.80" />
+        </linearGradient>
+      </defs>
+
+      {/* ── Back ridge — cool blue-grey atmospheric haze ── */}
       <path
         d="M0,500 L0,340
            Q60,310 120,285 Q160,268 200,245
@@ -36,11 +64,10 @@ function MountainSVG() {
            L1205,208 Q1230,182 1255,196
            Q1285,214 1315,242 Q1345,262 1385,252
            L1440,245 L1440,500 Z"
-        fill="#a07840"
-        fillOpacity="0.55"
+        fill="url(#ridgeDistant)"
       />
 
-      {/* ── Main ridge — warm dark sienna ── */}
+      {/* ── Main ridge — warm rock face ── */}
       <path
         d="M0,500 L0,395
            Q45,375 90,358 Q130,342 168,320
@@ -56,11 +83,10 @@ function MountainSVG() {
            Q1218,355 1252,362 Q1285,368 1318,350
            Q1348,334 1378,345 L1440,352
            L1440,500 Z"
-        fill="#7a5530"
-        fillOpacity="0.92"
+        fill="url(#ridgeMain)"
       />
 
-      {/* ── Highlight ridge — lighter warm face catches light ── */}
+      {/* ── Highlight ridge — lit rock face ── */}
       <path
         d="M0,500 L0,430
            Q55,418 108,408 Q148,400 185,390
@@ -77,15 +103,14 @@ function MountainSVG() {
            Q1232,438 1258,448 L1300,455
            Q1330,460 1360,455 Q1395,448 1420,452 L1440,454
            L1440,500 Z"
-        fill="#8b6040"
-        fillOpacity="0.65"
+        fill="url(#ridgeHighlight)"
       />
 
       {/* ── Snow caps on tallest peaks ── */}
-      <polygon points="272,228 255,248 272,240 290,244" fill="rgba(255,252,245,0.95)" />
-      <polygon points="495,278 478,298 495,288 512,292" fill="rgba(255,252,245,0.90)" />
-      <polygon points="788,295 771,315 788,305 805,309" fill="rgba(255,252,245,0.95)" />
-      <polygon points="1082,308 1065,328 1082,318 1099,322" fill="rgba(255,252,245,0.88)" />
+      <polygon points="272,228 252,252 272,242 294,246" fill="url(#snowCap)" />
+      <polygon points="495,278 475,302 495,290 515,294" fill="url(#snowCap)" />
+      <polygon points="788,295 768,319 788,307 808,311" fill="url(#snowCap)" />
+      <polygon points="1082,308 1062,332 1082,320 1102,324" fill="url(#snowCap)" />
     </svg>
   );
 }
@@ -94,24 +119,29 @@ function MountainSVG() {
 export default function ParallaxHero() {
   const heroRef = useRef<HTMLDivElement>(null);
 
-  // scrollYProgress: 0 when hero top = viewport top, 1 when hero bottom = viewport top
+  // scrollYProgress: 0 = hero at viewport top, 1 = hero fully scrolled out
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"],
   });
 
-  // Layers move DOWN (positive %) as hero scrolls away — slower = farther.
-  // Sky  10% apparent scroll speed → offset = 90% when fully scrolled
-  const skyY   = useTransform(scrollYProgress, [0, 1], ["0%",  "90%"]);
-  // Middle 30% apparent → offset 70%
-  const midY   = useTransform(scrollYProgress, [0, 1], ["0%",  "70%"]);
-  // Foreground 50% apparent → offset 50%
-  const foreY  = useTransform(scrollYProgress, [0, 1], ["0%",  "50%"]);
-  // Title drifts slightly (60% apparent speed → 40% offset)
-  const titleY = useTransform(scrollYProgress, [0, 1], ["0%",  "40%"]);
+  // Sky barely moves (10% net upward speed) — feels very far away
+  const skyY = useTransform(scrollYProgress, [0, 1], ["0%", "90%"]);
 
-  // Title opacity: fade out over first 50% of hero scroll
-  const titleOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  // Mid layer rises FAST (96.25vh net) — swallows "Wonders" text at p≈0.16
+  const midY = useTransform(scrollYProgress, [0, 1], ["0%", "5%"]);
+
+  // "Wonders" layer locked to same rate as titleY → zero positional drift
+  const wondersY = useTransform(scrollYProgress, [0, 1], ["0%", "38%"]);
+
+  // Foreground SVG — fast upward
+  const foreY = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+
+  // Title — same rate as wondersY keeps "Explore the" / "Wonders" aligned
+  const titleY = useTransform(scrollYProgress, [0, 1], ["0%", "38%"]);
+
+  // Fade out title layer after mid-scroll
+  const titleOpacity = useTransform(scrollYProgress, [0, 0.35, 0.5], [1, 1, 0]);
 
   return (
     <div
@@ -120,36 +150,79 @@ export default function ParallaxHero() {
       style={{ height: "100svh", isolation: "isolate" }}
     >
 
-      {/* ── Layer 1: Sky ── z=0, moves slowest ── */}
+      {/* ── Layer 1: Sky ── z=0, nearly stationary ── */}
       <motion.div
         style={{ y: skyY }}
-        className="absolute inset-0 z-0"
+        className="absolute inset-0"
         aria-hidden
       >
-        {/* Gradient sky base */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(to bottom, #8ab4ce 0%, #b8d0e0 25%, #d4e4f0 45%, #e8d8c0 65%, #d4bc90 80%, #c0a070 100%)",
-          }}
-        />
-        {/* Wide-angle sky photo blended over gradient */}
+        <div className="absolute inset-0" style={{ background: ALPENGLOW }} />
         <div
           className="absolute inset-0"
           style={{
             backgroundImage: `url('${SKY_IMAGE}')`,
             backgroundSize: "cover",
             backgroundPosition: "center 30%",
-            opacity: 0.65,
+            opacity: 0.55,
             mixBlendMode: "luminosity",
           }}
         />
       </motion.div>
 
-      {/* ── Layer 2: Middle mountain range ── z=10, mid speed ── */}
+      {/* ── Layer 2: "Wonders of Nepal" text ── z=5, BEHIND mid mountains ── */}
+      {/* Locked to same y-transform as titleY → zero drift from "Explore the" */}
       <motion.div
-        style={{ y: midY, position: "absolute", top: "25%", bottom: 0, left: 0, right: 0, zIndex: 10 }}
+        style={{ y: wondersY, zIndex: 5 }}
+        className="absolute inset-0 pointer-events-none select-none"
+        aria-hidden
+      >
+        <div
+          style={{
+            paddingTop: "22vh",
+            paddingLeft: "max(1.5rem, 8vw)",
+            paddingRight: "max(1.5rem, 8vw)",
+          }}
+        >
+          {/* Invisible spacer: matches height of flag label p */}
+          <div style={{ height: "calc(0.75rem * 2.5)", visibility: "hidden" }} />
+          {/* Invisible spacer: matches "Explore the" h1 line height */}
+          <div
+            style={{
+              height: "calc(clamp(2.6rem, 8vw, 6rem) * 1.1)",
+              visibility: "hidden",
+            }}
+          />
+          {/* Visible "Wonders of Nepal" — covered by mid mountains at p≈0.16 */}
+          <h1
+            style={{
+              fontFamily: "var(--font-playfair)",
+              fontSize: "clamp(2.6rem, 8vw, 6rem)",
+              lineHeight: 1.1,
+              margin: 0,
+              background:
+                "linear-gradient(135deg, #f59e0b 0%, #dc2626 50%, #c026d3 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              filter: "drop-shadow(0 2px 8px rgba(220,100,40,0.4))",
+            }}
+          >
+            Wonders of Nepal
+          </h1>
+        </div>
+      </motion.div>
+
+      {/* ── Layer 3: Mid mountain range ── z=10, rises fast → covers Wonders ── */}
+      <motion.div
+        style={{
+          y: midY,
+          position: "absolute",
+          top: "25%",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 10,
+        }}
         aria-hidden
       >
         <div
@@ -164,90 +237,210 @@ export default function ParallaxHero() {
               "linear-gradient(to bottom, transparent 0%, black 22%, black 100%)",
             WebkitMaskImage:
               "linear-gradient(to bottom, transparent 0%, black 22%, black 100%)",
-            filter: "saturate(0.75) brightness(0.9)",
+            filter: "saturate(0.8) brightness(0.88)",
           }}
         />
       </motion.div>
 
-      {/* ── Mist layer: atmospheric perspective between mid & fore ── */}
+      {/* ── Mist Band 1: Valley floor ── z=15, heaviest blur ── */}
       <div
         aria-hidden
-        className="absolute z-20 left-0 right-0 pointer-events-none"
+        className="absolute pointer-events-none"
         style={{
-          top: "52%",
-          height: "12%",
+          zIndex: 15,
+          bottom: "20%",
+          left: 0,
+          right: 0,
+          height: "8%",
           background:
-            "linear-gradient(to bottom, transparent 0%, rgba(235,228,215,0.55) 50%, transparent 100%)",
+            "linear-gradient(to bottom, transparent, rgba(220,215,205,0.65) 50%, transparent)",
+          filter: "blur(20px)",
+          mixBlendMode: "screen",
+        }}
+      />
+
+      {/* ── Mist Band 2: Mid valley ── z=20 ── */}
+      <div
+        aria-hidden
+        className="absolute pointer-events-none"
+        style={{
+          zIndex: 20,
+          top: "48%",
+          left: 0,
+          right: 0,
+          height: "7%",
+          background:
+            "linear-gradient(to bottom, transparent, rgba(210,225,238,0.45) 50%, transparent)",
           filter: "blur(14px)",
+          mixBlendMode: "screen",
         }}
       />
 
-      {/* ── Color grade overlay ── */}
+      {/* ── Mist Band 3: High altitude wisp ── z=25 ── */}
       <div
         aria-hidden
-        className="absolute inset-0 z-20 pointer-events-none"
+        className="absolute pointer-events-none"
         style={{
+          zIndex: 25,
+          top: "28%",
+          left: 0,
+          right: 0,
+          height: "5%",
           background:
-            "linear-gradient(to bottom, rgba(200,220,240,0.08) 0%, transparent 40%, rgba(180,140,80,0.12) 100%)",
+            "linear-gradient(to bottom, transparent, rgba(200,220,240,0.28) 50%, transparent)",
+          filter: "blur(10px)",
+          mixBlendMode: "screen",
         }}
       />
 
-      {/* ── Title text ── z=30, BELOW foreground peaks ── */}
+      {/* ── Color grade overlay ── z=26 ── */}
+      <div
+        aria-hidden
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          zIndex: 26,
+          background:
+            "linear-gradient(to bottom, rgba(45,27,78,0.08) 0%, transparent 35%, rgba(180,140,80,0.10) 100%)",
+        }}
+      />
+
+      {/* ── Title layer ── z=30, ABOVE all mountain layers ── */}
+      {/* "Explore the" stays visible; invisible spacer reserves Wonders line height */}
       <motion.div
-        style={{ y: titleY, opacity: titleOpacity }}
-        className="absolute inset-0 z-30 flex flex-col items-center justify-center pointer-events-none select-none px-6"
+        style={{ y: titleY, opacity: titleOpacity, zIndex: 30 }}
+        className="absolute inset-0 pointer-events-none select-none"
       >
-        <p
-          className="text-xs font-bold uppercase tracking-[0.22em] mb-4"
-          style={{ color: "rgba(160,60,40,0.95)", textShadow: "0 1px 6px rgba(255,255,255,0.6)" }}
-        >
-          🇳🇵 Himalayan Kingdom
-        </p>
-        <h1
-          className="text-center font-extrabold leading-tight tracking-tight"
+        <div
           style={{
-            fontSize: "clamp(2.6rem, 8vw, 6rem)",
-            color: "#fff",
-            textShadow:
-              "0 2px 4px rgba(0,0,0,0.25), 0 8px 32px rgba(0,0,0,0.18)",
-            fontFamily: "var(--font-playfair)",
+            paddingTop: "22vh",
+            paddingLeft: "max(1.5rem, 8vw)",
+            paddingRight: "max(1.5rem, 8vw)",
           }}
         >
-          Explore the{" "}
-          <span
+          {/* Flag label */}
+          <p
             style={{
-              background: "linear-gradient(135deg, #f59e0b 0%, #dc2626 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
+              fontSize: "0.75rem",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.22em",
+              marginBottom: "0.75rem",
+              color: "rgba(255,255,255,0.90)",
+              textShadow: "0 1px 6px rgba(80,20,80,0.5)",
             }}
           >
-            Wonders of Nepal
-          </span>
-        </h1>
-        <p
-          className="mt-4 text-center text-base sm:text-lg max-w-md leading-relaxed"
-          style={{
-            color: "rgba(255,255,255,0.82)",
-            textShadow: "0 1px 8px rgba(0,0,0,0.35)",
-          }}
-        >
-          From the birthplace of Buddha to the roof of the world
-        </p>
+            🇳🇵 Himalayan Kingdom
+          </p>
+
+          {/* Line 1: "Explore the" — fully visible */}
+          <h1
+            style={{
+              fontFamily: "var(--font-playfair)",
+              fontSize: "clamp(2.6rem, 8vw, 6rem)",
+              lineHeight: 1.1,
+              fontWeight: 800,
+              color: "#fff",
+              textShadow:
+                "0 2px 4px rgba(0,0,0,0.30), 0 8px 32px rgba(0,0,0,0.22)",
+              margin: 0,
+            }}
+          >
+            Explore the
+          </h1>
+
+          {/* Invisible spacer — matches "Wonders of Nepal" line in z=5 layer */}
+          <div
+            aria-hidden
+            style={{
+              height: "calc(clamp(2.6rem, 8vw, 6rem) * 1.1)",
+              visibility: "hidden",
+            }}
+          />
+
+          {/* Subtitle */}
+          <p
+            style={{
+              marginTop: "0.75rem",
+              fontSize: "clamp(0.95rem, 2vw, 1.125rem)",
+              maxWidth: "28rem",
+              lineHeight: 1.6,
+              color: "rgba(255,255,255,0.82)",
+              textShadow: "0 1px 8px rgba(0,0,0,0.35)",
+            }}
+          >
+            From the birthplace of Buddha to the roof of the world
+          </p>
+
+          {/* CTA Buttons */}
+          <div
+            className="pointer-events-auto"
+            style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginTop: "1.5rem" }}
+          >
+            {/* AI Trip Planner — frosted glass, red glow */}
+            <button
+              onClick={() =>
+                document.dispatchEvent(new CustomEvent("open-ai-planner"))
+              }
+              style={{
+                background: "rgba(220,38,38,0.18)",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
+                border: "1px solid rgba(220,38,38,0.45)",
+                boxShadow:
+                  "0 0 24px rgba(220,38,38,0.35), inset 0 1px 0 rgba(255,255,255,0.15)",
+                color: "#fff",
+                padding: "0.6rem 1.35rem",
+                borderRadius: "9999px",
+                fontWeight: 600,
+                fontSize: "0.9rem",
+                cursor: "pointer",
+                letterSpacing: "0.02em",
+              }}
+            >
+              ✨ AI Trip Planner
+            </button>
+
+            {/* Himalayan Concierge — dark frosted glass */}
+            <button
+              onClick={() =>
+                document
+                  .getElementById("discover")
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
+              style={{
+                background: "rgba(10,10,20,0.45)",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
+                border: "1px solid rgba(255,255,255,0.20)",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10)",
+                color: "#fff",
+                padding: "0.6rem 1.35rem",
+                borderRadius: "9999px",
+                fontWeight: 600,
+                fontSize: "0.9rem",
+                cursor: "pointer",
+                letterSpacing: "0.02em",
+              }}
+            >
+              🏔 Himalayan Concierge
+            </button>
+          </div>
+        </div>
       </motion.div>
 
-      {/* ── Layer 3: Foreground peaks SVG ── z=40, moves fastest ── */}
+      {/* ── Layer 4: Foreground SVG peaks ── z=40, moves fastest ── */}
       <motion.div
-        style={{ y: foreY }}
-        className="absolute bottom-0 left-0 right-0 z-40"
+        style={{ y: foreY, zIndex: 40 }}
+        className="absolute bottom-0 left-0 right-0"
         aria-hidden
       >
         <MountainSVG />
       </motion.div>
 
-      {/* ── Scroll cue ── */}
+      {/* ── Scroll cue ── z=50 ── */}
       <motion.div
-        className="absolute z-50 bottom-7 left-1/2 -translate-x-1/2 pointer-events-none"
+        className="absolute bottom-7 left-1/2 -translate-x-1/2 pointer-events-none"
+        style={{ zIndex: 50 }}
         animate={{ y: [0, 9, 0] }}
         transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
       >
@@ -255,7 +448,10 @@ export default function ParallaxHero() {
           className="w-6 h-10 rounded-full flex items-start justify-center pt-1.5"
           style={{ border: "1.5px solid rgba(255,255,255,0.55)" }}
         >
-          <div className="w-1 h-2.5 rounded-full" style={{ background: "rgba(255,255,255,0.75)" }} />
+          <div
+            className="w-1 h-2.5 rounded-full"
+            style={{ background: "rgba(255,255,255,0.75)" }}
+          />
         </div>
       </motion.div>
 
