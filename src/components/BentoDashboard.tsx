@@ -24,7 +24,7 @@ const GLASS_STYLE = {
   background: "rgba(255,255,255,0.58)",
   backdropFilter: "blur(40px)",
   WebkitBackdropFilter: "blur(40px)",
-  border: "1px solid rgba(255,255,255,0.88)",
+  border: "1px solid rgba(0,56,147,0.18)",
   boxShadow: [
     "inset 1px 1px 0 rgba(255,255,255,0.98)",
     "inset -1px -1px 0 rgba(0,0,0,0.04)",
@@ -36,9 +36,9 @@ const GLASS_STYLE = {
 const HOVER_SHADOW = [
   "inset 1px 1px 0 rgba(255,255,255,1)",
   "inset -1px -1px 0 rgba(0,0,0,0.05)",
-  "0 0 0 1px rgba(200,185,160,0.45)",
+  "0 0 0 1px rgba(0,56,147,0.22)",
   "0 20px 50px rgba(0,0,0,0.14)",
-  "0 0 40px rgba(180,140,60,0.12)",
+  "0 0 40px rgba(0,56,147,0.12)",
 ].join(", ");
 
 // ── Animation variants ────────────────────────────────────────────────
@@ -223,7 +223,7 @@ export default function BentoDashboard() {
           top: "-15%", right: "-10%",
           width: "45vw", height: "45vw",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(251,191,36,0.18) 0%, rgba(245,158,11,0.10) 45%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(220,20,60,0.18) 0%, rgba(180,20,40,0.10) 45%, transparent 70%)",
           filter: "blur(70px)",
         }}
         animate={{
@@ -243,7 +243,7 @@ export default function BentoDashboard() {
           bottom: "-10%", left: "-8%",
           width: "38vw", height: "38vw",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(251,113,133,0.12) 0%, rgba(245,158,11,0.07) 50%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(0,56,147,0.14) 0%, rgba(0,40,120,0.08) 50%, transparent 70%)",
           filter: "blur(80px)",
         }}
         animate={{
@@ -310,14 +310,14 @@ export default function BentoDashboard() {
         {/* ── CELL 3: Season Stats — col-span-1 ─────────────── */}
         <BentoCard className="min-h-[420px] flex flex-col justify-between p-8">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-600 mb-1">Right Now</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#003893] mb-1">Right Now</p>
             <h2 className="text-base font-bold text-zinc-900 tracking-tight mb-6">Season Pulse</h2>
 
             {/* Animated stat bars */}
             {[
-              { label: "In season", value: inSeasonCount, total: destinations.length, color: "bg-blue-500" },
-              { label: "Total destinations", value: destinations.length, total: destinations.length, color: "bg-violet-500" },
-              { label: "Categories", value: categoryGroups.length, total: 10, color: "bg-indigo-400" },
+              { label: "In season", value: inSeasonCount, total: destinations.length, color: "bg-[#003893]" },
+              { label: "Total destinations", value: destinations.length, total: destinations.length, color: "bg-[#DC143C]" },
+              { label: "Categories", value: categoryGroups.length, total: 10, color: "bg-[#0050c8]" },
             ].map((bar) => (
               <div key={bar.label} className="mb-5">
                 <div className="flex justify-between text-xs mb-1.5">
@@ -342,8 +342,8 @@ export default function BentoDashboard() {
               <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(0,0,0,0.09)" strokeWidth="6" />
               <defs>
                 <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#3b82f6" />
-                  <stop offset="100%" stopColor="#8b5cf6" />
+                  <stop offset="0%" stopColor="#DC143C" />
+                  <stop offset="100%" stopColor="#003893" />
                 </linearGradient>
               </defs>
               <motion.circle

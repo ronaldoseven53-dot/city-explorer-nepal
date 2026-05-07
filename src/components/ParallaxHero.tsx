@@ -236,7 +236,7 @@ export default function ParallaxHero() {
           Explore the
         </h1>
 
-        {/* Subtitle — solid black, white halo for legibility on photo */}
+        {/* Subtitle — crimson with white halo for legibility on photo */}
         <p
           style={{
             position: "absolute",
@@ -248,11 +248,11 @@ export default function ParallaxHero() {
             textAlign: "center",
             fontSize: "clamp(0.875rem, 1.7vw, 1rem)",
             lineHeight: 1.7,
-            letterSpacing: "0.015em",
-            fontWeight: 500,
-            color: "#000000",
+            letterSpacing: "0.08em",
+            fontWeight: 700,
+            color: "#DC143C",
             textShadow:
-              "0 0 24px rgba(255,255,255,1.0), 0 0 8px rgba(255,255,255,0.95), 0 1px 2px rgba(255,255,255,0.9)",
+              "0 0 24px rgba(255,255,255,0.95), 0 0 8px rgba(255,255,255,0.90), 0 0 32px rgba(220,20,60,0.30)",
           }}
         >
           From the birthplace of Buddha to the roof of the world
@@ -280,20 +280,20 @@ export default function ParallaxHero() {
             }
             whileHover={{
               scale: 1.04,
-              boxShadow: "0 0 32px rgba(220,75,55,0.42), inset 0 1px 0 rgba(255,255,255,0.28)",
+              boxShadow: "0 0 32px rgba(0,56,147,0.55), 0 0 12px rgba(220,20,60,0.28), inset 0 1px 0 rgba(255,255,255,0.28)",
             }}
             whileTap={{ scale: 0.96 }}
             transition={BTN_TRANSITION}
+            className="btn-flag"
             style={{
+              position: "relative",
               display: "flex",
               alignItems: "center",
               gap: "0.42rem",
-              background: "rgba(255,255,255,0.10)",
-              backdropFilter: "blur(20px)",
-              WebkitBackdropFilter: "blur(20px)",
-              border: "1px solid rgba(220,75,55,0.52)",
+              background: "#DC143C",
+              border: "1px solid rgba(0,56,147,0.40)",
               boxShadow:
-                "0 0 20px rgba(220,75,55,0.24), inset 0 1px 0 rgba(255,255,255,0.18)",
+                "0 0 20px rgba(220,20,60,0.30), inset 0 1px 0 rgba(255,255,255,0.22)",
               color: "#fff",
               padding: "0.62rem 1.4rem",
               borderRadius: "9999px",
@@ -317,20 +317,20 @@ export default function ParallaxHero() {
             }
             whileHover={{
               scale: 1.04,
-              boxShadow: "0 4px 24px rgba(255,255,255,0.18), inset 0 1px 0 rgba(255,255,255,0.28)",
+              boxShadow: "0 0 32px rgba(0,56,147,0.50), 0 4px 20px rgba(0,56,147,0.30), inset 0 1px 0 rgba(255,255,255,0.28)",
             }}
             whileTap={{ scale: 0.96 }}
             transition={BTN_TRANSITION}
+            className="btn-flag"
             style={{
+              position: "relative",
               display: "flex",
               alignItems: "center",
               gap: "0.42rem",
-              background: "rgba(255,255,255,0.08)",
-              backdropFilter: "blur(20px)",
-              WebkitBackdropFilter: "blur(20px)",
+              background: "#003893",
               border: "1px solid rgba(255,255,255,0.24)",
-              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.14), 0 1px 12px rgba(0,0,0,0.15)",
-              color: "rgba(255,255,255,0.92)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 12px rgba(0,56,147,0.25)",
+              color: "#ffffff",
               padding: "0.62rem 1.4rem",
               borderRadius: "9999px",
               fontWeight: 600,
