@@ -1,9 +1,85 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
+/* ── Tailwind v4: class-based dark mode ──────────────── */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Light mode (default) ────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #F8F9FA;
+  --foreground: #1A1A1A;
+
+  /* Glass cards */
+  --glass-bg:     rgba(255, 255, 255, 0.92);
+  --glass-border: rgba(0, 0, 0, 0.09);
+  --glass-shadow: inset 1px 1px 0 rgba(255,255,255,0.98), inset -1px -1px 0 rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.09), 0 2px 8px rgba(0,0,0,0.06);
+
+  /* BentoDashboard bg overlays */
+  --page-overlay:  rgba(248, 249, 250, 0.87);
+  --page-vignette: radial-gradient(ellipse at 50% 40%, transparent 25%, rgba(200,200,200,0.12) 65%, rgba(160,160,160,0.28) 100%);
+
+  /* Section bands (Carousel, StatsPanel, AI section) */
+  --section-bg:       rgba(255, 255, 255, 0.97);
+  --section-border:   rgba(0, 0, 0, 0.07);
+  --section-grid-gap: rgba(0, 0, 0, 0.07);
+
+  /* AI Himalaya card */
+  --ai-card-bg:     rgba(255, 255, 255, 0.90);
+  --ai-card-border: rgba(0, 0, 0, 0.08);
+
+  /* Navbar */
+  --nav-bg:         rgba(255, 255, 255, 0.93);
+  --nav-border:     rgba(0, 0, 0, 0.07);
+  --nav-drawer-bg:  rgba(255, 255, 255, 0.97);
+  --nav-glass-bg:   rgba(0, 0, 0, 0.05);
+  --nav-glass-bdr:  rgba(0, 0, 0, 0.09);
+
+  /* Text */
+  --text-primary:   #1A1A1A;
+  --text-secondary: rgba(26, 26, 26, 0.58);
+  --text-tertiary:  rgba(26, 26, 26, 0.36);
+
+  /* SVG fill */
+  --fill-primary: #1A1A1A;
+}
+
+/* ── Dark mode — exact match to existing component values ─ */
+.dark {
+  --background: #0B0E14;
+  --foreground: #EEF0F8;
+
+  /* Glass cards — from current BentoDashboard GLASS_STYLE */
+  --glass-bg:     rgba(12, 18, 36, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.25);
+
+  /* BentoDashboard bg overlays — from current Layer 2 / Layer 3 */
+  --page-overlay:  rgba(6, 10, 22, 0.88);
+  --page-vignette: radial-gradient(ellipse at 50% 40%, transparent 25%, rgba(0,0,0,0.30) 65%, rgba(0,0,0,0.70) 100%);
+
+  /* Section bands — from current StatsPanel/Carousel/AISection */
+  --section-bg:       rgba(8, 12, 24, 0.97);
+  --section-border:   rgba(255, 255, 255, 0.05);
+  --section-grid-gap: rgba(255, 255, 255, 0.05);
+
+  /* AI Himalaya card — from current AIAssistantSection */
+  --ai-card-bg:     rgba(15, 22, 40, 0.65);
+  --ai-card-border: rgba(255, 255, 255, 0.09);
+
+  /* Navbar — from current Navbar values */
+  --nav-bg:         rgba(10, 15, 28, 0.88);
+  --nav-border:     rgba(255, 255, 255, 0.06);
+  --nav-drawer-bg:  rgba(10, 15, 28, 0.96);
+  --nav-glass-bg:   rgba(255, 255, 255, 0.07);
+  --nav-glass-bdr:  rgba(255, 255, 255, 0.11);
+
+  /* Text */
+  --text-primary:   #EEF0F8;
+  --text-secondary: rgba(238, 240, 248, 0.52);
+  --text-tertiary:  rgba(238, 240, 248, 0.36);
+
+  /* SVG fill */
+  --fill-primary: #EEF0F8;
 }
 
 @theme inline {
@@ -13,17 +89,19 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Smooth cross-fade only while the theme is switching */
+.switching-theme * {
+  transition:
+    background-color 0.30s ease,
+    border-color     0.30s ease,
+    color            0.30s ease,
+    box-shadow       0.30s ease !important;
 }
 
 /* ── View Transitions ────────────────────────────────────────── */

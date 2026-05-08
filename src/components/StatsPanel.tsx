@@ -11,18 +11,18 @@ export default function StatsPanel() {
   }, []);
 
   const stats = [
-    { icon: MapPin,        value: String(destinations.length),    label: "Destinations",  color: "#FF4D6A" },
-    { icon: Layers,        value: String(categoryGroups.length),  label: "Categories",    color: "#60A5FA" },
-    { icon: Mountain,      value: "8,848 m",                      label: "Highest Peak",  color: "#34D399" },
-    { icon: CalendarDays,  value: String(inSeasonCount),          label: "In Season",     color: "#FBBF24" },
+    { icon: MapPin,       value: String(destinations.length),   label: "Destinations", color: "#FF4D6A" },
+    { icon: Layers,       value: String(categoryGroups.length), label: "Categories",   color: "#60A5FA" },
+    { icon: Mountain,     value: "8,848 m",                     label: "Highest Peak", color: "#34D399" },
+    { icon: CalendarDays, value: String(inSeasonCount),         label: "In Season",    color: "#FBBF24" },
   ];
 
   return (
     <section
       style={{
-        background: "rgba(8,12,24,0.97)",
-        borderTop: "1px solid rgba(255,255,255,0.05)",
-        borderBottom: "1px solid rgba(255,255,255,0.05)",
+        background: "var(--section-bg)",
+        borderTop: "1px solid var(--section-border)",
+        borderBottom: "1px solid var(--section-border)",
         padding: "0 max(1rem, 4vw)",
       }}
     >
@@ -31,7 +31,7 @@ export default function StatsPanel() {
           display: "grid",
           gridTemplateColumns: "repeat(4, 1fr)",
           gap: "1px",
-          background: "rgba(255,255,255,0.05)",
+          background: "var(--section-grid-gap)",
           borderRadius: "0",
         }}
       >
@@ -41,7 +41,7 @@ export default function StatsPanel() {
             <div
               key={s.label}
               style={{
-                background: "rgba(8,12,24,0.97)",
+                background: "var(--section-bg)",
                 padding: "20px 16px",
                 display: "flex",
                 flexDirection: "column",
@@ -75,7 +75,7 @@ export default function StatsPanel() {
               <p style={{
                 fontSize: "clamp(1.1rem, 3.5vw, 1.55rem)",
                 fontWeight: 800,
-                color: "#FFFFFF",
+                color: "var(--text-primary)",
                 lineHeight: 1,
                 letterSpacing: "-0.02em",
                 textAlign: "center",
@@ -85,7 +85,7 @@ export default function StatsPanel() {
 
               <p style={{
                 fontSize: "clamp(0.58rem, 1.3vw, 0.70rem)",
-                color: "rgba(255,255,255,0.42)",
+                color: "var(--text-secondary)",
                 fontWeight: 600,
                 letterSpacing: "0.06em",
                 textTransform: "uppercase",
