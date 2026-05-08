@@ -303,40 +303,6 @@ export default function AIAssistant() {
 
   return (
     <>
-      {/* ── Floating trigger button ─────────────────────────────── */}
-      <motion.button
-        onClick={() => setOpen((v) => !v)}
-        aria-label={open ? "Close AI Assistant" : "Open AI Assistant"}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.97 }}
-        transition={{ duration: 0.15 }}
-        style={{
-          boxShadow: open
-            ? "0 0 0 1px rgba(255,255,255,0.08), 0 8px 32px -8px rgba(0,0,0,0.6)"
-            : "0 0 0 1px rgba(255,255,255,0.08), 0 8px 32px -8px rgba(245,158,11,0.25), 0 4px 16px -4px rgba(0,0,0,0.5)",
-        }}
-        className={`
-          fixed bottom-6 right-6 z-50
-          flex items-center gap-2.5 px-4 py-3 rounded-full
-          bg-zinc-950/80 backdrop-blur-2xl
-          border border-white/[0.12]
-          transition-colors duration-200 cursor-pointer
-          ${open ? "text-white/70 hover:text-white" : "text-white hover:border-white/20"}
-        `}
-      >
-        <motion.span
-          animate={{ rotate: open ? 90 : 0, opacity: open ? 0.55 : 1 }}
-          transition={{ duration: 0.2 }}
-          className="text-xl"
-          aria-hidden
-        >
-          {open ? "✕" : "✨"}
-        </motion.span>
-        <span className="text-sm font-semibold hidden sm:inline select-none tracking-tight">
-          {open ? "Close" : "Himalayan Concierge"}
-        </span>
-      </motion.button>
-
       {/* ── Chat panel ─────────────────────────────────────────── */}
       <AnimatePresence>
         {open && (

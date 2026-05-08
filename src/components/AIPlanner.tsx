@@ -135,20 +135,6 @@ export default function AIPlanner() {
 
   return (
     <>
-      {/* ── Floating trigger button ─────────────────────────── */}
-      <button
-        onClick={() => setOpen((v) => !v)}
-        aria-label="Open AI Trip Planner"
-        className="fixed bottom-6 left-6 z-50 group flex items-center gap-2.5 px-5 py-3 rounded-full shadow-2xl cursor-pointer transition-all duration-300
-          bg-gradient-to-r from-red-700 to-rose-600 hover:from-red-600 hover:to-rose-500
-          text-white font-semibold text-sm border border-white/20"
-      >
-        <span className="text-lg transition-transform duration-300 group-hover:rotate-12">
-          {open ? "✕" : "✨"}
-        </span>
-        <span className="hidden sm:inline">{open ? "Close Planner" : "AI Trip Planner"}</span>
-      </button>
-
       {/* ── Chat panel ──────────────────────────────────────── */}
       {open && (
         <div className="fixed bottom-20 left-6 z-50 w-[92vw] sm:w-[420px] max-h-[78vh] flex flex-col rounded-3xl overflow-hidden
