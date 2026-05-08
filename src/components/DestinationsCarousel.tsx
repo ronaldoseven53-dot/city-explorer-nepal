@@ -73,9 +73,9 @@ function DestCard({ dest }: { dest: FeaturedDestination }) {
     <motion.div
       whileHover={{ y: -4, scale: 1.02 }}
       transition={{ type: "spring", stiffness: 400, damping: 28 }}
-      className="flex-shrink-0 rounded-[18px] overflow-hidden cursor-pointer"
+      className="flex-shrink-0 rounded-[16px] overflow-hidden cursor-pointer"
       style={{
-        width: "clamp(148px, 38vw, 190px)",
+        width: "clamp(128px, 31vw, 168px)",
         background: "rgba(255,255,255,0.06)",
         backdropFilter: "blur(12px)",
         WebkitBackdropFilter: "blur(12px)",
@@ -85,7 +85,7 @@ function DestCard({ dest }: { dest: FeaturedDestination }) {
     >
       <TransitionLink href={dest.href} className="block h-full">
         {/* Photo */}
-        <div className="relative" style={{ height: "clamp(110px, 28vw, 140px)" }}>
+        <div className="relative" style={{ height: "clamp(98px, 24vw, 125px)" }}>
           <Image
             src={dest.image}
             alt={dest.name}
@@ -157,7 +157,7 @@ export default function DestinationsCarousel() {
       {/* Header */}
       <div
         className="flex items-center justify-between"
-        style={{ paddingLeft: "max(1.5rem, 6vw)", paddingRight: "max(1.5rem, 6vw)", marginBottom: "18px" }}
+        style={{ paddingLeft: "max(1rem, 4vw)", paddingRight: "max(1rem, 4vw)", marginBottom: "16px" }}
       >
         <div className="flex items-center gap-2">
           <span style={{ fontSize: "0.60rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.52)", fontWeight: 700 }}>
@@ -188,10 +188,10 @@ export default function DestinationsCarousel() {
       {/* Horizontal scroll */}
       <div
         ref={scrollRef}
-        className="flex gap-3 overflow-x-auto"
+        className="flex gap-2 overflow-x-auto"
         style={{
-          paddingLeft: "max(1.5rem, 6vw)",
-          paddingRight: "max(1.5rem, 6vw)",
+          paddingLeft: "max(1rem, 4vw)",
+          paddingRight: "max(1rem, 4vw)",
           scrollbarWidth: "none",
           msOverflowStyle: "none",
           WebkitOverflowScrolling: "touch",

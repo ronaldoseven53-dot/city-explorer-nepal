@@ -204,14 +204,14 @@ export default function ParallaxHero() {
               onClick={() =>
                 document.dispatchEvent(new CustomEvent("open-ai-planner"))
               }
-              whileHover={{ scale: 1.04, boxShadow: "0 0 36px rgba(220,20,60,0.55)" }}
+              whileHover={{ scale: 1.04, boxShadow: "0 0 40px rgba(255,40,100,0.60)" }}
               whileTap={{ scale: 0.96 }}
               transition={BTN_TRANSITION}
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
-                background: "#DC143C",
+                background: "linear-gradient(135deg, #FF3B7D 0%, #E8103C 55%, #C0102E 100%)",
                 border: "none",
                 color: "#fff",
                 padding: "13px 28px",
@@ -220,7 +220,7 @@ export default function ParallaxHero() {
                 fontSize: "0.9rem",
                 cursor: "pointer",
                 letterSpacing: "0.01em",
-                boxShadow: "0 4px 24px rgba(220,20,60,0.50)",
+                boxShadow: "0 4px 28px rgba(230,30,80,0.55)",
                 willChange: "transform",
               }}
             >
