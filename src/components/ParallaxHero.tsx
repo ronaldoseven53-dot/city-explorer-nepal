@@ -109,52 +109,37 @@ export default function ParallaxHero() {
         <div
           style={{
             position: "absolute",
-            top: "10%",
-            left: "max(1.5rem, 6vw)",
-            right: "max(1.5rem, 6vw)",
-            maxWidth: "640px",
+            top: "10vh",
+            left: "5vw",
+            width: "70vw",
           }}
         >
           {/* ── Small label ── */}
-          <div
+          <p
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              marginBottom: "14px",
+              fontSize: "0.75rem",
+              fontWeight: 700,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: "#D4D4D4",
+              marginBottom: "0",
+              textShadow: "0 1px 8px rgba(0,0,0,0.5)",
             }}
           >
-            <span style={{ fontSize: "0.62rem", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.60)", fontWeight: 700, textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}>
-              🇳🇵 &nbsp;Himalayan Kingdom
-            </span>
-          </div>
+            NP HIMALAYAN KINGDOM
+          </p>
 
-          {/* ── Ornamental divider ── */}
-          <div
-            style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "18px" }}
-          >
-            <div style={{ height: "1px", width: "36px", background: "linear-gradient(to right, transparent, rgba(210,175,90,0.65))" }} />
-            <span style={{ color: "rgba(210,175,90,0.80)", fontSize: "0.7rem", lineHeight: 1 }}>✦</span>
-            <div style={{ height: "1px", width: "36px", background: "linear-gradient(to left, transparent, rgba(210,175,90,0.65))" }} />
-          </div>
-
-          {/* ── "NEPAL" — mountain photo bleeds through the letters ── */}
+          {/* ── NEPAL — giant Playfair serif ── */}
           <h1
-            aria-label="NEPAL"
             style={{
-              backgroundImage: `url('${PHOTO}')`,
-              backgroundSize: "220% auto",
-              backgroundPosition: "55% 22%",
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              color: "transparent",
-              fontSize: "clamp(4.8rem, 26vw, 11rem)",
-              fontWeight: 900,
+              fontFamily: "var(--font-playfair), Georgia, 'Times New Roman', serif",
+              fontSize: "clamp(5rem, 18vw, 15rem)",
+              fontWeight: 500,
+              lineHeight: 1,
               letterSpacing: "-0.025em",
-              lineHeight: 0.88,
-              fontFamily: "'Arial Black', 'Arial Bold', Impact, 'Franklin Gothic Heavy', sans-serif",
-              filter: "drop-shadow(0 3px 20px rgba(160,110,40,0.42))",
-              marginBottom: "20px",
+              color: "#D4D4D4",
+              textShadow: "0 4px 40px rgba(0,0,0,0.60)",
+              margin: 0,
               userSelect: "none",
               display: "block",
             }}
@@ -162,35 +147,37 @@ export default function ParallaxHero() {
             NEPAL
           </h1>
 
-          {/* ── Main heading ── */}
+          {/* ── Main heading — pulls up under NEPAL ── */}
           <h2
             style={{
-              fontSize: "clamp(1.6rem, 4.2vw, 2.8rem)",
+              fontFamily: "var(--font-geist-sans), system-ui, sans-serif",
+              fontSize: "clamp(1.5rem, 4.5vw, 3.75rem)",
               fontWeight: 800,
-              color: "#ffffff",
-              lineHeight: 1.12,
-              letterSpacing: "-0.015em",
-              textShadow: "0 2px 16px rgba(0,0,0,0.55)",
-              marginBottom: "14px",
-              maxWidth: "min(500px, 80vw)",
+              color: "#FAFAFA",
+              lineHeight: 1.1,
+              letterSpacing: "-0.025em",
+              textShadow: "0 2px 20px rgba(0,0,0,0.65)",
+              marginTop: "-2rem",
+              marginBottom: "0",
+              maxWidth: "min(680px, 90%)",
             }}
           >
-            Discover the Roof<br />of the World
+            Discover the Roof of the World
           </h2>
 
-          {/* ── Subheading ── */}
+          {/* ── Body text ── */}
           <p
             style={{
-              fontSize: "clamp(0.875rem, 1.8vw, 1rem)",
-              color: "rgba(255,255,255,0.65)",
+              fontSize: "clamp(0.9rem, 1.6vw, 1.25rem)",
+              color: "#D4D4D4",
               lineHeight: 1.65,
               textShadow: "0 1px 10px rgba(0,0,0,0.55)",
+              marginTop: "1.5rem",
               marginBottom: "28px",
-              maxWidth: "min(380px, 84vw)",
+              maxWidth: "min(576px, 90%)",
             }}
           >
-            AI-crafted journeys, local experiences,<br />
-            and spiritual adventures.
+            AI-crafted journeys, local experiences, and spiritual adventures.
           </p>
 
           {/* ── CTA Buttons ── */}
