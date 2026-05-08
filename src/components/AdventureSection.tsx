@@ -65,7 +65,7 @@ const CATEGORIES: Category[] = [
     id: "pilgrimage",
     title: "Pilgrimage",
     description: "Sacred sites, monasteries & spiritual journeys",
-    image: "https://images.unsplash.com/photo-1526398977052-654af8b12e8c?w=900&q=85",
+    image: "https://images.unsplash.com/photo-1609168494389-230528e6a9c3?w=900&q=85",
     href: "/experience/pilgrimage",
     colClass: "col-span-1 md:col-span-3",
     sizes: "(max-width: 768px) 50vw, 50vw",
