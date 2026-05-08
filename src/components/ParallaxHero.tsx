@@ -367,34 +367,6 @@ export default function ParallaxHero() {
         </div>
       </motion.div>
 
-      {/* ════════════════════════════════════════════════════════════════════ */}
-      {/* ══ AI Trip Planner — bottom-left  z=40 ════════════════════════════ */}
-      {/* ════════════════════════════════════════════════════════════════════ */}
-      <motion.div
-        className="pointer-events-auto"
-        style={{ position: "absolute", bottom: "2rem", left: "max(1.5rem, 5vw)", zIndex: 40 }}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.7, duration: 0.45 }}
-      >
-        <motion.button
-          onClick={() => document.dispatchEvent(new CustomEvent("open-ai-planner"))}
-          whileHover={{ scale: 1.06, boxShadow: "0 0 28px rgba(220,20,60,0.62)" }}
-          whileTap={{ scale: 0.95 }}
-          transition={BTN_TRANSITION}
-          style={{
-            display: "flex", alignItems: "center", gap: "7px",
-            background: "#DC143C", border: "none", color: "#fff",
-            padding: "9px 16px", borderRadius: "9999px",
-            fontWeight: 700, fontSize: "0.77rem", cursor: "pointer",
-            boxShadow: "0 4px 18px rgba(220,20,60,0.50)",
-            letterSpacing: "0.01em", willChange: "transform",
-          }}
-        >
-          <Sparkles size={13} strokeWidth={2.2} />
-          AI Trip Planner
-        </motion.button>
-      </motion.div>
 
       {/* ════════════════════════════════════════════════════════════════════ */}
       {/* ══ Watch Nepal — bottom-right  z=40 ═══════════════════════════════ */}
@@ -435,35 +407,6 @@ export default function ParallaxHero() {
         </motion.button>
       </motion.div>
 
-      {/* ════════════════════════════════════════════════════════════════════ */}
-      {/* ══ Himalayan Concierge — bottom-right  z=40 ═══════════════════════ */}
-      {/* ════════════════════════════════════════════════════════════════════ */}
-      <motion.div
-        className="pointer-events-auto"
-        style={{ position: "absolute", bottom: "2rem", right: "max(1.5rem, 5vw)", zIndex: 40 }}
-        initial={{ opacity: 0, x: 16 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.65, duration: 0.45 }}
-      >
-        <motion.button
-          whileHover={{ scale: 1.05, boxShadow: "0 0 26px rgba(180,140,60,0.42)" }}
-          whileTap={{ scale: 0.96 }}
-          transition={BTN_TRANSITION}
-          style={{
-            display: "flex", alignItems: "center", gap: "8px",
-            background: "rgba(10,10,14,0.82)",
-            backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-            border: "1px solid rgba(200,160,60,0.32)",
-            color: "#fff", padding: "12px 20px", borderRadius: "9999px",
-            fontWeight: 700, fontSize: "0.84rem", cursor: "pointer",
-            boxShadow: "0 4px 18px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.06)",
-            letterSpacing: "0.01em", willChange: "transform",
-          }}
-        >
-          <Sparkles size={14} strokeWidth={2} color="#D4A840" />
-          Himalayan Concierge
-        </motion.button>
-      </motion.div>
 
       {/* ══ Scroll cue  z=50 ═════════════════════════════════════════════════ */}
       <motion.div

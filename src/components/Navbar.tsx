@@ -6,6 +6,7 @@ import { MapPin, Star, Menu, X } from "lucide-react";
 import NavPassportBadge from "@/components/NavPassportBadge";
 import TransitionLink from "@/components/TransitionLink";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useTheme } from "@/context/ThemeContext";
 
 const NAV_LINKS = [
   { label: "Destinations", href: "/#discover" },
@@ -14,6 +15,17 @@ const NAV_LINKS = [
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
+  // Glassmorphism tokens — match user's spec exactly
+  const glassBg     = isDark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.05)";
+  const glassBorder = isDark ? "rgba(255,255,255,0.20)" : "rgba(0,0,0,0.10)";
+
+  // Badge: Crimson in dark, glowing Amber in light
+  const badgeBg   = isDark ? "#DC143C"                         : "#F59E0B";
+  const badgeGlow = isDark ? "rgba(220,20,60,0.55)"            : "rgba(245,158,11,0.60)";
+  const starGlow  = isDark ? "drop-shadow(0 0 5px rgba(251,191,36,0.55))" : "drop-shadow(0 0 5px rgba(245,158,11,0.65))";
 
   return (
     <nav
@@ -22,7 +34,7 @@ export default function Navbar() {
         background: "var(--nav-bg)",
         backdropFilter: "blur(24px)",
         WebkitBackdropFilter: "blur(24px)",
-        borderBottom: "1px solid var(--nav-border)",
+        borderBottom: `1px solid ${glassBorder}`,
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-5">
@@ -34,8 +46,10 @@ export default function Navbar() {
               className="flex items-center justify-center rounded-[10px]"
               style={{
                 width: 40, height: 40,
-                background: "var(--nav-glass-bg)",
-                border: "1px solid var(--nav-glass-bdr)",
+                background: glassBg,
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                border: `1px solid ${glassBorder}`,
               }}
             >
               <svg width="22" height="18" viewBox="0 0 22 18" fill="none" aria-hidden>
@@ -76,48 +90,94 @@ export default function Navbar() {
 
           {/* ── Right cluster ── */}
           <div className="flex items-center gap-2">
-            {/* My Collection — desktop only */}
-            <button
-              className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-full text-zinc-600 dark:text-white/72 text-[0.8rem] font-medium"
+
+            {/* ── My Collection ── */}
+            <motion.button
+              initial="rest"
+              whileHover="hover"
+              animate="rest"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-full text-zinc-600 dark:text-white/80 text-[0.8rem] font-medium"
               style={{
-                background: "var(--nav-glass-bg)",
-                border: "1px solid var(--nav-glass-bdr)",
+                background: glassBg,
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                border: `1px solid ${glassBorder}`,
+                cursor: "pointer",
               }}
             >
-              <Star size={13} strokeWidth={2} />
+              <Star
+                size={13}
+                strokeWidth={2}
+                style={{ filter: starGlow }}
+                className="text-zinc-600 dark:text-white/80"
+              />
               My Collection
-              <span
-                className="flex items-center justify-center text-white font-bold"
+              {/* Notification badge — pulses on parent hover */}
+              <motion.span
+                className="flex items-center justify-center text-white font-bold relative"
+                variants={{
+                  rest: {
+                    scale: 1,
+                    boxShadow: `0 0 7px ${badgeGlow}`,
+                  },
+                  hover: {
+                    scale: [1, 1.22, 0.92, 1.12, 1],
+                    boxShadow: [
+                      `0 0 7px ${badgeGlow}`,
+                      `0 0 18px ${badgeGlow}`,
+                      `0 0 6px ${badgeGlow}`,
+                      `0 0 14px ${badgeGlow}`,
+                      `0 0 7px ${badgeGlow}`,
+                    ],
+                    transition: { duration: 0.55, ease: "easeInOut" },
+                  },
+                }}
                 style={{
-                  background: "#DC143C",
+                  background: badgeBg,
                   borderRadius: "9999px",
-                  width: 16, height: 16,
+                  width: 18, height: 18,
                   fontSize: "0.58rem",
+                  flexShrink: 0,
                 }}
               >
                 1
-              </span>
-            </button>
+              </motion.span>
+            </motion.button>
 
-            {/* Theme toggle */}
+            {/* ── Theme toggle ── */}
             <ThemeToggle />
 
-            {/* Passport badge */}
+            {/* ── Passport badge ── */}
             <NavPassportBadge />
 
-            {/* Hamburger */}
-            <button
+            {/* ── Hamburger ── */}
+            <motion.button
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               onClick={() => setMenuOpen((v) => !v)}
-              className="flex items-center justify-center rounded-[10px] text-zinc-700 dark:text-white/80 hover:text-zinc-900 dark:hover:text-white transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.92 }}
+              transition={{ type: "spring", stiffness: 500, damping: 28 }}
+              className="flex items-center justify-center rounded-[10px] text-zinc-700 dark:text-white/85 hover:text-zinc-900 dark:hover:text-white"
               style={{
                 width: 40, height: 40, cursor: "pointer",
-                background: "var(--nav-glass-bg)",
-                border: "1px solid var(--nav-glass-bdr)",
+                background: glassBg,
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                border: `1px solid ${glassBorder}`,
               }}
             >
-              {menuOpen ? <X size={18} strokeWidth={2} /> : <Menu size={18} strokeWidth={2} />}
-            </button>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={menuOpen ? "close" : "open"}
+                  initial={{ opacity: 0, rotate: -30, scale: 0.7 }}
+                  animate={{ opacity: 1, rotate: 0,   scale: 1   }}
+                  exit={  { opacity: 0, rotate:  30, scale: 0.7 }}
+                  transition={{ type: "spring", stiffness: 520, damping: 24, mass: 0.55 }}
+                >
+                  {menuOpen ? <X size={18} strokeWidth={2} /> : <Menu size={18} strokeWidth={2} />}
+                </motion.div>
+              </AnimatePresence>
+            </motion.button>
           </div>
         </div>
       </div>
@@ -135,7 +195,7 @@ export default function Navbar() {
             style={{
               background: "var(--nav-drawer-bg)",
               backdropFilter: "blur(24px)",
-              borderTop: "1px solid var(--nav-border)",
+              borderTop: `1px solid ${glassBorder}`,
             }}
           >
             <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
@@ -156,9 +216,22 @@ export default function Navbar() {
                 </motion.div>
               ))}
               <div className="mt-2 px-4 py-3 flex items-center gap-2 text-zinc-600 dark:text-white/70 text-sm">
-                <Star size={14} strokeWidth={2} />
+                <Star size={14} strokeWidth={2} style={{ filter: starGlow }} />
                 My Collection
-                <span className="flex items-center justify-center text-white font-bold text-[0.58rem] rounded-full" style={{ background: "#DC143C", width: 16, height: 16 }}>1</span>
+                <motion.span
+                  className="flex items-center justify-center text-white font-bold text-[0.58rem] rounded-full"
+                  style={{
+                    background: badgeBg,
+                    width: 18, height: 18,
+                    boxShadow: `0 0 7px ${badgeGlow}`,
+                  }}
+                  animate={{
+                    boxShadow: [`0 0 7px ${badgeGlow}`, `0 0 14px ${badgeGlow}`, `0 0 7px ${badgeGlow}`],
+                  }}
+                  transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  1
+                </motion.span>
               </div>
             </div>
           </motion.div>
