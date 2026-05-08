@@ -5,8 +5,6 @@ import DestinationsCarousel from "@/components/DestinationsCarousel";
 import AIAssistantSection from "@/components/AIAssistantSection";
 import AdventureSection from "@/components/AdventureSection";
 import BentoDashboard from "@/components/BentoDashboard";
-import AIPlanner from "@/components/AIPlanner";
-
 export default function Home() {
   return (
     <>
@@ -17,7 +15,6 @@ export default function Home() {
       <AdventureSection />
       <AIAssistantSection />
       <BentoDashboard />
-      <AIPlanner />
     </>
   );
 }

@@ -213,14 +213,8 @@ export default function BentoDashboard() {
         </BentoCard>
 
         {/* ── CELL 3: Interactive Map ── */}
-        <BentoCard className="lg:col-span-2 min-h-[420px] flex flex-col" hoverShadow={HOVER_SHADOW}>
-          <div className="p-4 pb-2 flex-shrink-0">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400 dark:text-white/40 mb-1">Live</p>
-            <h2 className="text-base font-bold text-zinc-900 dark:text-white tracking-tight">Interactive Map</h2>
-          </div>
-          <div className="flex-1 min-h-0">
-            <MapLoader />
-          </div>
+        <BentoCard className="lg:col-span-2 min-h-[460px] p-0 overflow-hidden" hoverShadow={HOVER_SHADOW}>
+          <MapLoader />
         </BentoCard>
 
         {/* ── CELL 3: AI Planner CTA ── */}

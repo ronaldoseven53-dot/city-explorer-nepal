@@ -24,6 +24,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     let stored: Theme | null = null;
     try { stored = localStorage.getItem("theme") as Theme | null; } catch {}
     const initial: Theme = stored === "light" ? "light" : "dark";
+    // Sync DOM class — overrides any server-rendered hardcoded class
+    document.documentElement.classList.toggle("dark", initial === "dark");
     setTheme(initial);
     setMounted(true);
   }, []);
