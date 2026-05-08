@@ -9,6 +9,11 @@ import {
 import TransitionLink from "@/components/TransitionLink";
 import { useTheme } from "@/context/ThemeContext";
 
+const drawerVariants = {
+  open:   { x: 0,      transition: { type: "spring" as const, stiffness: 300, damping: 30 } },
+  closed: { x: "100%", transition: { type: "spring" as const, stiffness: 300, damping: 30 } },
+};
+
 const NAV_LINKS = [
   { label: "Destinations", href: "/#discover",          icon: Compass },
   { label: "Experiences",  href: "/experience/adventure", icon: MapPin  },
@@ -156,10 +161,10 @@ export default function Navbar() {
             {/* Drawer panel */}
             <motion.aside
               key="drawer-panel"
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", stiffness: 380, damping: 34, mass: 0.85 }}
+              variants={drawerVariants}
+              initial="closed"
+              animate="open"
+              exit="closed"
               className="fixed top-0 right-0 bottom-0 z-50 flex flex-col w-[300px] sm:w-[340px]"
               style={{
                 background: isDark ? "rgba(7,11,28,0.94)" : "rgba(250,251,255,0.96)",
