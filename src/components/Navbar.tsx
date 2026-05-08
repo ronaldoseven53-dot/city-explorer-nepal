@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { MapPin, Star, Menu, X } from "lucide-react";
 import NavPassportBadge from "@/components/NavPassportBadge";
 import TransitionLink from "@/components/TransitionLink";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const NAV_LINKS = [
   { label: "Destinations", href: "/#discover" },
@@ -96,6 +97,9 @@ export default function Navbar() {
                 1
               </span>
             </button>
+
+            {/* Theme toggle */}
+            <ThemeToggle />
 
             {/* Passport badge */}
             <NavPassportBadge />
