@@ -58,26 +58,30 @@ export async function GET(request: Request) {
 
   try {
     const res = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather` +
-      `?lat=${coords.lat}&lon=${coords.lon}&appid=${OWM_KEY}&units=metric`,
-      { next: { revalidate: 600 } }, // cache 10 min per city per deployment
+      `https://api.openweathermap.org/data/3.0/onecall` +
+      `?lat=${coords.lat}&lon=${coords.lon}` +
+      `&exclude=minutely,hourly,daily,alerts` +
+      `&appid=${OWM_KEY}&units=metric`,
+      { next: { revalidate: 600 } },
     );
 
     if (!res.ok) throw new Error(`OWM responded ${res.status}`);
 
     const d = await res.json();
 
-    const weatherId  = (d.weather?.[0]?.id   as number) ?? 800;
-    const visMeters  = (d.visibility          as number) ?? 10_000;
+    // One Call 3.0 nests current conditions under d.current
+    const cur        = d.current;
+    const weatherId  = (cur.weather?.[0]?.id          as number) ?? 800;
+    const visMeters  = (cur.visibility                 as number) ?? 10_000;
     const { label: visibilityLabel, score: visibilityScore } = resolveVisibility(visMeters);
 
     return Response.json({
-      temp:          Math.round(d.main.temp as number),
-      condition:     titleCase((d.weather?.[0]?.description as string) ?? "Clear"),
+      temp:          Math.round(cur.temp as number),
+      condition:     titleCase((cur.weather?.[0]?.description as string) ?? "Clear"),
       icon:          resolveIcon(weatherId),
       visibilityLabel,
       visibilityScore,
-      skyCondition:  SKY_LABEL[d.weather?.[0]?.main as string] ?? "Clear Skies",
+      skyCondition:  SKY_LABEL[cur.weather?.[0]?.main as string] ?? "Clear Skies",
     });
   } catch {
     return Response.json({ error: "Failed to fetch weather data" }, { status: 502 });
