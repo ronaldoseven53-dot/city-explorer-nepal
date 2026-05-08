@@ -14,8 +14,7 @@ const MapLoader = dynamic(() => import("./MapLoader"), { ssr: false });
 // ── Constants ─────────────────────────────────────────────────────────
 const NOISE_BG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`;
 
-const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1673505413397-0cd0dc4f5854?w=2400&q=90";
+const HERO_IMAGE = "/images/nepal-hero.jpg";
 
 const TEMPLE_IMAGE =
   "https://images.unsplash.com/photo-1592285896110-8d88b5b3a5d8?w=2400&q=90";
