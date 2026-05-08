@@ -263,14 +263,21 @@ export default function LiveInsights({ isDark }: { isDark: boolean }) {
     setError(false);
 
     fetch(`/api/weather?city=${id}`, { signal: ctrl.signal })
-      .then(r => r.json())
+      .then(async r => {
+        const d = await r.json();
+        if (!r.ok || d.error) {
+          console.error(`[LiveInsights] API error — HTTP ${r.status}:`, d.error ?? d);
+          throw new Error(d.error ?? `HTTP ${r.status}`);
+        }
+        return d;
+      })
       .then(d => {
-        if (d.error) throw new Error(d.error);
         setWeather(d as WeatherData);
         setLoading(false);
       })
       .catch(e => {
         if (e.name !== "AbortError") {
+          console.error("[LiveInsights] Fetch failed:", e.message);
           setError(true);
           setLoading(false);
         }
@@ -401,10 +408,9 @@ export default function LiveInsights({ isDark }: { isDark: boolean }) {
                 Data temporarily<br />unavailable
               </p>
             ) : loading ? (
-              <div className="flex flex-col gap-2">
-                <Skeleton w={72} h={42} />
-                <Skeleton w={110} h={12} />
-              </div>
+              <p className="animate-pulse text-[13px] font-semibold" style={{ color: textSecondary }}>
+                Loading…
+              </p>
             ) : (
               <div className="flex items-end justify-between gap-2">
                 <div>
@@ -456,11 +462,9 @@ export default function LiveInsights({ isDark }: { isDark: boolean }) {
                 Data temporarily<br />unavailable
               </p>
             ) : loading ? (
-              <div className="flex flex-col gap-2">
-                <Skeleton w={90} h={24} />
-                <Skeleton w={110} h={12} />
-                <Skeleton w="100%" h={6} className="mt-2" />
-              </div>
+              <p className="animate-pulse text-[13px] font-semibold" style={{ color: textSecondary }}>
+                Loading…
+              </p>
             ) : (
               <>
                 <p className="text-[22px] font-extrabold tracking-tight leading-none" style={{ color: textPrimary }}>
