@@ -6,6 +6,7 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import AIPlannerTrigger from "./AIPlannerTrigger";
 import JourneyInsights from "./JourneyInsights";
+import LiveInsights from "./LiveInsights";
 import { destinations, categoryGroups } from "@/data/destinations";
 import { checkSeasonality } from "@/lib/seasonality";
 import { useTheme } from "@/context/ThemeContext";
@@ -217,7 +218,7 @@ export default function BentoDashboard() {
           <MapLoader />
         </BentoCard>
 
-        {/* ── CELL 3: AI Planner CTA ── */}
+        {/* ── CELL 4: AI Planner CTA ── */}
         <BentoCard className="min-h-[280px] flex flex-col justify-between p-8" hoverShadow={HOVER_SHADOW}>
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-red-600 dark:text-red-400 mb-1">✨ Gemini AI</p>
@@ -231,6 +232,11 @@ export default function BentoDashboard() {
           <div className="mt-6">
             <AIPlannerTrigger />
           </div>
+        </BentoCard>
+
+        {/* ── CELL 5: Live Insights ── */}
+        <BentoCard className="lg:col-span-3 sm:col-span-2" hoverShadow={HOVER_SHADOW}>
+          <LiveInsights isDark={isDark} />
         </BentoCard>
 
       </motion.div>
