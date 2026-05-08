@@ -1,244 +1,197 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { motion } from "motion/react";
 import Image from "next/image";
 
-interface Experience {
+interface Category {
+  id: string;
   title: string;
-  subtitle: string;
-  tag: string;
+  description: string;
   image: string;
   href: string;
+  /** Tailwind responsive col-span classes */
+  colClass: string;
+  /** Image sizes hint for next/image */
+  sizes: string;
 }
 
-const EXPERIENCES: Experience[] = [
+const CATEGORIES: Category[] = [
   {
-    title: "Trekking & High Passes",
-    subtitle: "Himalayan multi-day routes",
-    tag: "Multi-day",
-    image: "https://images.unsplash.com/photo-1551632811-561732d1e306?w=700&q=85",
+    id: "agriculture",
+    title: "Agriculture & Local Product",
+    description: "Terraced farms, tea gardens & spice trails",
+    image: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=900&q=85",
+    href: "/experience/agriculture",
+    colClass: "col-span-1 md:col-span-2",
+    sizes: "(max-width: 768px) 50vw, 33vw",
+  },
+  {
+    id: "adventure",
+    title: "Adventure and Thrills",
+    description: "Paragliding, bungee, rafting & extreme sports",
+    image: "https://images.unsplash.com/photo-1503220317375-aaad61436b1b?w=1200&q=85",
+    href: "/experience/adventure",
+    colClass: "col-span-1 md:col-span-4",
+    sizes: "(max-width: 768px) 50vw, 67vw",
+  },
+  {
+    id: "trekking",
+    title: "Trekking and High Passes",
+    description: "Himalayan trails from Everest to Annapurna",
+    image: "https://images.unsplash.com/photo-1551632811-561732d1e306?w=1200&q=85",
     href: "/experience/trekking",
+    colClass: "col-span-1 md:col-span-4",
+    sizes: "(max-width: 768px) 50vw, 67vw",
   },
   {
-    title: "Paragliding in Pokhara",
-    subtitle: "Thermal flights over Phewa Lake",
-    tag: "Half-day",
-    image: "https://images.unsplash.com/photo-1503220317375-aaad61436b1b?w=700&q=85",
-    href: "/experience/adventure",
+    id: "heritage",
+    title: "Heritage and Culture",
+    description: "Ancient stupas, temples & UNESCO world sites",
+    image: "https://images.unsplash.com/photo-1592285896110-8d88b5b3a5d8?w=900&q=85",
+    href: "/experience/heritage",
+    colClass: "col-span-1 md:col-span-2",
+    sizes: "(max-width: 768px) 50vw, 33vw",
   },
   {
-    title: "Jungle Safari Chitwan",
-    subtitle: "Rhinos, tigers & wild elephants",
-    tag: "2–3 days",
-    image: "https://images.unsplash.com/photo-1544870234-c32b01786468?w=700&q=85",
-    href: "/experience/adventure",
+    id: "nature",
+    title: "Nature and Science",
+    description: "Glaciers, rare species & pristine wilderness",
+    image: "https://images.unsplash.com/photo-1544442069-97dded965a9f?w=900&q=85",
+    href: "/experience/nature",
+    colClass: "col-span-1 md:col-span-3",
+    sizes: "(max-width: 768px) 50vw, 50vw",
   },
   {
-    title: "White Water Rafting",
-    subtitle: "Grade III–V rapids, Trishuli River",
-    tag: "Full-day",
-    image: "https://images.unsplash.com/photo-1530549387789-4c1017266635?w=700&q=85",
-    href: "/experience/adventure",
-  },
-  {
-    title: "Everest Base Camp Trek",
-    subtitle: "The world's most iconic trail",
-    tag: "14 days",
-    image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=700&q=85",
-    href: "/experience/trekking",
+    id: "pilgrimage",
+    title: "Pilgrimage",
+    description: "Sacred sites, monasteries & spiritual journeys",
+    image: "https://images.unsplash.com/photo-1526398977052-654af8b12e8c?w=900&q=85",
+    href: "/experience/pilgrimage",
+    colClass: "col-span-1 md:col-span-3",
+    sizes: "(max-width: 768px) 50vw, 50vw",
   },
 ];
 
-// ── Arrow button (appears on section hover) ───────────────────────
+// ── Card ─────────────────────────────────────────────────────────
 
-function ArrowBtn({
-  dir,
-  onClick,
-  isDark,
-}: {
-  dir: "left" | "right";
-  onClick: () => void;
-  isDark?: boolean;
-}) {
-  const Icon = dir === "left" ? ChevronLeft : ChevronRight;
+function CategoryCard({ cat }: { cat: Category }) {
   return (
-    <motion.button
-      onClick={onClick}
-      whileHover={{ scale: 1.08 }}
-      whileTap={{ scale: 0.93 }}
-      aria-label={dir === "left" ? "Scroll left" : "Scroll right"}
-      className="flex items-center justify-center cursor-pointer z-10 flex-shrink-0"
+    <motion.a
+      href={cat.href}
+      whileHover={{ y: -6 }}
+      transition={{ type: "spring", stiffness: 360, damping: 26, mass: 0.9 }}
+      className={`group relative overflow-hidden block ${cat.colClass}`}
       style={{
-        width: 38,
-        height: 38,
-        borderRadius: "50%",
-        background: isDark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.07)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-        border: `1px solid ${isDark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.10)"}`,
-        color: isDark ? "rgba(255,255,255,0.75)" : "rgba(0,0,0,0.60)",
-        boxShadow: "0 4px 14px rgba(0,0,0,0.18)",
+        borderRadius: 22,
+        border: "1px solid rgba(255,255,255,0.10)",
+        boxShadow: "0 6px 28px rgba(0,0,0,0.26)",
+        willChange: "transform",
+        cursor: "pointer",
+        textDecoration: "none",
       }}
     >
-      <Icon size={16} strokeWidth={2.2} />
-    </motion.button>
-  );
-}
+      {/* ── Background image — scales on CSS hover (GPU layer) ── */}
+      <div
+        className="absolute inset-0 transition-transform duration-500 ease-out group-hover:scale-[1.07]"
+        style={{ willChange: "transform" }}
+      >
+        <Image
+          src={cat.image}
+          alt={cat.title}
+          fill
+          className="object-cover"
+          sizes={cat.sizes}
+        />
+      </div>
 
-// ── Individual experience card ────────────────────────────────────
-
-function ExperienceCard({ exp }: { exp: Experience }) {
-  return (
-    <a href={exp.href} className="flex-shrink-0 block" style={{ width: "clamp(240px, 70vw, 290px)" }}>
-      <motion.div
-        whileHover={{ y: -7 }}
-        transition={{ type: "spring", stiffness: 380, damping: 26 }}
-        className="relative overflow-hidden"
+      {/* ── Static gradient scrim ── */}
+      <div
+        className="absolute inset-0 pointer-events-none"
         style={{
-          height: "clamp(340px, 55vw, 400px)",
-          borderRadius: 24,
-          border: "1px solid rgba(255,255,255,0.10)",
-          boxShadow: "0 8px 28px rgba(0,0,0,0.28)",
-          willChange: "transform",
+          background:
+            "linear-gradient(to top, rgba(0,0,0,0.90) 0%, rgba(0,0,0,0.28) 52%, rgba(0,0,0,0.04) 100%)",
+          transition: "opacity 0.3s ease",
+        }}
+      />
+
+      {/* ── Hover: additional darkening layer ── */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        style={{ background: "rgba(0,0,0,0.18)" }}
+      />
+
+      {/* ── Glassmorphism footer ── */}
+      <div
+        className="absolute bottom-0 left-0 right-0"
+        style={{
+          padding: "12px 14px 15px",
+          background: "rgba(4,8,22,0.54)",
+          backdropFilter: "blur(18px)",
+          WebkitBackdropFilter: "blur(18px)",
+          borderTop: "1px solid rgba(255,255,255,0.09)",
         }}
       >
-        {/* ── Background image ── */}
-        <div className="absolute inset-0">
-          <Image
-            src={exp.image}
-            alt={exp.title}
-            fill
-            className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-            sizes="(max-width: 640px) 70vw, 290px"
-            style={{ willChange: "transform" }}
+        {/* Orange accent bar + title */}
+        <div className="flex items-start gap-2.5 mb-1.5">
+          <div
+            aria-hidden
+            style={{
+              width: 3,
+              height: 18,
+              borderRadius: 2,
+              flexShrink: 0,
+              marginTop: 2,
+              background: "linear-gradient(to bottom, #fb923c, #f97316)",
+              boxShadow: "0 0 9px rgba(249,115,22,0.65)",
+            }}
           />
+          <p
+            className="font-bold text-white leading-snug"
+            style={{ fontSize: "clamp(0.78rem, 1.6vw, 0.92rem)" }}
+          >
+            {cat.title}
+          </p>
         </div>
 
-        {/* ── Full gradient scrim ── */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.30) 50%, rgba(0,0,0,0.06) 100%)",
-          }}
-        />
-
-        {/* ── Tag pill (top-left) ── */}
-        <div
-          className="absolute top-3.5 left-3.5"
-          style={{
-            background: "rgba(220,20,60,0.80)",
-            backdropFilter: "blur(10px)",
-            WebkitBackdropFilter: "blur(10px)",
-            borderRadius: 9999,
-            padding: "3px 10px",
-            border: "1px solid rgba(255,255,255,0.18)",
-          }}
-        >
-          <span className="text-white font-semibold text-[0.60rem] tracking-widest uppercase">
-            {exp.tag}
+        {/* Description + Explore link */}
+        <div className="flex items-center justify-between" style={{ paddingLeft: 15 }}>
+          <p className="text-white/42 text-[0.64rem] font-medium truncate pr-2 leading-none">
+            {cat.description}
+          </p>
+          <span
+            className="flex items-center gap-1 text-white/65 group-hover:text-white/90 transition-colors duration-200 flex-shrink-0"
+            style={{ fontSize: "0.68rem", fontWeight: 600 }}
+          >
+            Explore
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden>
+              <path
+                d="M1 5h8M6 2l3 3-3 3"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </span>
         </div>
-
-        {/* ── Glassmorphism text panel (bottom) ── */}
-        <div
-          className="absolute bottom-0 left-0 right-0"
-          style={{
-            padding: "14px 16px 18px",
-            background: "rgba(4,8,22,0.52)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
-            borderTop: "1px solid rgba(255,255,255,0.09)",
-          }}
-        >
-          {/* Orange accent bar + title */}
-          <div className="flex items-start gap-2.5 mb-2">
-            <div
-              style={{
-                width: 3,
-                height: 20,
-                borderRadius: 2,
-                flexShrink: 0,
-                marginTop: 2,
-                background: "linear-gradient(to bottom, #fb923c, #f97316)",
-                boxShadow: "0 0 8px rgba(249,115,22,0.60)",
-              }}
-            />
-            <p
-              className="font-bold text-white leading-snug"
-              style={{ fontSize: "clamp(0.85rem, 2vw, 0.95rem)" }}
-            >
-              {exp.title}
-            </p>
-          </div>
-
-          {/* Subtitle + Explore link */}
-          <div className="flex items-center justify-between pl-[19px]">
-            <p className="text-white/45 text-[0.68rem] font-medium truncate pr-2">
-              {exp.subtitle}
-            </p>
-            <span
-              className="flex items-center gap-1 text-white/70 text-[0.70rem] font-semibold flex-shrink-0"
-              style={{ letterSpacing: "0.02em" }}
-            >
-              Explore
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden>
-                <path
-                  d="M1 5h8M6 2l3 3-3 3"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </span>
-          </div>
-        </div>
-      </motion.div>
-    </a>
+      </div>
+    </motion.a>
   );
 }
 
 // ── Section ───────────────────────────────────────────────────────
 
 export default function AdventureSection() {
-  const scrollRef   = useRef<HTMLDivElement>(null);
-  const [hovered, setHovered] = useState(false);
-  // Track whether there is room to scroll in each direction
-  const [canLeft,  setCanLeft]  = useState(false);
-  const [canRight, setCanRight] = useState(true);
-
-  // Read scroll position when this fires after scrollBy
-  const updateArrows = () => {
-    const el = scrollRef.current;
-    if (!el) return;
-    setCanLeft(el.scrollLeft > 4);
-    setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
-  };
-
-  const scroll = (dir: 1 | -1) => {
-    scrollRef.current?.scrollBy({ left: dir * 310, behavior: "smooth" });
-    setTimeout(updateArrows, 380);
-  };
-
   return (
     <section
       style={{
         background: "var(--section-bg)",
         borderTop: "1px solid var(--section-border)",
-        paddingTop: "clamp(1.25rem, 4vw, 2rem)",
-        paddingBottom: "clamp(1.25rem, 4vw, 2rem)",
+        padding: "clamp(1.25rem, 4vw, 2.25rem) max(1rem, 4vw)",
       }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
     >
-      {/* ── Header row ── */}
-      <div
-        className="flex items-center justify-between mb-4"
-        style={{ paddingLeft: "max(1rem, 4vw)", paddingRight: "max(1rem, 4vw)" }}
-      >
+      {/* ── Header ── */}
+      <div className="flex items-end justify-between mb-4">
         <div>
           <p
             style={{
@@ -283,57 +236,23 @@ export default function AdventureSection() {
         </a>
       </div>
 
-      {/* ── Carousel row ── */}
-      <div className="flex items-center gap-3" style={{ paddingLeft: "max(1rem, 4vw)", paddingRight: "max(1rem, 4vw)" }}>
-
-        {/* Left arrow */}
-        <AnimatePresence>
-          {hovered && canLeft && (
-            <motion.div
-              key="arrow-left"
-              initial={{ opacity: 0, scale: 0.85 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.85 }}
-              transition={{ duration: 0.18 }}
-            >
-              <ArrowBtn dir="left" onClick={() => scroll(-1)} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Scroll container */}
-        <div
-          ref={scrollRef}
-          onScroll={updateArrows}
-          className="flex gap-3 overflow-x-auto flex-1"
-          style={{
-            scrollbarWidth: "none",
-            msOverflowStyle: "none",
-            WebkitOverflowScrolling: "touch",
-          }}
-        >
-          {EXPERIENCES.map((exp) => (
-            <ExperienceCard key={exp.title} exp={exp} />
-          ))}
-          {/* Right fade spacer */}
-          <div style={{ width: 8, flexShrink: 0 }} />
-        </div>
-
-        {/* Right arrow */}
-        <AnimatePresence>
-          {hovered && canRight && (
-            <motion.div
-              key="arrow-right"
-              initial={{ opacity: 0, scale: 0.85 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.85 }}
-              transition={{ duration: 0.18 }}
-            >
-              <ArrowBtn dir="right" onClick={() => scroll(1)} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
+      {/* ── Bento grid ── */}
+      {/*
+        Mobile  (default):  2-col, all cards equal (col-span-1)
+        Desktop (md+):      6-col bento —
+          Row 1: Agriculture (2) + Adventure (4)
+          Row 2: Trekking (4) + Heritage (2)
+          Row 3: Nature (3) + Pilgrimage (3)
+      */}
+      <div
+        className="grid grid-cols-2 md:grid-cols-6 gap-3"
+        style={{
+          gridAutoRows: "clamp(185px, 20vw, 248px)",
+        }}
+      >
+        {CATEGORIES.map((cat) => (
+          <CategoryCard key={cat.id} cat={cat} />
+        ))}
       </div>
     </section>
   );
