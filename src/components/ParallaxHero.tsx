@@ -6,8 +6,7 @@ import { Sparkles, Headphones, Star, Play } from "lucide-react";
 
 const BTN_TRANSITION: Transition = { type: "tween", duration: 0.18, ease: "easeInOut" };
 
-const PHOTO =
-  "https://images.unsplash.com/photo-1525784451128-d1488f52f03e?w=3200&q=95";
+const PHOTO = "/images/nepal-landscape.jpg";
 
 // Colored circle avatars — no external avatar service needed
 const AVATAR_SEEDS = [
