@@ -5,6 +5,7 @@ import { motion, useScroll, useTransform } from "motion/react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import AIPlannerTrigger from "./AIPlannerTrigger";
+import JourneyInsights from "./JourneyInsights";
 import { destinations, categoryGroups } from "@/data/destinations";
 import { checkSeasonality } from "@/lib/seasonality";
 import { useTheme } from "@/context/ThemeContext";
@@ -206,7 +207,12 @@ export default function BentoDashboard() {
           </div>
         </BentoCard>
 
-        {/* ── CELL 2: Interactive Map ── */}
+        {/* ── CELL 2: Journey Insights ── */}
+        <BentoCard className="lg:col-span-3 sm:col-span-2 p-6 sm:p-8" hoverShadow={HOVER_SHADOW}>
+          <JourneyInsights isDark={isDark} />
+        </BentoCard>
+
+        {/* ── CELL 3: Interactive Map ── */}
         <BentoCard className="lg:col-span-2 min-h-[420px] flex flex-col" hoverShadow={HOVER_SHADOW}>
           <div className="p-4 pb-2 flex-shrink-0">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400 dark:text-white/40 mb-1">Live</p>
