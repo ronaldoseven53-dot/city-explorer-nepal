@@ -221,11 +221,11 @@ export default function MapSection() {
       {showLegend && (
         <div
           className="absolute bottom-3.5 left-1/2 -translate-x-1/2 z-[500]
-            flex items-center gap-1 flex-wrap justify-center"
+            flex flex-nowrap items-center gap-6 scrollbar-hide overflow-x-auto"
           style={{
             ...GLASS,
             borderRadius: 9999,
-            padding: "6px 10px",
+            padding: "7px 16px",
             maxWidth: "calc(100% - 28px)",
           }}
         >

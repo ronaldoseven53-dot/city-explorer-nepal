@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
 import {
   Mountain, Landmark, Leaf, Star, TrendingUp, Wheat,
   PawPrint, Waves, Bike, Camera, Globe, Heart,
-  ChevronRight,
+  ChevronRight, ChevronLeft,
 } from "lucide-react";
 import { categoryGroups } from "@/data/destinations";
 
@@ -115,8 +115,10 @@ function CategoryChip({
 // ── Main section ───────────────────────────────────────────────────────
 
 export default function CategoriesSection() {
-  const [current, setCurrent] = useState(0);
-  const [dir, setDir]         = useState(1);
+  const [current, setCurrent]   = useState(0);
+  const [dir, setDir]           = useState(1);
+  const [arrowsVisible, setArrowsVisible] = useState(false);
+  const touchStartX             = useRef<number>(0);
 
   // Auto-advance every 5 s
   useEffect(() => {
@@ -132,9 +134,24 @@ export default function CategoriesSection() {
     setCurrent(c => (c + 1) % SLIDES.length);
   };
 
+  const goPrev = () => {
+    setDir(-1);
+    setCurrent(c => (c - 1 + SLIDES.length) % SLIDES.length);
+  };
+
   const goTo = (i: number) => {
     setDir(i > current ? 1 : -1);
     setCurrent(i);
+  };
+
+  // Touch swipe handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    if (dx < -50) goNext();
+    else if (dx > 50) goPrev();
   };
 
   const slide = SLIDES[current];
@@ -167,7 +184,14 @@ export default function CategoriesSection() {
         <div>
           <SectionHeader label="Featured" />
 
-          <div className="relative rounded-[28px] overflow-hidden" style={{ height: 300 }}>
+          <div
+            className="relative rounded-[28px] overflow-hidden"
+            style={{ height: 300 }}
+            onMouseEnter={() => setArrowsVisible(true)}
+            onMouseLeave={() => setArrowsVisible(false)}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
 
             {/* Slides */}
             <AnimatePresence mode="wait" custom={dir}>
@@ -233,39 +257,77 @@ export default function CategoriesSection() {
               </motion.div>
             </AnimatePresence>
 
-            {/* Next arrow */}
-            <button
-              onClick={goNext}
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center cursor-pointer transition-opacity duration-150 hover:opacity-90"
+            {/* Back arrow */}
+            <motion.button
+              onClick={goPrev}
+              animate={{ opacity: arrowsVisible ? 1 : 0 }}
+              transition={{ duration: 0.2 }}
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center cursor-pointer hover:opacity-100 sm:opacity-0"
               style={{
                 width: 40, height: 40, borderRadius: "50%",
-                background: "rgba(255,255,255,0.14)",
+                background: "rgba(10,14,28,0.55)",
                 backdropFilter: "blur(12px)",
                 WebkitBackdropFilter: "blur(12px)",
                 border: "1px solid rgba(255,255,255,0.22)",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.35)",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.40)",
+                // always visible on touch devices (pointer:coarse)
+                opacity: arrowsVisible ? 1 : undefined,
+              }}
+              aria-label="Previous slide"
+            >
+              <ChevronLeft size={18} color="white" strokeWidth={2} />
+            </motion.button>
+
+            {/* Next arrow */}
+            <motion.button
+              onClick={goNext}
+              animate={{ opacity: arrowsVisible ? 1 : 0 }}
+              transition={{ duration: 0.2 }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center cursor-pointer hover:opacity-100 sm:opacity-0"
+              style={{
+                width: 40, height: 40, borderRadius: "50%",
+                background: "rgba(10,14,28,0.55)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                border: "1px solid rgba(255,255,255,0.22)",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.40)",
+                opacity: arrowsVisible ? 1 : undefined,
               }}
               aria-label="Next slide"
             >
               <ChevronRight size={18} color="white" strokeWidth={2} />
-            </button>
+            </motion.button>
 
-            {/* Dot indicators */}
+            {/* Dot indicators — layoutId active pill slides between positions */}
             <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5">
               {SLIDES.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => goTo(i)}
                   aria-label={`Slide ${i + 1}`}
-                  className="cursor-pointer transition-all duration-300"
+                  className="relative cursor-pointer flex-shrink-0"
                   style={{
-                    width:        i === current ? 20 : 6,
-                    height:       6,
-                    borderRadius: 9999,
-                    background:   i === current ? slide.accent : "rgba(255,255,255,0.35)",
-                    boxShadow:    i === current ? `0 0 8px ${slide.accent}80` : "none",
+                    width:  i === current ? 20 : 6,
+                    height: 6,
+                    transition: "width 0.25s ease",
                   }}
-                />
+                >
+                  {/* Track */}
+                  <div className="absolute inset-0 rounded-full"
+                    style={{ background: "rgba(255,255,255,0.28)" }} />
+                  {/* Active indicator */}
+                  {i === current && (
+                    <motion.div
+                      layoutId="carousel-active-dot"
+                      className="absolute inset-0 rounded-full"
+                      style={{
+                        background: slide.accent,
+                        boxShadow: `0 0 10px ${slide.accent}90`,
+                      }}
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                </button>
               ))}
             </div>
 
