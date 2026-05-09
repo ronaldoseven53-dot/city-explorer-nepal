@@ -92,13 +92,13 @@ function StoryViewer({
   // Keyboard nav
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") next();
-      if (e.key === "ArrowLeft")  prev();
+      if (e.key === "ArrowRight") setIdx(i => (i < STORIES.length - 1 ? i + 1 : i));
+      if (e.key === "ArrowLeft")  setIdx(i => (i > 0 ? i - 1 : i));
       if (e.key === "Escape")     onClose();
     };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
-  });
+  }, [onClose]);
 
   const next = () => {
     if (idx < STORIES.length - 1) setIdx(i => i + 1);
@@ -153,16 +153,16 @@ function StoryViewer({
         ))}
       </div>
 
-      {/* Close */}
-      <button onClick={onClose}
-        className="absolute top-12 right-4 z-10 w-9 h-9 flex items-center justify-center rounded-full cursor-pointer"
-        style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)" }}>
-        <X size={18} color="white" />
-      </button>
-
       {/* Tap zones */}
       <div className="absolute inset-y-0 left-0 w-1/3 z-10" onClick={prev} />
       <div className="absolute inset-y-0 right-0 w-2/3 z-10" onClick={next} />
+
+      {/* Close — z-20 sits above tap zones */}
+      <button onClick={onClose}
+        className="absolute top-12 right-4 z-20 w-9 h-9 flex items-center justify-center rounded-full cursor-pointer"
+        style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.18)" }}>
+        <X size={18} color="white" />
+      </button>
 
       {/* Chevron hints */}
       {idx > 0 && (
@@ -211,10 +211,11 @@ export default function StoriesSection() {
         <div className="flex items-center justify-between mb-5">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.22em] mb-0.5"
-              style={{ color: "rgba(255,255,255,0.38)" }}>
+              style={{ color: "var(--text-tertiary)" }}>
               Nepal Through the Lens
             </p>
-            <h2 className="text-[18px] font-extrabold text-white tracking-tight">
+            <h2 className="text-[18px] font-extrabold tracking-tight"
+              style={{ color: "var(--text-primary)" }}>
               Destination Stories
             </h2>
           </div>

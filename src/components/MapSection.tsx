@@ -142,6 +142,17 @@ export default function MapSection() {
 
   useEffect(() => { ensurePingStyles(); }, []);
 
+  // Listen for programmatic filter trigger (from Explore button in carousel)
+  useEffect(() => {
+    const h = (e: Event) => {
+      const { key } = (e as CustomEvent<{ key: string }>).detail;
+      setActive(key);
+      setShowLegend(true);
+    };
+    document.addEventListener("map-filter", h);
+    return () => document.removeEventListener("map-filter", h);
+  }, []);
+
   const toggle = (key: string) => setActive((p) => (p === key ? null : key));
 
   return (

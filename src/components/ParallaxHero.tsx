@@ -2,17 +2,11 @@
 
 import { useRef } from "react";
 import { motion, useScroll, useTransform, type Transition } from "motion/react";
-import { Sparkles, Headphones, Star, Play } from "lucide-react";
+import { Sparkles, Headphones, Play } from "lucide-react";
 
 const BTN_TRANSITION: Transition = { type: "tween", duration: 0.18, ease: "easeInOut" };
 
 const PHOTO = "/images/nepal-landscape.jpg";
-
-const AVATAR_SEEDS = [
-  { bg: "#8B6F5E", initials: "R" },
-  { bg: "#5E7B8B", initials: "M" },
-  { bg: "#6B8B5E", initials: "S" },
-];
 
 // ─── Title font-size shared between the z=5 NEPAL layer and the z=30 spacer ─
 // 30–40 % of viewport width. At 1280 px: 10 vw = 128 px ≈ 8 rem.
@@ -319,54 +313,6 @@ export default function ParallaxHero() {
           </div>
         </div>
       </motion.div>
-
-      {/* ════════════════════════════════════════════════════════════════════ */}
-      {/* ══ Trust bar — bottom-left  z=35 ══════════════════════════════════ */}
-      {/* ════════════════════════════════════════════════════════════════════ */}
-      <motion.div
-        style={{
-          position: "absolute", bottom: "6.5rem", left: "max(1.5rem, 5vw)",
-          zIndex: 35, pointerEvents: "none", userSelect: "none",
-        }}
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5, duration: 0.45 }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
-          {/* Avatars */}
-          <div style={{ display: "flex" }}>
-            {AVATAR_SEEDS.map((a, i) => (
-              <div
-                key={i}
-                style={{
-                  width: 28, height: 28, borderRadius: "50%",
-                  background: a.bg, border: "2px solid rgba(255,255,255,0.32)",
-                  marginLeft: i > 0 ? -7 : 0,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: "0.58rem", fontWeight: 700, color: "#fff",
-                }}
-              >
-                {a.initials}
-              </div>
-            ))}
-          </div>
-          <div>
-            <div style={{ display: "flex", gap: "2px", marginBottom: "2px" }}>
-              {[1, 2, 3, 4, 5].map((s) => (
-                <Star key={s} size={9} fill="#FBBF24" stroke="none" />
-              ))}
-            </div>
-            <p style={{ fontSize: "0.67rem", color: "rgba(255,255,255,0.52)", fontWeight: 500, lineHeight: 1 }}>
-              4.9 · 5K reviews
-            </p>
-          </div>
-          <span style={{ width: 3, height: 3, borderRadius: "50%", background: "rgba(255,255,255,0.20)", flexShrink: 0 }} />
-          <p style={{ fontSize: "0.56rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.36)", fontWeight: 700 }}>
-            Trusted by Travelers
-          </p>
-        </div>
-      </motion.div>
-
 
       {/* ════════════════════════════════════════════════════════════════════ */}
       {/* ══ Watch Nepal — bottom-right  z=40 ═══════════════════════════════ */}

@@ -6,6 +6,16 @@ import Image from "next/image";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { categoryGroups } from "@/data/destinations";
 
+// Maps category group IDs → MapSection filter keys
+const SLIDE_TO_MAP_KEY: Record<string, string> = {
+  trekking:    "mountain",
+  adventure:   "mountain",
+  heritage:    "heritage",
+  nature:      "nature",
+  pilgrimage:  "pilgrimage",
+  agriculture: "agriculture",
+};
+
 // ── Carousel slides from real category groups ──────────────────────────
 
 const ACCENT: Record<string, string> = {
@@ -45,6 +55,7 @@ export default function CategoriesSection() {
   const [current, setCurrent]           = useState(0);
   const [dir, setDir]                   = useState(1);
   const [arrowsVisible, setArrowsVisible] = useState(false);
+  const [rippleKey, setRippleKey]       = useState(0);
   const touchStartX                     = useRef<number>(0);
 
   // Auto-advance every 5 s
@@ -68,6 +79,17 @@ export default function CategoriesSection() {
   };
 
   const slide = SLIDES[current];
+
+  const handleExplore = () => {
+    const mapKey = SLIDE_TO_MAP_KEY[slide.id];
+    setRippleKey(k => k + 1);
+    if (mapKey) {
+      document.dispatchEvent(new CustomEvent("map-filter", { detail: { key: mapKey } }));
+    }
+    setTimeout(() => {
+      document.getElementById("discover")?.scrollIntoView({ behavior: "smooth" });
+    }, 220);
+  };
 
   return (
     <section className="relative w-full py-10 sm:py-14">
@@ -146,11 +168,27 @@ export default function CategoriesSection() {
                     {slide.description}
                   </p>
                   <motion.button
+                    onClick={handleExplore}
                     whileHover={{ x: 4 }}
+                    whileTap={{ scale: 0.92 }}
                     transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                    className="flex items-center gap-1.5 text-[13px] font-bold cursor-pointer"
+                    className="relative flex items-center gap-1.5 text-[13px] font-bold cursor-pointer overflow-hidden rounded-sm"
                     style={{ color: slide.accent }}
                   >
+                    {/* Click ripple */}
+                    <AnimatePresence>
+                      {rippleKey > 0 && (
+                        <motion.span
+                          key={rippleKey}
+                          className="absolute inset-0 rounded-sm pointer-events-none"
+                          initial={{ opacity: 0.5, scale: 0.4 }}
+                          animate={{ opacity: 0, scale: 3 }}
+                          exit={{}}
+                          transition={{ duration: 0.45, ease: "easeOut" }}
+                          style={{ background: slide.accent, transformOrigin: "center" }}
+                        />
+                      )}
+                    </AnimatePresence>
                     Explore
                     <ChevronRight size={14} strokeWidth={2.5} />
                   </motion.button>

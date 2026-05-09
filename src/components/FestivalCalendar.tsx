@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
 
 // ── Festival data ──────────────────────────────────────────────────────
 
@@ -170,6 +171,9 @@ function FestivalCard({ fest, isFocus }: { fest: typeof FESTIVALS[0]; isFocus: b
 // ── Main section ───────────────────────────────────────────────────────
 
 export default function FestivalCalendar() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
   const [current, setCurrent] = useState(0);
   const [cardW, setCardW]     = useState(260);
   const trackRef              = useRef<HTMLDivElement>(null);
@@ -212,11 +216,12 @@ export default function FestivalCalendar() {
           <div>
             <p
               className="text-[10px] font-bold uppercase tracking-[0.22em] mb-0.5"
-              style={{ color: "rgba(255,255,255,0.38)" }}
+              style={{ color: "var(--text-tertiary)" }}
             >
               Plan Around Culture
             </p>
-            <h2 className="text-[18px] font-extrabold text-white tracking-tight">
+            <h2 className="text-[18px] font-extrabold tracking-tight"
+              style={{ color: "var(--text-primary)" }}>
               Festival Calendar
             </h2>
           </div>
@@ -229,13 +234,13 @@ export default function FestivalCalendar() {
               className="flex items-center justify-center cursor-pointer transition-all duration-150"
               style={{
                 width: 34, height: 34, borderRadius: "50%",
-                background: "rgba(255,255,255,0.07)",
-                border: "1px solid rgba(255,255,255,0.12)",
+                background: "var(--glass-bg)",
+                border: "1px solid var(--glass-border)",
                 opacity: current === 0 ? 0.3 : 1,
               }}
               aria-label="Previous festival"
             >
-              <ChevronLeft size={16} color="white" strokeWidth={2} />
+              <ChevronLeft size={16} color={isDark ? "white" : "#1A1A1A"} strokeWidth={2} />
             </motion.button>
             <motion.button
               onClick={next}
@@ -244,13 +249,13 @@ export default function FestivalCalendar() {
               className="flex items-center justify-center cursor-pointer transition-all duration-150"
               style={{
                 width: 34, height: 34, borderRadius: "50%",
-                background: "rgba(255,255,255,0.07)",
-                border: "1px solid rgba(255,255,255,0.12)",
+                background: "var(--glass-bg)",
+                border: "1px solid var(--glass-border)",
                 opacity: current === FESTIVALS.length - 1 ? 0.3 : 1,
               }}
               aria-label="Next festival"
             >
-              <ChevronRight size={16} color="white" strokeWidth={2} />
+              <ChevronRight size={16} color={isDark ? "white" : "#1A1A1A"} strokeWidth={2} />
             </motion.button>
           </div>
         </div>
@@ -296,7 +301,7 @@ export default function FestivalCalendar() {
               }}
             >
               <div className="absolute inset-0 rounded-full"
-                style={{ background: "rgba(255,255,255,0.18)" }} />
+                style={{ background: isDark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.18)" }} />
               {i === current && (
                 <motion.div
                   layoutId="festival-active-dot"
