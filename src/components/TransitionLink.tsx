@@ -1,16 +1,17 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { startTransition, type MouseEvent, type ReactNode } from "react";
+import { startTransition, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 
 interface Props {
   href: string;
   children: ReactNode;
   className?: string;
   title?: string;
+  style?: CSSProperties;
 }
 
-export default function TransitionLink({ href, children, className, title }: Props) {
+export default function TransitionLink({ href, children, className, title, style }: Props) {
   const router = useRouter();
 
   const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
@@ -34,7 +35,7 @@ export default function TransitionLink({ href, children, className, title }: Pro
   };
 
   return (
-    <a href={href} onClick={handleClick} className={className} title={title}>
+    <a href={href} onClick={handleClick} className={className} title={title} style={style}>
       {children}
     </a>
   );

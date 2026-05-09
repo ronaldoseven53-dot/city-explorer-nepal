@@ -1,20 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { categoryGroups } from "@/data/destinations";
-
-// Maps category group IDs → MapSection filter keys
-const SLIDE_TO_MAP_KEY: Record<string, string> = {
-  trekking:    "mountain",
-  adventure:   "mountain",
-  heritage:    "heritage",
-  nature:      "nature",
-  pilgrimage:  "pilgrimage",
-  agriculture: "agriculture",
-};
 
 // ── Carousel slides from real category groups ──────────────────────────
 
@@ -52,6 +43,7 @@ const slideVariants = {
 // ── Main section ───────────────────────────────────────────────────────
 
 export default function CategoriesSection() {
+  const router                          = useRouter();
   const [current, setCurrent]           = useState(0);
   const [dir, setDir]                   = useState(1);
   const [arrowsVisible, setArrowsVisible] = useState(false);
@@ -81,14 +73,8 @@ export default function CategoriesSection() {
   const slide = SLIDES[current];
 
   const handleExplore = () => {
-    const mapKey = SLIDE_TO_MAP_KEY[slide.id];
     setRippleKey(k => k + 1);
-    if (mapKey) {
-      document.dispatchEvent(new CustomEvent("map-filter", { detail: { key: mapKey } }));
-    }
-    setTimeout(() => {
-      document.getElementById("discover")?.scrollIntoView({ behavior: "smooth" });
-    }, 220);
+    setTimeout(() => router.push(`/explore/${slide.id}`), 220);
   };
 
   return (
@@ -99,10 +85,11 @@ export default function CategoriesSection() {
         <div className="flex items-center justify-between mb-5">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.22em] mb-0.5"
-              style={{ color: "rgba(255,255,255,0.38)" }}>
+              style={{ color: "var(--text-tertiary)" }}>
               Explore by Theme
             </p>
-            <h2 className="text-[18px] font-extrabold text-white tracking-tight">
+            <h2 className="text-[18px] font-extrabold tracking-tight"
+              style={{ color: "var(--text-primary)" }}>
               Featured Destinations
             </h2>
           </div>
