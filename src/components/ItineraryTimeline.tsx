@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
-import { Plane, Bus, Car, X, Plus } from "lucide-react";
+import { Plane, Bus, Car, X, Plus, Route } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 
 // ── Destination palette ────────────────────────────────────────────────
@@ -22,6 +22,45 @@ const PALETTE = [
 ] as const;
 
 type DestId = typeof PALETTE[number]["id"];
+
+// ── Geographic coordinates (lat, lng) for nearest-neighbor sort ────────
+// Approximate centroids for each hub
+
+const COORDS: Record<DestId, [number, number]> = {
+  ktm: [27.7172, 85.3240],   // Kathmandu
+  pok: [28.2096, 83.9856],   // Pokhara
+  chi: [27.5291, 84.3542],   // Chitwan
+  lum: [27.4833, 83.2833],   // Lumbini
+  bha: [27.6722, 85.4278],   // Bhaktapur
+  ana: [28.5167, 83.8667],   // Annapurna / Jomsom
+  mus: [28.9958, 83.8506],   // Mustang (Lo Manthang)
+  rar: [29.5167, 82.0833],   // Rara Lake
+};
+
+function geoDistSq(a: DestId, b: DestId): number {
+  const [la, lo] = COORDS[a];
+  const [lb, ob] = COORDS[b];
+  return (la - lb) ** 2 + (lo - ob) ** 2;
+}
+
+// Greedy nearest-neighbour starting from ids[0] (first chosen city stays fixed)
+function nearestNeighborSort(ids: DestId[]): DestId[] {
+  if (ids.length <= 2) return ids;
+  const remaining = new Set(ids.slice(1));
+  const path: DestId[] = [ids[0]];
+  while (remaining.size > 0) {
+    const cur = path[path.length - 1];
+    let best: DestId = remaining.values().next().value as DestId;
+    let bestDist = geoDistSq(cur, best);
+    remaining.forEach((id) => {
+      const d = geoDistSq(cur, id);
+      if (d < bestDist) { bestDist = d; best = id; }
+    });
+    path.push(best);
+    remaining.delete(best);
+  }
+  return path;
+}
 
 // ── Route lookup ───────────────────────────────────────────────────────
 
@@ -48,40 +87,35 @@ const ROUTE_ICONS: Record<RouteMode, React.ElementType> = {
   drive:  Car,
 };
 
-function getRoute(a: string, b: string) {
+function getRoute(a: DestId, b: DestId) {
   return ROUTES[`${a}-${b}`] ?? ROUTES[`${b}-${a}`] ?? { mode: "bus" as RouteMode, time: "varies" };
 }
 
-const MAX_STOPS = 5;
+const MAX_STOPS        = 5;
 const COST_MIN_PER_DAY = 50;
 const COST_MAX_PER_DAY = 80;
 
-// ── Route connector between two stops ─────────────────────────────────
+// ── Route connector ────────────────────────────────────────────────────
 
 function RouteConnector({ from, to }: { from: DestId; to: DestId }) {
-  const route  = getRoute(from, to);
-  const Icon   = ROUTE_ICONS[route.mode];
+  const route = getRoute(from, to);
+  const Icon  = ROUTE_ICONS[route.mode];
   const colors: Record<RouteMode, string> = {
-    flight: "#0EA5E9",
-    bus:    "#F97316",
-    drive:  "#84CC16",
+    flight: "#0EA5E9", bus: "#F97316", drive: "#84CC16",
   };
   const col = colors[route.mode];
 
   return (
-    <div className="flex flex-col items-center justify-center flex-shrink-0" style={{ width: 64, marginTop: -4 }}>
-      {/* Dashed line */}
+    <div className="flex flex-col items-center justify-center flex-shrink-0"
+      style={{ width: 64, marginTop: -4 }}>
       <div className="w-full flex items-center gap-0.5">
         {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="flex-1 h-[1.5px] rounded-full"
             style={{ background: `${col}55` }} />
         ))}
       </div>
-      {/* Mode badge */}
-      <div
-        className="flex items-center gap-1 rounded-full px-2 py-0.5 mt-1"
-        style={{ background: `${col}18`, border: `1px solid ${col}40` }}
-      >
+      <div className="flex items-center gap-1 rounded-full px-2 py-0.5 mt-1"
+        style={{ background: `${col}18`, border: `1px solid ${col}40` }}>
         <Icon size={9} color={col} strokeWidth={2} />
         <span style={{ fontSize: 8, fontWeight: 700, color: col, lineHeight: 1 }}>{route.time}</span>
       </div>
@@ -92,13 +126,9 @@ function RouteConnector({ from, to }: { from: DestId; to: DestId }) {
 // ── Stop node ──────────────────────────────────────────────────────────
 
 function StopNode({
-  dest,
-  dayStart,
-  onRemove,
+  dest, dayStart, onRemove,
 }: {
-  dest: typeof PALETTE[number];
-  dayStart: number;
-  onRemove: () => void;
+  dest: typeof PALETTE[number]; dayStart: number; onRemove: () => void;
 }) {
   const [hovered, setHovered] = useState(false);
 
@@ -114,38 +144,30 @@ function StopNode({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Circle + remove overlay */}
       <div className="relative">
         {/* Glow ring */}
-        <div
-          className="absolute rounded-full"
+        <div className="absolute rounded-full"
           style={{
             inset: -2,
             background: `conic-gradient(${dest.color}cc, ${dest.color}22, ${dest.color}cc)`,
             filter: "blur(1.5px)",
           }}
         />
-        <div
-          className="relative rounded-full p-[2px]"
-          style={{ background: "#080c1a", width: 60, height: 60, zIndex: 1 }}
-        >
+        <div className="relative rounded-full p-[2px]"
+          style={{ background: "#080c1a", width: 60, height: 60, zIndex: 1 }}>
           <div className="w-full h-full rounded-full overflow-hidden relative">
             <Image src={dest.img} alt={dest.name} fill className="object-cover" sizes="60px" />
           </div>
         </div>
-
         {/* Day badge */}
-        <div
-          className="absolute -top-1 -right-1 z-10 rounded-full flex items-center justify-center"
+        <div className="absolute -top-1 -right-1 z-10 rounded-full flex items-center justify-center"
           style={{
             width: 18, height: 18, background: dest.color,
             boxShadow: `0 0 8px ${dest.color}99`,
             fontSize: 8, fontWeight: 800, color: "#fff",
-          }}
-        >
+          }}>
           {dest.days}d
         </div>
-
         {/* Hover remove */}
         <AnimatePresence>
           {hovered && (
@@ -163,13 +185,13 @@ function StopNode({
           )}
         </AnimatePresence>
       </div>
-
-      {/* Labels */}
       <div className="flex flex-col items-center gap-0.5">
-        <span className="text-[10px] font-bold text-center leading-tight" style={{ color: "var(--text-primary)" }}>
+        <span className="text-[10px] font-bold text-center leading-tight"
+          style={{ color: "var(--text-primary)" }}>
           {dest.name}
         </span>
-        <span className="text-[9px] font-medium text-center" style={{ color: "var(--text-tertiary)" }}>
+        <span className="text-[9px] font-medium text-center"
+          style={{ color: "var(--text-tertiary)" }}>
           Day {dayStart}–{dayStart + dest.days - 1}
         </span>
       </div>
@@ -183,14 +205,29 @@ export default function ItineraryTimeline() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  const [selected, setSelected] = useState<DestId[]>([]);
+  const [selected, setSelected]       = useState<DestId[]>([]);
+  const [reorderCount, setReorderCount] = useState(0);
+
+  // Auto-dismiss "Route Optimized" badge after 2.5 s
+  useEffect(() => {
+    if (reorderCount === 0) return;
+    const t = setTimeout(() => setReorderCount(0), 2500);
+    return () => clearTimeout(t);
+  }, [reorderCount]);
 
   const toggle = (id: DestId) => {
-    setSelected(prev => {
-      if (prev.includes(id)) return prev.filter(x => x !== id);
-      if (prev.length >= MAX_STOPS) return prev;
-      return [...prev, id];
-    });
+    if (selected.includes(id)) {
+      setSelected(prev => prev.filter(x => x !== id));
+      return;
+    }
+    if (selected.length >= MAX_STOPS) return;
+
+    const naive  = [...selected, id];
+    const sorted = naive.length >= 2 ? nearestNeighborSort(naive) : naive;
+    const didReorder = sorted.some((s, i) => s !== naive[i]);
+
+    setSelected(sorted);
+    if (didReorder) setReorderCount(c => c + 1);
   };
 
   const remove = (id: DestId) => setSelected(prev => prev.filter(x => x !== id));
@@ -201,8 +238,19 @@ export default function ItineraryTimeline() {
   const budgetMax     = totalDays * COST_MAX_PER_DAY;
 
   return (
-    <section className="relative w-full py-8 sm:py-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="relative w-full py-8 sm:py-10 overflow-hidden">
+
+      {/* Bottom scrim — transparent → rgba(0,0,0,0.4) */}
+      <div
+        aria-hidden
+        className="absolute inset-x-0 bottom-0 pointer-events-none"
+        style={{
+          height: "45%",
+          background: "linear-gradient(to bottom, transparent, rgba(0,0,0,0.40))",
+        }}
+      />
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ zIndex: 1 }}>
 
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
@@ -217,22 +265,47 @@ export default function ItineraryTimeline() {
             </h2>
           </div>
 
-          {/* Duration badge */}
-          {totalDays > 0 && (
-            <motion.div
-              layout
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="rounded-full px-3 py-1.5 text-[11px] font-bold"
-              style={{
-                background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
-                color: "var(--text-primary)",
-                border: "1px solid var(--glass-border)",
-              }}
-            >
-              {selected.length} stop{selected.length !== 1 ? "s" : ""} · {totalDays} day{totalDays !== 1 ? "s" : ""}
-            </motion.div>
-          )}
+          <div className="flex items-center gap-2">
+            {/* Route Optimized badge */}
+            <AnimatePresence>
+              {reorderCount > 0 && (
+                <motion.div
+                  key={reorderCount}
+                  initial={{ opacity: 0, scale: 0.75, x: 8 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.85, x: 4 }}
+                  transition={{ type: "spring", stiffness: 420, damping: 24 }}
+                  className="flex items-center gap-1.5 rounded-full px-3 py-1.5"
+                  style={{
+                    background: "rgba(34,197,94,0.15)",
+                    border: "1px solid rgba(34,197,94,0.40)",
+                  }}
+                >
+                  <Route size={10} color="#22C55E" strokeWidth={2.5} />
+                  <span style={{ fontSize: 10, fontWeight: 700, color: "#22C55E" }}>
+                    Route Optimized
+                  </span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Duration badge */}
+            {totalDays > 0 && (
+              <motion.div
+                layout
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="rounded-full px-3 py-1.5 text-[11px] font-bold"
+                style={{
+                  background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
+                  color: "var(--text-primary)",
+                  border: "1px solid var(--glass-border)",
+                }}
+              >
+                {selected.length} stop{selected.length !== 1 ? "s" : ""} · {totalDays} day{totalDays !== 1 ? "s" : ""}
+              </motion.div>
+            )}
+          </div>
         </div>
 
         {/* Destination picker */}
@@ -246,7 +319,7 @@ export default function ItineraryTimeline() {
                 onClick={() => !isDisabled && toggle(dest.id)}
                 whileTap={!isDisabled ? { scale: 0.93 } : {}}
                 transition={{ type: "spring", stiffness: 420, damping: 22 }}
-                className="flex items-center gap-2 rounded-full px-3 py-1.5 cursor-pointer transition-all duration-150"
+                className="flex items-center gap-2 rounded-full px-3 py-1.5"
                 style={{
                   background: isSelected
                     ? `${dest.color}20`
@@ -258,12 +331,12 @@ export default function ItineraryTimeline() {
                   cursor: isDisabled ? "not-allowed" : "pointer",
                 }}
               >
-                {/* Mini image */}
                 <div className="relative rounded-full overflow-hidden flex-shrink-0"
                   style={{ width: 20, height: 20 }}>
                   <Image src={dest.img} alt={dest.name} fill className="object-cover" sizes="20px" />
                 </div>
-                <span className="text-[11px] font-semibold" style={{ color: isSelected ? dest.color : "var(--text-secondary)" }}>
+                <span className="text-[11px] font-semibold"
+                  style={{ color: isSelected ? dest.color : "var(--text-secondary)" }}>
                   {dest.name}
                 </span>
                 {isSelected
@@ -274,13 +347,14 @@ export default function ItineraryTimeline() {
             );
           })}
           {selected.length >= MAX_STOPS && (
-            <span className="text-[10px] font-semibold self-center" style={{ color: "var(--text-tertiary)" }}>
+            <span className="text-[10px] font-semibold self-center"
+              style={{ color: "var(--text-tertiary)" }}>
               Max {MAX_STOPS} stops
             </span>
           )}
         </div>
 
-        {/* Timeline */}
+        {/* Timeline card */}
         <div
           className="rounded-[22px] overflow-hidden"
           style={{
@@ -290,7 +364,6 @@ export default function ItineraryTimeline() {
           }}
         >
           {selected.length === 0 ? (
-            /* Empty state */
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -302,15 +375,15 @@ export default function ItineraryTimeline() {
               >
                 <Plus size={18} color="var(--text-tertiary)" strokeWidth={2} />
               </div>
-              <p className="text-[13px] font-semibold" style={{ color: "var(--text-secondary)" }}>
+              <p className="text-[13px] font-semibold"
+                style={{ color: "var(--text-secondary)" }}>
                 Select destinations above to build your route
               </p>
               <p className="text-[11px]" style={{ color: "var(--text-tertiary)" }}>
-                Up to {MAX_STOPS} stops · travel times calculated automatically
+                Up to {MAX_STOPS} stops · shortest path auto-calculated
               </p>
             </motion.div>
           ) : (
-            /* Timeline row */
             <div className="overflow-x-auto scrollbar-hide px-5 py-5">
               <div className="flex items-center" style={{ minWidth: "max-content", gap: 0 }}>
                 <AnimatePresence mode="popLayout">
@@ -318,7 +391,11 @@ export default function ItineraryTimeline() {
                     const dayStart = selectedDests.slice(0, i).reduce((s, d) => s + d.days, 1);
                     return (
                       <div key={dest.id} className="flex items-center">
-                        <StopNode dest={dest} dayStart={dayStart} onRemove={() => remove(dest.id)} />
+                        <StopNode
+                          dest={dest}
+                          dayStart={dayStart}
+                          onRemove={() => remove(dest.id)}
+                        />
                         {i < selectedDests.length - 1 && (
                           <RouteConnector from={dest.id} to={selectedDests[i + 1].id} />
                         )}
@@ -348,7 +425,8 @@ export default function ItineraryTimeline() {
               }}
             >
               <div>
-                <p className="font-bold text-[13px] leading-tight" style={{ color: "var(--text-primary)" }}>
+                <p className="font-bold text-[13px] leading-tight"
+                  style={{ color: "var(--text-primary)" }}>
                   Est. ${budgetMin}–${budgetMax} total
                 </p>
                 <p className="text-[11px] mt-0.5" style={{ color: "var(--text-secondary)" }}>

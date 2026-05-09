@@ -204,8 +204,17 @@ export default function StoriesSection() {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
-    <section className="relative w-full py-8 sm:py-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="relative w-full py-8 sm:py-10 overflow-hidden">
+      {/* Bottom scrim — ensures white circle labels stay readable in any theme */}
+      <div
+        aria-hidden
+        className="absolute inset-x-0 bottom-0 pointer-events-none"
+        style={{
+          height: "55%",
+          background: "linear-gradient(to bottom, transparent, rgba(0,0,0,0.40))",
+        }}
+      />
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ zIndex: 1 }}>
 
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
@@ -235,7 +244,7 @@ export default function StoriesSection() {
             <StoryCircle key={s.id} story={s} index={i} onClick={() => setOpen(i)} />
           ))}
         </div>
-      </div>
+      </div> {/* /relative content wrapper */}
 
       {/* Cinematic viewer */}
       <AnimatePresence>

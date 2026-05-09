@@ -208,8 +208,17 @@ export default function FestivalCalendar() {
   };
 
   return (
-    <section className="relative w-full py-8 sm:py-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="relative w-full py-8 sm:py-10 overflow-hidden">
+      {/* Bottom scrim — transparent → rgba(0,0,0,0.4) */}
+      <div
+        aria-hidden
+        className="absolute inset-x-0 bottom-0 pointer-events-none"
+        style={{
+          height: "45%",
+          background: "linear-gradient(to bottom, transparent, rgba(0,0,0,0.40))",
+        }}
+      />
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ zIndex: 1 }}>
 
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
