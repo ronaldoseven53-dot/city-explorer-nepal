@@ -1,13 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
-import Image from "next/image";
 import dynamic from "next/dynamic";
 import AIPlannerTrigger from "./AIPlannerTrigger";
 import LiveInsights from "./LiveInsights";
-import { destinations, categoryGroups } from "@/data/destinations";
-import { checkSeasonality } from "@/lib/seasonality";
 import { useTheme } from "@/context/ThemeContext";
 
 const MapLoader = dynamic(() => import("./MapLoader"), { ssr: false });
@@ -79,11 +76,6 @@ export default function BentoDashboard() {
     ? "inset 0 1px 0 rgba(255,255,255,0.10), 0 0 0 1px rgba(255,255,255,0.12), 0 20px 50px rgba(0,0,0,0.50), 0 0 40px rgba(220,38,38,0.10)"
     : "inset 1px 1px 0 rgba(255,255,255,1), 0 0 0 1px rgba(0,0,0,0.10), 0 20px 50px rgba(0,0,0,0.13)";
 
-  const inSeasonCount = useMemo(() => {
-    const m = new Date().getMonth();
-    return checkSeasonality(destinations, m).length;
-  }, []);
-
   const [heroImage, setHeroImage] = useState(HERO_IMAGE);
 
   useEffect(() => {
@@ -101,13 +93,6 @@ export default function BentoDashboard() {
       if (resetTimer !== null) window.clearTimeout(resetTimer);
     };
   }, []);
-
-  const stats = [
-    { value: String(destinations.length), label: "Destinations" },
-    { value: String(categoryGroups.length), label: "Categories" },
-    { value: "8,848 m", label: "Highest Peak" },
-    { value: `${inSeasonCount}`, label: "In Season" },
-  ];
 
   const { scrollY, scrollYProgress } = useScroll();
   const himalayanOpacity = useTransform(scrollYProgress, [0, 0.25, 0.55], [1, 1, 0]);
@@ -177,35 +162,7 @@ export default function BentoDashboard() {
         animate="visible"
       >
 
-        {/* ── CELL 1: Hero ── */}
-        <BentoCard className="lg:col-span-3 sm:col-span-2 min-h-[320px]" hoverShadow={HOVER_SHADOW}>
-          <div className="absolute inset-0">
-            <Image src={heroImage} alt="Himalayan peaks" fill className="object-cover object-center" priority />
-            <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-white/15 to-transparent" />
-          </div>
-          <div className="relative z-10 p-8 sm:p-10 flex flex-col sm:flex-row sm:items-end justify-between gap-8 h-full">
-            <div>
-              <p className="text-red-600 dark:text-red-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">
-                🇳🇵 Himalayan Kingdom
-              </p>
-              <p className="text-zinc-600 dark:text-white/60 text-sm sm:text-base max-w-md leading-relaxed">
-                Discover Nepal&apos;s most breathtaking destinations — from sacred pilgrimage sites to remote Himalayan trails.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3 flex-shrink-0">
-              {stats.map((s) => (
-                <div
-                  key={s.label}
-                  style={{ ...GLASS_STYLE }}
-                  className="rounded-2xl px-4 py-3 text-center min-w-[80px]"
-                >
-                  <p className="text-2xl font-extrabold text-zinc-900 dark:text-white tracking-tight">{s.value}</p>
-                  <p className="text-zinc-500 dark:text-white/45 text-[11px] font-medium mt-0.5 uppercase tracking-wide">{s.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </BentoCard>
+
 
         {/* ── CELL 2: Interactive Map ── */}
         <BentoCard className="lg:col-span-2 h-[460px] p-0 overflow-hidden" hoverShadow={HOVER_SHADOW}>
