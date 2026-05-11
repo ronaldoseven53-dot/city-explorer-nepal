@@ -10,29 +10,25 @@ import { destinations } from "@/data/destinations";
 import { useUserPassport } from "@/context/UserPassportContext";
 import { Wifi, X, ChevronDown, RotateCcw } from "lucide-react";
 
-// ── Chat persistence (localStorage, 3-min TTL) ─────────────────────
+// ── Chat persistence (sessionStorage — auto-wipes on tab close) ────
 
 const CHAT_KEY = "himalaya_chat_v1";
-const CHAT_TTL = 3 * 60 * 1000; // 3 minutes
 
 function loadStoredChat(): UIMessage[] {
   try {
-    const raw = localStorage.getItem(CHAT_KEY);
-    if (!raw) return [];
-    const { messages: msgs, ts } = JSON.parse(raw) as { messages: UIMessage[]; ts: number };
-    if (Date.now() - ts > CHAT_TTL) { localStorage.removeItem(CHAT_KEY); return []; }
-    return msgs;
+    const raw = sessionStorage.getItem(CHAT_KEY);
+    return raw ? (JSON.parse(raw) as UIMessage[]) : [];
   } catch { return []; }
 }
 
 function saveChat(msgs: UIMessage[]) {
   try {
-    // Strip tool-call parts — only text survives to the next session
+    // Strip tool-call parts to keep storage lean
     const textOnly = msgs
       .map(m => ({ ...m, parts: m.parts.filter((p: { type: string }) => p.type === "text") }))
       .filter(m => m.parts.length > 0);
-    if (textOnly.length === 0) { localStorage.removeItem(CHAT_KEY); return; }
-    localStorage.setItem(CHAT_KEY, JSON.stringify({ messages: textOnly, ts: Date.now() }));
+    if (textOnly.length === 0) { sessionStorage.removeItem(CHAT_KEY); return; }
+    sessionStorage.setItem(CHAT_KEY, JSON.stringify(textOnly));
   } catch {}
 }
 
@@ -202,18 +198,19 @@ export default function AIAssistant() {
   );
 
   const { visitedIds } = useUserPassport();
-  const { messages, sendMessage, status, error, setMessages } = useChat({
+  const { messages, sendMessage, status, error, setMessages, clearError } = useChat({
     transport,
     messages: chatInitialMessages,
   });
 
-  // Persist messages to localStorage whenever they change
+  // Persist messages to sessionStorage whenever they change
   useEffect(() => { saveChat(messages); }, [messages]);
 
   const clearChat = useCallback(() => {
     setMessages([]);
-    localStorage.removeItem(CHAT_KEY);
-  }, [setMessages]);
+    clearError();
+    sessionStorage.removeItem(CHAT_KEY);
+  }, [setMessages, clearError]);
   const isThinking = status === "streaming" || status === "submitted";
 
   const appendMockResponse = useCallback(() => {
@@ -251,12 +248,16 @@ export default function AIAssistant() {
   useEffect(() => {
     const handler = (e: Event) => {
       const prompt = (e as CustomEvent<{ prompt?: string }>).detail?.prompt;
-      if (prompt) autoPromptRef.current = prompt;
+      if (prompt) {
+        // "Plan with AI" clicked — wipe old history so new plan starts clean
+        clearChat();
+        autoPromptRef.current = prompt;
+      }
       setIsChatOpen(true);
     };
     document.addEventListener("open-ai-planner", handler);
     return () => document.removeEventListener("open-ai-planner", handler);
-  }, []);
+  }, [clearChat]);
 
   // Auto-send injected prompt after panel opens
   useEffect(() => {
@@ -267,10 +268,12 @@ export default function AIAssistant() {
     return () => clearTimeout(t);
   }, [isChatOpen, handleSend]);
 
-  // Focus input on open
+  // Focus input + clear any stale error when panel opens
   useEffect(() => {
-    if (isChatOpen) setTimeout(() => inputRef.current?.focus(), 300);
-  }, [isChatOpen]);
+    if (!isChatOpen) return;
+    clearError();
+    setTimeout(() => inputRef.current?.focus(), 300);
+  }, [isChatOpen, clearError]);
 
   // Escape to close
   useEffect(() => {
