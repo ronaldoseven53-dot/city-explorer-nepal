@@ -1,5 +1,5 @@
 import { streamText, tool, stepCountIs } from "ai";
-import { google } from "@ai-sdk/google";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { z } from "zod";
 import { destinations } from "@/data/destinations";
 
@@ -252,25 +252,17 @@ export async function POST(req: Request) {
 
     const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
-    console.log('Using Key:', apiKey ? 'Key Found' : 'Key Missing');
-
     if (!apiKey) {
-      console.error("CRITICAL: No API Key found in Environment Variables");
       return new Response(
         JSON.stringify({ error: "Missing Google API key" }),
         { status: 500, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    // Ensure the SDK can find the API key
-    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-      process.env.GOOGLE_GENERATIVE_AI_API_KEY = apiKey;
-    }
-
-    console.log('KEY CHECK:', process.env.GOOGLE_GENERATIVE_AI_API_KEY ? 'Present' : 'MISSING');
+    const google = createGoogleGenerativeAI({ apiKey });
 
     const result = streamText({
-      model:    google("gemini-1.5-flash"),
+      model:    google("gemini-2.0-flash"),
       system:   SYSTEM_PROMPT,
       messages,
       tools:    { getTransportOptions, buildItinerary },
