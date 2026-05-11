@@ -4,8 +4,6 @@ import L from "leaflet";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import { motion, AnimatePresence } from "motion/react";
-import { Settings, Plus, Minus, LocateFixed, Search, X } from "lucide-react";
-import { useTheme } from "@/context/ThemeContext";
 import { destinations, type Destination } from "@/data/destinations";
 
 // ── Category config ───────────────────────────────────────────────────
@@ -133,35 +131,16 @@ function GlowMarkers({
   );
 }
 
-// ── Search filter (client-side over destination names) ────────────────
-
-function useSearch(query: string) {
-  if (!query.trim()) return null;
-  const q = query.toLowerCase();
-  return destinations.filter(
-    (d) =>
-      d.name.toLowerCase().includes(q) ||
-      d.region.toLowerCase().includes(q) ||
-      d.category.toLowerCase().includes(q)
-  );
-}
-
 // ── MapSection ────────────────────────────────────────────────────────
 
 export default function MapSection() {
-  const { theme }  = useTheme();
-  const isDark     = theme === "dark";
 
   const [active,     setActive]     = useState<string | null>(null);
   const [hovered,    setHovered]    = useState<HoveredPin | null>(null);
   const [showLegend, setShowLegend] = useState(true);
-  const [searchVal,  setSearchVal]  = useState("");
-  const [showSearch, setShowSearch] = useState(false);
 
   const mapRef    = useRef<L.Map | null>(null);
   const handleMap = useCallback((m: L.Map) => { mapRef.current = m; }, []);
-
-  const results = useSearch(searchVal);
 
   useEffect(() => { ensurePingStyles(); }, []);
 
@@ -178,19 +157,8 @@ export default function MapSection() {
 
   const toggle = (key: string) => setActive((p) => (p === key ? null : key));
 
-  const flyToResult = (d: Destination) => {
-    mapRef.current?.flyTo([d.coordinates.lat, d.coordinates.lng], 11, { animate: true, duration: 1.2 });
-    setSearchVal("");
-    setShowSearch(false);
-  };
-
-  // Tile URL switches between dark (Carto dark) and light (Carto light) on theme change
-  const tileUrl = isDark
-    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-    : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
-
   return (
-    <div className="relative w-full" style={{ height: 460, background: "#080c1a" }}>
+    <div className="relative w-full" style={{ height: 460 }}>
 
       {/* ── Leaflet map ── */}
       <MapContainer
@@ -198,15 +166,12 @@ export default function MapSection() {
         zoom={7}
         className="absolute inset-0 w-full h-full"
         scrollWheelZoom={false}
-        zoomControl={false}
-        attributionControl={false}
-        style={{ background: "#080c1a" }}
+        zoomControl={true}
+        attributionControl={true}
       >
         <TileLayer
-          key={tileUrl}
-          url={tileUrl}
-          attribution="&copy; CARTO &copy; OpenStreetMap"
-          subdomains="abcd"
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           maxZoom={19}
         />
         <MapInstanceCapture onMap={handleMap} />
@@ -217,118 +182,7 @@ export default function MapSection() {
         />
       </MapContainer>
 
-      {/* ── Top-left: title ── */}
-      <div
-        className="absolute top-3.5 left-3.5 z-[500] pointer-events-none select-none"
-        style={{ ...GLASS, borderRadius: 14, padding: "9px 14px" }}
-      >
-        <p className="text-white font-extrabold text-[13px] tracking-tight leading-none mb-0.5">
-          Explore Nepal Map
-        </p>
-        <p className="text-white/40 text-[10px] font-medium tracking-wide">
-          Interactive &amp; Filterable
-        </p>
-      </div>
-
-      {/* ── Top-center: search bar ── */}
-      <div className="absolute top-3.5 left-1/2 -translate-x-1/2 z-[500]"
-        style={{ width: "min(320px, calc(100% - 240px))" }}>
-        <div style={{ ...GLASS, borderRadius: 9999, padding: "7px 14px" }}
-          className="flex items-center gap-2">
-          <Search size={13} strokeWidth={2.5} color="rgba(255,255,255,0.50)" className="flex-shrink-0" />
-          <input
-            type="text"
-            placeholder="Search destinations…"
-            value={searchVal}
-            onChange={(e) => { setSearchVal(e.target.value); setShowSearch(true); }}
-            onFocus={() => setShowSearch(true)}
-            className="flex-1 bg-transparent border-0 outline-none text-white placeholder-white/35 text-[12px] font-medium"
-            style={{ minWidth: 0 }}
-          />
-          <AnimatePresence>
-            {searchVal && (
-              <motion.button
-                onClick={() => { setSearchVal(""); setShowSearch(false); }}
-                initial={{ opacity: 0, scale: 0.6 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.6 }}
-                className="flex-shrink-0 cursor-pointer"
-              >
-                <X size={12} color="rgba(255,255,255,0.40)" />
-              </motion.button>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Search results dropdown */}
-        <AnimatePresence>
-          {showSearch && results && results.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.15 }}
-              className="absolute top-full left-0 right-0 mt-1.5 overflow-hidden"
-              style={{ ...GLASS, borderRadius: 14, maxHeight: 200, overflowY: "auto" }}
-            >
-              {results.slice(0, 6).map((d) => (
-                <button
-                  key={d.id}
-                  onClick={() => flyToResult(d)}
-                  className="w-full text-left px-4 py-2.5 cursor-pointer transition-colors hover:bg-white/[0.07] flex items-center gap-2.5"
-                  style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
-                >
-                  <span style={{
-                    width: 7, height: 7, borderRadius: "50%", flexShrink: 0,
-                    background: COLOR_MAP[d.category] ?? "#6B7280",
-                    boxShadow: `0 0 6px ${COLOR_MAP[d.category] ?? "#6B7280"}`,
-                  }} />
-                  <div>
-                    <p className="text-white text-[12px] font-semibold leading-tight">{d.name}</p>
-                    <p className="text-white/40 text-[10px]">{d.region}</p>
-                  </div>
-                </button>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* ── Top-right: filter toggle ── */}
-      <button
-        onClick={() => setShowLegend((v) => !v)}
-        className="absolute top-3.5 right-3.5 z-[500] flex items-center gap-1.5 cursor-pointer
-          transition-opacity duration-150 hover:opacity-80"
-        style={{ ...GLASS, borderRadius: 9999, padding: "7px 13px" }}
-      >
-        <Settings size={12} strokeWidth={2} color="rgba(255,255,255,0.65)" />
-        <span className="text-white/65 text-[11px] font-semibold">Filter</span>
-      </button>
-
-      {/* ── Left: zoom controls ── */}
-      <div
-        className="absolute left-3.5 top-1/2 -translate-y-1/2 z-[500] flex flex-col gap-1"
-        style={{ ...GLASS, borderRadius: 14, padding: 5 }}
-      >
-        {([
-          { Icon: Plus,        tip: "Zoom in",    fn: () => mapRef.current?.zoomIn()  },
-          { Icon: LocateFixed, tip: "Reset view", fn: () => mapRef.current?.flyTo(NEPAL_CENTER, 7, { duration: 1.2 }) },
-          { Icon: Minus,       tip: "Zoom out",   fn: () => mapRef.current?.zoomOut() },
-        ] as const).map(({ Icon, tip, fn }) => (
-          <button
-            key={tip}
-            onClick={fn}
-            aria-label={tip}
-            title={tip}
-            className="flex items-center justify-center w-8 h-8 rounded-[10px] cursor-pointer
-              text-white/55 hover:text-white hover:bg-white/[0.10] transition-all duration-150"
-          >
-            <Icon size={14} strokeWidth={2} />
-          </button>
-        ))}
-      </div>
-
-      {/* ── Bottom: category legend ── */}
+      {/* ── Bottom: category filter pills ── */}
       <AnimatePresence>
         {showLegend && (
           <motion.div
@@ -337,17 +191,25 @@ export default function MapSection() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.18 }}
-            className="absolute bottom-3.5 left-1/2 -translate-x-1/2 z-[500]
-              flex flex-nowrap items-center gap-5 scrollbar-hide overflow-x-auto"
-            style={{ ...GLASS, borderRadius: 9999, padding: "7px 16px", maxWidth: "calc(100% - 28px)" }}
+            className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[500]
+              flex flex-nowrap items-center gap-1.5 scrollbar-hide overflow-x-auto"
+            style={{
+              background: "rgba(255,255,255,0.90)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              border: "1px solid rgba(0,0,0,0.10)",
+              boxShadow: "0 2px 16px rgba(0,0,0,0.12)",
+              borderRadius: 9999,
+              padding: "5px 12px",
+              maxWidth: "calc(100% - 28px)",
+            }}
           >
             <button
               onClick={() => setActive(null)}
-              className="text-[10px] font-bold px-2.5 py-1 rounded-full cursor-pointer
-                transition-all duration-150 flex-shrink-0"
+              className="text-[10px] font-bold px-2.5 py-1 rounded-full cursor-pointer transition-all duration-150 flex-shrink-0"
               style={{
-                background: active === null ? "rgba(255,255,255,0.16)" : "transparent",
-                color:      active === null ? "#fff" : "rgba(255,255,255,0.38)",
+                background: active === null ? "rgba(0,0,0,0.10)" : "transparent",
+                color:      active === null ? "#111" : "rgba(0,0,0,0.40)",
               }}
             >
               All
@@ -356,18 +218,17 @@ export default function MapSection() {
               <button
                 key={key}
                 onClick={() => toggle(key)}
-                className="flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1
-                  rounded-full cursor-pointer transition-all duration-150 flex-shrink-0"
+                className="flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full cursor-pointer transition-all duration-150 flex-shrink-0"
                 style={{
-                  background: active === key ? `${color}20` : "transparent",
-                  color:      active === key ? color : "rgba(255,255,255,0.38)",
-                  border:     active === key ? `1px solid ${color}50` : "1px solid transparent",
+                  background: active === key ? `${color}18` : "transparent",
+                  color:      active === key ? color : "rgba(0,0,0,0.40)",
+                  border:     active === key ? `1px solid ${color}60` : "1px solid transparent",
                 }}
               >
                 <span style={{
                   width: 6, height: 6, borderRadius: "50%",
                   background: color, display: "inline-block", flexShrink: 0,
-                  boxShadow: active === key ? `0 0 6px ${color}` : "none",
+                  boxShadow: active === key ? `0 0 5px ${color}` : "none",
                 }} />
                 {label}
               </button>
@@ -425,11 +286,7 @@ export default function MapSection() {
         )}
       </AnimatePresence>
 
-      {/* Attribution */}
-      <p className="absolute bottom-1 right-2 z-[400] text-[8px] text-white/18
-        pointer-events-none select-none">
-        © CARTO © OpenStreetMap contributors
-      </p>
+
     </div>
   );
 }
