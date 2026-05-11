@@ -6,6 +6,7 @@ import AIAssistant from "@/components/AIAssistant";
 import { UserPassportProvider } from "@/context/UserPassportContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import MasterExplorerModal from "@/components/MasterExplorerModal";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -60,6 +61,7 @@ export default function RootLayout({
             <MasterExplorerModal />
           </UserPassportProvider>
         </ThemeProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
