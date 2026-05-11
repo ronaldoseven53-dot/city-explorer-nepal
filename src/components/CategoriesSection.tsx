@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
-import { ChevronRight, ChevronLeft, Mountain, Landmark, Leaf, Compass, Wind, Sprout, Zap } from "lucide-react";
+import { ChevronRight, ChevronLeft } from "lucide-react";
 import { categoryGroups } from "@/data/destinations";
 
 // ── Carousel slides from real category groups ──────────────────────────
@@ -16,18 +16,6 @@ const ACCENT: Record<string, string> = {
   heritage:    "#F97316",
   nature:      "#22C55E",
   pilgrimage:  "#A855F7",
-};
-
-// ── Mobile card icon map ───────────────────────────────────────────────
-
-const CATEGORY_ICONS: Record<string, React.ElementType> = {
-  agriculture: Sprout,
-  adventure:   Zap,
-  trekking:    Mountain,
-  heritage:    Landmark,
-  nature:      Leaf,
-  pilgrimage:  Compass,
-  hill:        Wind,
 };
 
 const SLIDES = categoryGroups.map((g) => ({
@@ -107,55 +95,7 @@ export default function CategoriesSection() {
           </div>
         </div>
 
-        {/* ── Mobile: vertical bento card list (hidden on sm+) ── */}
-        <div className="sm:hidden flex flex-col gap-2.5 mb-2">
-          {SLIDES.map((slide, i) => {
-            const Icon = CATEGORY_ICONS[slide.id] ?? Mountain;
-            return (
-              <motion.button
-                key={slide.id}
-                onClick={() => { setDir(i > current ? 1 : -1); setCurrent(i); setTimeout(() => router.push(`/explore/${slide.id}`), 180); }}
-                whileTap={{ scale: 0.97 }}
-                transition={{ type: "spring", stiffness: 420, damping: 22 }}
-                className="w-full flex items-center gap-3 text-left cursor-pointer rounded-2xl"
-                style={{
-                  minHeight:  64,
-                  padding:    "12px 16px",
-                  background: "var(--glass-bg)",
-                  border:     "1px solid var(--glass-border)",
-                  backdropFilter:       "blur(12px)",
-                  WebkitBackdropFilter: "blur(12px)",
-                }}
-              >
-                {/* Icon */}
-                <div className="flex items-center justify-center rounded-xl flex-shrink-0"
-                  style={{ width: 44, height: 44, background: `${slide.accent}18`, border: `1px solid ${slide.accent}35` }}>
-                  <Icon size={20} color={slide.accent} strokeWidth={1.8} />
-                </div>
-
-                {/* Text */}
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-[14px] leading-tight mb-0.5"
-                    style={{ color: "var(--text-primary)" }}>
-                    {slide.title}
-                  </p>
-                  <p className="text-[11px] truncate" style={{ color: "var(--text-tertiary)" }}>
-                    {slide.description}
-                  </p>
-                </div>
-
-                {/* View details arrow */}
-                <div className="flex items-center justify-center rounded-full flex-shrink-0"
-                  style={{ width: 32, height: 32, background: `${slide.accent}15`, border: `1px solid ${slide.accent}30` }}>
-                  <ChevronRight size={15} color={slide.accent} strokeWidth={2.5} />
-                </div>
-              </motion.button>
-            );
-          })}
-        </div>
-
-        {/* ── Desktop: featured carousel (hidden on mobile) ── */}
-        <div className="hidden sm:block">
+        {/* Featured carousel */}
         <div
           className="relative rounded-[28px] overflow-hidden"
           style={{ height: 300 }}
@@ -314,8 +254,6 @@ export default function CategoriesSection() {
           </div>
 
         </div>
-
-        </div>{/* /hidden sm:block desktop carousel */}
 
       </div>
     </section>

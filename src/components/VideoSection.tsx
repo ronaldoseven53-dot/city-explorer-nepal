@@ -83,32 +83,51 @@ export default function VideoSection() {
     else p.pauseVideo();
   }, [isInView]);
 
-  // ── Custom fullscreen: unmute audio for the full experience ───────
-  const handleFullscreen = useCallback(() => {
-    if (!wrapperRef.current) return;
-    if (!document.fullscreenElement) {
-      wrapperRef.current.requestFullscreen().then(() => {
-        playerRef.current?.unMute();
-        setMuted(false);
-      }).catch(() => {});
+  // ── Toggle mute/unmute ────────────────────────────────────────────
+  const toggleMute = useCallback(() => {
+    if (!playerRef.current) return;
+    if (muted) {
+      playerRef.current.unMute();
+      setMuted(false);
     } else {
-      document.exitFullscreen().then(() => {
-        playerRef.current?.mute();
-        setMuted(true);
-      }).catch(() => {});
+      playerRef.current.mute();
+      setMuted(true);
+    }
+  }, [muted]);
+
+  // ── Fullscreen: webkit fallback for iOS Safari + Android Chrome ───
+  const handleFullscreen = useCallback(() => {
+    const el  = wrapperRef.current as (HTMLDivElement & { webkitRequestFullscreen?(): Promise<void> }) | null;
+    const doc = document as Document & { webkitFullscreenElement?: Element; webkitExitFullscreen?(): Promise<void> };
+    if (!el) return;
+
+    const isFs = doc.fullscreenElement || doc.webkitFullscreenElement;
+    if (!isFs) {
+      (el.requestFullscreen?.() ?? el.webkitRequestFullscreen?.())
+        ?.then(() => { playerRef.current?.unMute(); setMuted(false); })
+        .catch(() => {});
+    } else {
+      (doc.exitFullscreen?.() ?? doc.webkitExitFullscreen?.())
+        ?.then(() => { playerRef.current?.mute(); setMuted(true); })
+        .catch(() => {});
     }
   }, []);
 
-  // Re-mute if user exits fullscreen via Esc
+  // Re-mute when user exits fullscreen via Esc or system back (both std + webkit)
   useEffect(() => {
+    const doc = document as Document & { webkitFullscreenElement?: Element };
     const onFSChange = () => {
-      if (!document.fullscreenElement) {
+      if (!doc.fullscreenElement && !doc.webkitFullscreenElement) {
         playerRef.current?.mute();
         setMuted(true);
       }
     };
     document.addEventListener("fullscreenchange", onFSChange);
-    return () => document.removeEventListener("fullscreenchange", onFSChange);
+    document.addEventListener("webkitfullscreenchange", onFSChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", onFSChange);
+      document.removeEventListener("webkitfullscreenchange", onFSChange);
+    };
   }, []);
 
   const scrollToFeatured = () =>
@@ -135,14 +154,26 @@ export default function VideoSection() {
               Watch Nepal in 60 Sec
             </h2>
           </div>
-          {/* Audio status indicator */}
-          <span className="flex items-center gap-1.5 text-[11px] font-semibold select-none"
-            style={{ color: "var(--text-tertiary)" }}>
+          {/* Audio toggle button — works on mobile and desktop */}
+          <button
+            onClick={toggleMute}
+            aria-label={muted ? "Unmute video" : "Mute video"}
+            className="flex items-center gap-1.5 text-[11px] font-semibold cursor-pointer transition-opacity hover:opacity-70"
+            style={{
+              color:               "var(--text-tertiary)",
+              background:          "none",
+              border:              "none",
+              padding:             "8px 4px",
+              minHeight:           44,
+              minWidth:            44,
+              WebkitTapHighlightColor: "transparent",
+            }}
+          >
             {muted
               ? <VolumeX size={13} strokeWidth={2} />
               : <Volume2 size={13} strokeWidth={2} />}
             {muted ? "Muted" : "Audio On"}
-          </span>
+          </button>
         </div>
 
         {/* ── Video wrapper — 16:9 desktop / 9:16 mobile ───────────── */}
