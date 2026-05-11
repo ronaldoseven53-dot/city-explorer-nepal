@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
 import dynamic from "next/dynamic";
-import AIPlannerTrigger from "./AIPlannerTrigger";
+import HimalayanAICard from "./HimalayanAICard";
 import LiveInsights from "./LiveInsights";
 import FeaturedAdventureCard from "./FeaturedAdventureCard";
 import { useTheme } from "@/context/ThemeContext";
@@ -173,20 +173,9 @@ export default function BentoDashboard() {
           <MapLoader />
         </BentoCard>
 
-        {/* ── CELL 4: AI Planner CTA ── */}
-        <BentoCard className="min-h-[280px] flex flex-col justify-between p-8" hoverShadow={HOVER_SHADOW}>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-red-600 dark:text-red-400 mb-1">✨ Gemini AI</p>
-            <h2 className="text-xl font-extrabold text-zinc-900 dark:text-white tracking-tight leading-tight mt-1 mb-3">
-              Plan your perfect Nepal trip
-            </h2>
-            <p className="text-zinc-500 dark:text-white/50 text-sm leading-relaxed">
-              Tell our AI your interests, budget, or dates — it builds a personalised itinerary instantly.
-            </p>
-          </div>
-          <div className="mt-6">
-            <AIPlannerTrigger />
-          </div>
+        {/* ── CELL 4: Himalaya AI ── */}
+        <BentoCard className="min-h-[300px] flex flex-col p-8" hoverShadow={HOVER_SHADOW}>
+          <HimalayanAICard />
         </BentoCard>
 
         {/* ── CELL 5: Live Insights ── */}

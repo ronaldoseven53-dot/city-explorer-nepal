@@ -11,19 +11,19 @@ import { X } from "lucide-react";
 
 function getLineEmoji(line: string): string {
   const l = line.toLowerCase();
-  if (/trek|hike|walk|trail/.test(l))       return "🥾";
-  if (/flight|fly|airport/.test(l))         return "✈️";
-  if (/bus|drive|road|jeep/.test(l))        return "🚌";
-  if (/temple|stupa|shrine|mandir/.test(l)) return "🛕";
-  if (/lake|river|pond/.test(l))            return "🏞️";
-  if (/wildlife|rhino|tiger|elephant/.test(l)) return "🐘";
-  if (/food|eat|restaurant|cuisine/.test(l))   return "🍜";
-  if (/hotel|lodge|stay|accomm/.test(l))    return "🏨";
-  if (/view|sunrise|sunset|panorama/.test(l))  return "🌄";
-  if (/museum|heritage|culture/.test(l))    return "🏛️";
-  if (/market|shop|bazar/.test(l))          return "🛍️";
-  if (/meditation|yoga|spiritual/.test(l))  return "🧘";
-  if (/camera|photo|photograph/.test(l))    return "📸";
+  if (/trek|hike|walk|trail/.test(l))           return "🥾";
+  if (/flight|fly|airport/.test(l))             return "✈️";
+  if (/bus|drive|road|jeep/.test(l))            return "🚌";
+  if (/temple|stupa|shrine|mandir/.test(l))     return "🛕";
+  if (/lake|river|pond/.test(l))                return "🏞️";
+  if (/wildlife|rhino|tiger|elephant/.test(l))  return "🐘";
+  if (/food|eat|restaurant|cuisine/.test(l))    return "🍜";
+  if (/hotel|lodge|stay|accomm/.test(l))        return "🏨";
+  if (/view|sunrise|sunset|panorama/.test(l))   return "🌄";
+  if (/museum|heritage|culture/.test(l))        return "🏛️";
+  if (/market|shop|bazar/.test(l))              return "🛍️";
+  if (/meditation|yoga|spiritual/.test(l))      return "🧘";
+  if (/camera|photo|photograph/.test(l))        return "📸";
   return "📍";
 }
 
@@ -50,7 +50,9 @@ function FormattedMessage({ text }: { text: string }) {
               <span className="flex-shrink-0 w-7 h-7 rounded-full bg-red-600/80 flex items-center justify-center text-white font-bold text-xs">
                 {trimmed.match(/\d+/)?.[0]}
               </span>
-              <span className="font-bold text-white text-base">{trimmed.replace(/^day\s+\d+[:\s—–-]*/i, "")}</span>
+              <span className="font-bold text-white text-base">
+                {trimmed.replace(/^day\s+\d+[:\s—–-]*/i, "")}
+              </span>
             </div>
           );
         }
@@ -83,8 +85,8 @@ function FormattedMessage({ text }: { text: string }) {
 
 const SUGGESTIONS = [
   "Plan a 7-day Nepal trip for first-timers",
-  "Best trekking destinations for beginners",
-  "Top wildlife experiences in Nepal",
+  "Best trekking for beginners in Nepal",
+  "Top wildlife experiences in Chitwan",
   "Hidden gems off the beaten path",
 ];
 
@@ -93,6 +95,7 @@ export default function AIPlanner() {
   const [input, setInput] = useState("");
   const bottomRef         = useRef<HTMLDivElement>(null);
   const inputRef          = useRef<HTMLInputElement>(null);
+  const autoPromptRef     = useRef<string | null>(null);
 
   const { messages, sendMessage, status, setMessages } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
@@ -105,12 +108,25 @@ export default function AIPlanner() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
-  // Open via custom event from CTA buttons
+  // Open via custom event — reads optional { prompt } payload
   useEffect(() => {
-    const handler = () => setOpen(true);
+    const handler = (e: Event) => {
+      const prompt = (e as CustomEvent<{ prompt?: string }>).detail?.prompt;
+      if (prompt) autoPromptRef.current = prompt;
+      setOpen(true);
+    };
     document.addEventListener("open-ai-planner", handler);
     return () => document.removeEventListener("open-ai-planner", handler);
   }, []);
+
+  // Auto-send injected prompt after panel opens
+  useEffect(() => {
+    if (!open || !autoPromptRef.current) return;
+    const p = autoPromptRef.current;
+    autoPromptRef.current = null;
+    const t = setTimeout(() => sendMessage({ text: p }), 380);
+    return () => clearTimeout(t);
+  }, [open, sendMessage]);
 
   // Focus input on open
   useEffect(() => {
@@ -158,35 +174,50 @@ export default function AIPlanner() {
             <div
               className="w-full max-w-[440px] max-h-[82vh] flex flex-col rounded-3xl overflow-hidden pointer-events-auto"
               style={{
-                background: "rgba(8, 14, 36, 0.80)",
-                backdropFilter: "blur(28px)",
-                WebkitBackdropFilter: "blur(28px)",
-                border: "1px solid rgba(255,255,255,0.10)",
-                boxShadow: "0 32px 80px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.07)",
+                background:          "rgba(8,14,36,0.82)",
+                backdropFilter:      "blur(28px)",
+                WebkitBackdropFilter:"blur(28px)",
+                border:              "1px solid rgba(255,255,255,0.10)",
+                boxShadow:           "0 32px 80px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.07)",
               }}
             >
               {/* ── Header ── */}
               <div
                 className="flex items-center justify-between px-5 py-4 flex-shrink-0"
                 style={{
-                  background: "rgba(220,38,38,0.10)",
+                  background:   "rgba(220,38,38,0.10)",
                   borderBottom: "1px solid rgba(255,255,255,0.08)",
-                  backdropFilter: "blur(8px)",
                 }}
               >
                 <div className="flex items-center gap-3">
-                  <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center shadow-lg flex-shrink-0"
-                    style={{
-                      background: "linear-gradient(135deg, #dc2626, #be123c)",
-                      boxShadow: "0 0 16px rgba(220,38,38,0.45)",
+                  {/* Avatar with pulsing glow while streaming */}
+                  <motion.div
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-lg flex-shrink-0"
+                    style={{ background: "linear-gradient(135deg, #dc2626, #be123c)" }}
+                    animate={isLoading ? {
+                      boxShadow: [
+                        "0 0 0px rgba(220,38,38,0.9), 0 0 8px rgba(220,38,38,0.5)",
+                        "0 0 14px rgba(220,38,38,0.9), 0 0 32px rgba(220,38,38,0.45)",
+                        "0 0 0px rgba(220,38,38,0.9), 0 0 8px rgba(220,38,38,0.5)",
+                      ],
+                    } : {
+                      boxShadow: "0 0 14px rgba(220,38,38,0.40)",
                     }}
+                    transition={isLoading
+                      ? { duration: 1.4, repeat: Infinity, ease: "easeInOut" }
+                      : { duration: 0.4 }
+                    }
                   >
-                    <span className="text-lg" aria-hidden>🏔️</span>
-                  </div>
+                    🏔️
+                  </motion.div>
+
                   <div>
-                    <p className="text-white font-bold text-sm leading-none tracking-tight">AI Trip Planner</p>
-                    <p className="text-white/40 text-[11px] mt-0.5 font-medium">Powered by Gemini · Nepal only</p>
+                    <p className="text-white font-bold text-sm leading-none tracking-tight">
+                      Himalaya AI
+                    </p>
+                    <p className="text-white/40 text-[11px] mt-0.5 font-medium">
+                      {isLoading ? "Thinking…" : "Expert Nepal Guide · Powered by Gemini"}
+                    </p>
                   </div>
                 </div>
 
@@ -201,7 +232,7 @@ export default function AIPlanner() {
                   )}
                   <button
                     onClick={() => setOpen(false)}
-                    aria-label="Close planner"
+                    aria-label="Close"
                     className="flex items-center justify-center w-8 h-8 rounded-full text-white/35 hover:text-white hover:bg-white/[0.10] transition-all duration-200 cursor-pointer"
                   >
                     <X size={16} strokeWidth={2} />
@@ -210,7 +241,8 @@ export default function AIPlanner() {
               </div>
 
               {/* ── Messages ── */}
-              <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 min-h-0"
+              <div
+                className="flex-1 overflow-y-auto px-4 py-4 space-y-3 min-h-0"
                 style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(255,255,255,0.08) transparent" }}
               >
                 {/* Empty state — suggestions */}
@@ -231,10 +263,10 @@ export default function AIPlanner() {
                           whileTap={{ scale: 0.98 }}
                           className="text-left text-xs text-white/65 hover:text-white/90 cursor-pointer transition-colors duration-150"
                           style={{
-                            background: "rgba(255,255,255,0.05)",
-                            border: "1px solid rgba(255,255,255,0.09)",
+                            background:   "rgba(255,255,255,0.05)",
+                            border:       "1px solid rgba(255,255,255,0.09)",
                             borderRadius: "14px",
-                            padding: "11px 16px",
+                            padding:      "11px 16px",
                           }}
                         >
                           {s}
@@ -261,12 +293,23 @@ export default function AIPlanner() {
                       className={`flex gap-2.5 ${m.role === "user" ? "justify-end" : "justify-start"}`}
                     >
                       {m.role === "assistant" && (
-                        <div
+                        <motion.div
                           className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-sm mt-0.5"
                           style={{ background: "linear-gradient(135deg, #dc2626, #be123c)" }}
+                          animate={isLoading ? {
+                            boxShadow: [
+                              "0 0 0px rgba(220,38,38,0.9)",
+                              "0 0 10px rgba(220,38,38,0.8), 0 0 22px rgba(220,38,38,0.4)",
+                              "0 0 0px rgba(220,38,38,0.9)",
+                            ],
+                          } : { boxShadow: "0 0 8px rgba(220,38,38,0.35)" }}
+                          transition={isLoading
+                            ? { duration: 1.4, repeat: Infinity, ease: "easeInOut" }
+                            : { duration: 0.4 }
+                          }
                         >
                           🏔️
-                        </div>
+                        </motion.div>
                       )}
                       <div
                         className={`max-w-[88%] px-4 py-3 rounded-2xl text-sm backdrop-blur-sm ${
@@ -274,15 +317,8 @@ export default function AIPlanner() {
                         }`}
                         style={
                           m.role === "user"
-                            ? {
-                                background: "rgba(220,38,38,0.75)",
-                                border: "1px solid rgba(220,38,38,0.35)",
-                                color: "#fff",
-                              }
-                            : {
-                                background: "rgba(255,255,255,0.06)",
-                                border: "1px solid rgba(255,255,255,0.10)",
-                              }
+                            ? { background: "rgba(220,38,38,0.75)", border: "1px solid rgba(220,38,38,0.35)", color: "#fff" }
+                            : { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)" }
                         }
                       >
                         {m.role === "user"
@@ -297,12 +333,20 @@ export default function AIPlanner() {
                 {/* Thinking indicator */}
                 {isLoading && (
                   <div className="flex gap-2.5 justify-start">
-                    <div
+                    <motion.div
                       className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-sm"
                       style={{ background: "linear-gradient(135deg, #dc2626, #be123c)" }}
+                      animate={{
+                        boxShadow: [
+                          "0 0 0px rgba(220,38,38,0.9)",
+                          "0 0 12px rgba(220,38,38,0.9), 0 0 28px rgba(220,38,38,0.45)",
+                          "0 0 0px rgba(220,38,38,0.9)",
+                        ],
+                      }}
+                      transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
                     >
                       🏔️
-                    </div>
+                    </motion.div>
                     <div
                       className="rounded-2xl rounded-bl-sm px-5 py-3.5"
                       style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)" }}
@@ -335,18 +379,18 @@ export default function AIPlanner() {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(); } }}
-                    placeholder="Plan my Nepal trip…"
+                    placeholder="Ask about Nepal travel…"
                     disabled={isLoading}
                     className="flex-1 text-white placeholder-white/25 text-sm outline-none disabled:opacity-40 transition-all duration-200"
                     style={{
-                      background: "rgba(255,255,255,0.06)",
-                      border: "1px solid rgba(255,255,255,0.14)",
+                      background:   "rgba(255,255,255,0.06)",
+                      border:       "1px solid rgba(255,255,255,0.14)",
                       borderRadius: "16px",
-                      padding: "11px 16px",
-                      boxShadow: "inset 0 2px 6px rgba(0,0,0,0.25)",
+                      padding:      "11px 16px",
+                      boxShadow:    "inset 0 2px 6px rgba(0,0,0,0.25)",
                     }}
                     onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(220,38,38,0.55)"; }}
-                    onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.14)"; }}
+                    onBlur={(e)  => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.14)"; }}
                   />
                   <motion.button
                     onClick={submit}
@@ -356,16 +400,17 @@ export default function AIPlanner() {
                     className="flex-shrink-0 w-10 h-10 rounded-2xl flex items-center justify-center cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                     style={{
                       background: "linear-gradient(135deg, #dc2626, #be123c)",
-                      boxShadow: "0 0 18px rgba(220,38,38,0.50), 0 4px 12px rgba(0,0,0,0.35)",
+                      boxShadow:  "0 0 18px rgba(220,38,38,0.50), 0 4px 12px rgba(0,0,0,0.35)",
                     }}
                   >
                     <span className="text-white font-bold text-base leading-none">↑</span>
                   </motion.button>
                 </div>
                 <p className="text-white/18 text-[10px] text-center mt-2 tracking-wide">
-                  Enter to send · Grounded in 17 Nepal destinations
+                  Enter to send · Grounded in Nepal destinations
                 </p>
               </div>
+
             </div>
           </motion.div>
         </>
