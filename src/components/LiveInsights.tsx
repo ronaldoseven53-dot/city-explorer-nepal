@@ -393,12 +393,12 @@ export default function LiveInsights({ isDark }: { isDark: boolean }) {
           initial="enter"
           animate="center"
           exit="exit"
-          className="grid grid-cols-1 sm:grid-cols-3 gap-3"
+          className="li-cards-row"
           style={{ willChange: "transform, opacity" }}
         >
 
           {/* ── Card 1: Weather ── */}
-          <div style={INNER_CARD}>
+          <div className="li-card" style={INNER_CARD}>
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] mb-3.5" style={{ color: "#FB923C" }}>
               ☁ Weather
             </p>
@@ -414,7 +414,7 @@ export default function LiveInsights({ isDark }: { isDark: boolean }) {
             ) : (
               <div className="flex items-end justify-between gap-2">
                 <div>
-                  <p className="text-[40px] font-black tracking-tight leading-none" style={{ color: textPrimary }}>
+                  <p className="text-[40px] font-black tracking-tight leading-none li-temp" style={{ color: textPrimary }}>
                     {weather!.temp}
                     <span className="text-xl font-semibold ml-0.5" style={{ color: textSecondary }}>°C</span>
                   </p>
@@ -435,7 +435,7 @@ export default function LiveInsights({ isDark }: { isDark: boolean }) {
           </div>
 
           {/* ── Card 2: Season (always static) ── */}
-          <div style={INNER_CARD}>
+          <div className="li-card" style={INNER_CARD}>
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] mb-3.5" style={{ color: city.seasonColor }}>
               🌿 Season
             </p>
@@ -445,14 +445,14 @@ export default function LiveInsights({ isDark }: { isDark: boolean }) {
                 {city.currentSeason}
               </span>
             </div>
-            <p className="text-[19px] font-extrabold tracking-tight leading-none" style={{ color: textPrimary }}>
+            <p className="text-[19px] font-extrabold tracking-tight leading-none li-season-title" style={{ color: textPrimary }}>
               {city.bestSeason}
             </p>
             <p className="text-[11px] mt-1.5" style={{ color: textMuted }}>Best travel window</p>
           </div>
 
           {/* ── Card 3: Visibility ── */}
-          <div style={INNER_CARD}>
+          <div className="li-card" style={INNER_CARD}>
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] mb-3.5" style={{ color: "#60A5FA" }}>
               👁 Visibility
             </p>
@@ -467,7 +467,7 @@ export default function LiveInsights({ isDark }: { isDark: boolean }) {
               </p>
             ) : (
               <>
-                <p className="text-[22px] font-extrabold tracking-tight leading-none" style={{ color: textPrimary }}>
+                <p className="text-[22px] font-extrabold tracking-tight leading-none li-vis-label" style={{ color: textPrimary }}>
                   {weather!.visibilityLabel}
                 </p>
                 <p className="text-[12px] mt-1.5 font-medium" style={{ color: textSecondary }}>
@@ -492,6 +492,35 @@ export default function LiveInsights({ isDark }: { isDark: boolean }) {
 
         </motion.div>
       </AnimatePresence>
+
+      <style>{`
+        .li-cards-row {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 12px;
+        }
+        @media (max-width: 639px) {
+          .li-cards-row {
+            display: flex;
+            flex-direction: row;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            gap: 10px;
+          }
+          .li-cards-row::-webkit-scrollbar { display: none; }
+          .li-card {
+            flex-shrink: 0;
+            width: 85%;
+            scroll-snap-align: start;
+            padding: 12px 12px 10px !important;
+          }
+          .li-temp         { font-size: 28px !important; line-height: 1 !important; }
+          .li-season-title { font-size: 15px !important; }
+          .li-vis-label    { font-size: 16px !important; }
+        }
+      `}</style>
 
     </div>
   );
