@@ -356,6 +356,59 @@ const kalinchowk: Spot = {
   basePrice: 4000,
 };
 
+// ── Everest Base Camp (Adventure) ────────────────────────────────
+
+const everestBaseCamp: Spot = {
+  id: "everest-base-camp",
+  name: "Everest Base Camp",
+  province: "Koshi (Province No. 1)",
+  region: "Solukhumbu District",
+  description:
+    "The ultimate Himalayan pilgrimage — a 130 km journey through Sherpa villages, ancient monasteries, and glacial moraines to stand at 5,364 m in the shadow of the world's highest peak. Flanked by Nuptse and the Khumbu Icefall, EBC is the iconic destination that defines adventure in Nepal.",
+  activities: [
+    "EBC classic trek via Lukla and Namche Bazaar (12–14 days)",
+    "Kala Patthar summit hike (5,644 m) for the closest Everest panorama",
+    "Tengboche monastery visit and butter-lamp puja ceremony",
+    "Ama Dablam viewpoint hike from Pangboche",
+    "Gokyo Lakes alternate route with Gokyo Ri summit (5,483 m)",
+    "Sherpa cultural homestay and museum in Namche Bazaar",
+    "Photography at the Khumbu Glacier moraine",
+    "Three Passes trek (Kongma La, Cho La, Renjo La)",
+  ],
+  wildlife: [
+    "Snow leopard (elusive, high altitude)",
+    "Himalayan tahr",
+    "Musk deer",
+    "Pika",
+    "Lammergeier (bearded vulture)",
+    "Yellow-billed chough",
+    "Himalayan griffon vulture",
+  ],
+  placeholderImage: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80",
+  highlights: [
+    "Stand at 5,364 m at the foot of Mount Everest (8,848 m)",
+    "Kala Patthar — the finest 360° Himalayan panorama on Earth",
+    "Tengboche Monastery — the most dramatically sited gompa in Nepal",
+    "Namche Bazaar — the legendary trekking capital of the world",
+    "Sagarmatha National Park — UNESCO World Heritage site",
+    "Gokyo Ri — turquoise glacial lakes above 4,700 m",
+  ],
+  bestTimeToVisit: "Mar – May and Oct – Dec",
+  category: "mountain",
+  elevation: "5,364 m (17,598 ft)",
+  travelTips: [
+    "Fly Kathmandu → Lukla (35 min) and book months ahead — seats sell out in peak season",
+    "Acclimatise strictly: do not ascend above 3,000 m by more than 300–500 m per day",
+    "Hire a licensed Sherpa guide — it supports local communities and improves your safety",
+    "Travel insurance must cover emergency helicopter evacuation from altitude",
+    "Bring warm layers rated to −20 °C even in spring — temperatures drop sharply at night",
+  ],
+  gettingThere:
+    "Fly Kathmandu–Lukla (IATA: LUA, 35 min) via Tara Air or Summit Air. From Lukla the trek begins: Day 1 to Phakding, Day 2 to Namche Bazaar (acclimatisation rest day on Day 3). No road access to EBC — trekking is the only route in.",
+  coordinates: { lat: 28.0027, lng: 86.8528 },
+  basePrice: 4500,
+};
+
 // ── Trekking ──────────────────────────────────────────────────────
 
 const manang: Spot = {
@@ -907,7 +960,7 @@ export const categoryGroups: CategoryGroup[] = [
     emoji: "🧗",
     description:
       "Nepal's terrain is a natural adventure playground. Paraglide over Annapurna, ski at altitude, go on jeep safaris through ancient desert kingdoms, or spot rhinos in the jungle.",
-    spots: [pokhara, mustang, chitwan, kalinchowk],
+    spots: [everestBaseCamp, pokhara, mustang, chitwan, kalinchowk],
   },
   {
     id: "trekking",
