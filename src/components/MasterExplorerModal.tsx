@@ -54,7 +54,7 @@ export default function MasterExplorerModal() {
   const { showModal, dismissModal, categoryProgress, visitedCount, totalCount } =
     useUserPassport();
 
-  const pieces = useMemo(generatePieces, []);
+  const pieces = useMemo(() => generatePieces(), []);
 
   if (!showModal) return null;
 

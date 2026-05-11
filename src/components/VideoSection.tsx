@@ -22,14 +22,14 @@ export default function VideoSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const playerRef  = useRef<YTPlayer | null>(null);
-  const [apiReady, setApiReady] = useState(false);
+  const [apiReady, setApiReady] = useState(() => typeof window !== "undefined" && !!w().YT?.Player);
   const [muted,    setMuted]    = useState(true);
 
   const isInView = useInView(sectionRef, { amount: 0.3 });
 
   // ── Load YouTube IFrame API (once per page) ───────────────────────
   useEffect(() => {
-    if (w().YT?.Player) { setApiReady(true); return; }
+    if (w().YT?.Player) return; // already loaded (lazy init handled it)
 
     const prev = w().onYouTubeIframeAPIReady;
     w().onYouTubeIframeAPIReady = () => { setApiReady(true); prev?.(); };
@@ -46,7 +46,6 @@ export default function VideoSection() {
   useEffect(() => {
     if (!apiReady || playerRef.current) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     playerRef.current = new (w().YT.Player as new (...a: unknown[]) => YTPlayer)("yt-player-inner", {
       videoId: VIDEO_ID,
       playerVars: {

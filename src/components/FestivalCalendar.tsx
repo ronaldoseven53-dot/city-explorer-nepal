@@ -318,11 +318,21 @@ export default function FestivalCalendar() {
   const [activeCategory, setActiveCategory] = useState<FestivalCategory | "all">("all");
   const [current,        setCurrent]        = useState(0);
   const [reminders,      setReminders]      = useState<Set<string>>(new Set());
+  const [prevCategory,   setPrevCategory]   = useState(activeCategory);
+
+  // Reset card index when filter changes (setState-during-render — no effect needed)
+  if (activeCategory !== prevCategory) {
+    setPrevCategory(activeCategory);
+    setCurrent(0);
+  }
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Hydrate reminders from localStorage
-  useEffect(() => { setReminders(loadReminders()); }, []);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setReminders(loadReminders());
+  }, []);
 
   // On mount: fire browser notification for reminded festivals ≤ 2 days away
   useEffect(() => {
@@ -349,9 +359,8 @@ export default function FestivalCalendar() {
   // Safe current index
   const idx = Math.min(current, Math.max(0, filtered.length - 1));
 
-  // Reset scroll + index when filter changes
+  // Reset scroll position when filter changes (setCurrent(0) is handled by setState-during-render above)
   useEffect(() => {
-    setCurrent(0);
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ left: 0, behavior: "instant" as ScrollBehavior });
     }

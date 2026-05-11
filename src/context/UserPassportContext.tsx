@@ -48,6 +48,7 @@ export function UserPassportProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(VISITED_KEY);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (raw) setVisitedIds(new Set(JSON.parse(raw) as string[]));
     } catch {
       // localStorage unavailable (SSR, private mode)

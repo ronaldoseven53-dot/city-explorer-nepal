@@ -13,10 +13,11 @@ import { Wifi, X, ChevronDown } from "lucide-react";
 // ── Responsive hook ────────────────────────────────────────────────
 
 function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(max-width: 639px)").matches
+  );
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 639px)");
-    setIsMobile(mq.matches);
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
@@ -55,18 +56,25 @@ const QUICK_PROMPTS = [
 const NEPAL_CENTER = { lat: 28.3949, lng: 84.124 };
 
 function TypewriterText({ text, speed = 30 }: { text: string; speed?: number }) {
+  const [prevText, setPrevText]       = useState(text);
   const [displayText, setDisplayText] = useState("");
-  const [isComplete, setIsComplete] = useState(false);
+  const [isComplete, setIsComplete]   = useState(false);
 
-  useEffect(() => {
+  // Reset when the text prop changes (setState-during-render pattern — no effect needed)
+  if (text !== prevText) {
+    setPrevText(text);
     setDisplayText("");
     setIsComplete(false);
-    let i = 0;
+  }
+
+  useEffect(() => {
+    let i = displayText.length;
     const timer = setInterval(() => {
       if (i < text.length) { setDisplayText(text.slice(0, i + 1)); i++; }
       else { setIsComplete(true); clearInterval(timer); }
     }, speed);
     return () => clearInterval(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text, speed]);
 
   return (
@@ -129,7 +137,6 @@ function shouldSuggestNext(text: string) {
 export default function AIAssistant() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [input, setInput] = useState("");
-  const [passportSuggestion, setPassportSuggestion] = useState<string | null>(null);
   const [glowingMessageId, setGlowingMessageId] = useState<string | null>(null);
   const bottomRef      = useRef<HTMLDivElement>(null);
   const lastAssistantId = useRef<string | null>(null);
@@ -225,23 +232,25 @@ export default function AIAssistant() {
     document.dispatchEvent(new CustomEvent("himalaya-chat-state", { detail: { open: isChatOpen } }));
   }, [isChatOpen]);
 
-  // Passport "what next" suggestion
+  // Passport "what next" suggestion — derived value, no state needed
   const lastUserText = useMemo(() => {
     const m = [...messages].reverse().find((m) => m.role === "user");
     if (!m) return "";
     return m.parts.filter((p) => p.type === "text").map((p) => p.text).join(" ").trim();
   }, [messages]);
 
+  const passportSuggestion = useMemo<string | null>(() => {
+    if (!shouldSuggestNext(lastUserText)) return null;
+    const next = findNearestUnvisited(visitedIds);
+    if (next) return `Based on your My Collection progress, the nearest unvisited landmark is ${next.name}. I recommend exploring it next.`;
+    return "You have visited every landmark — congratulations! Let me help you choose an epic new route.";
+  }, [lastUserText, visitedIds]);
+
+  // Side effects when passport suggestion changes (map fly + hero image)
   useEffect(() => {
-    if (shouldSuggestNext(lastUserText)) {
-      const next = findNearestUnvisited(visitedIds);
-      if (next) {
-        setPassportSuggestion(`Based on your My Collection progress, the nearest unvisited landmark is ${next.name}. I recommend exploring it next.`);
-        dispatchMapFly(next); dispatchHeroImage(next);
-      } else {
-        setPassportSuggestion("You have visited every landmark — congratulations! Let me help you choose an epic new route.");
-      }
-    } else { setPassportSuggestion(null); }
+    if (!shouldSuggestNext(lastUserText)) return;
+    const next = findNearestUnvisited(visitedIds);
+    if (next) { dispatchMapFly(next); dispatchHeroImage(next); }
   }, [lastUserText, visitedIds]);
 
   // Map fly on AI reply

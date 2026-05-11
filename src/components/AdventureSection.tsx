@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import Image from "next/image";
+import Link from "next/link";
 
 interface Category {
   id: string;
@@ -218,7 +219,7 @@ export default function AdventureSection() {
           </h2>
         </div>
 
-        <a
+        <Link
           href="/experience/adventure"
           className="flex items-center gap-1.5 font-semibold text-[0.75rem] transition-opacity duration-150 hover:opacity-70"
           style={{ color: "#DC143C" }}
@@ -233,7 +234,7 @@ export default function AdventureSection() {
               strokeLinejoin="round"
             />
           </svg>
-        </a>
+        </Link>
       </div>
 
       {/* ── Bento grid ── */}

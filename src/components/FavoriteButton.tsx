@@ -21,7 +21,7 @@ export default function FavoriteButton({ destinationId }: { destinationId: strin
         .eq("user_id", user.id).eq("destination_id", destinationId).maybeSingle()
         .then(({ data }) => setSaved(!!data));
     });
-  }, [destinationId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [destinationId]);
 
   const toggle = () => {
     if (!userId) { router.push("/auth/login"); return; }

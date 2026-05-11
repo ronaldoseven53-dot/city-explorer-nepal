@@ -208,17 +208,6 @@ function WeatherIcon({ type }: { type: IconType }) {
   return <SunIcon />;
 }
 
-// ── Loading skeleton ───────────────────────────────────────────────────
-
-function Skeleton({ w, h, className = "" }: { w: number | string; h: number; className?: string }) {
-  return (
-    <div
-      className={`animate-pulse rounded-lg ${className}`}
-      style={{ width: w, height: h, background: "rgba(255,255,255,0.09)" }}
-    />
-  );
-}
-
 // ── Transition variants ────────────────────────────────────────────────
 
 const slideVariants = {
@@ -287,6 +276,7 @@ export default function LiveInsights({ isDark }: { isDark: boolean }) {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     return fetchWeather(city.id);
   }, [city.id, fetchWeather]);
 

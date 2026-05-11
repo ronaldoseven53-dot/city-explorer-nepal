@@ -26,6 +26,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const initial: Theme = stored === "light" ? "light" : "dark";
     // Sync DOM class — overrides any server-rendered hardcoded class
     document.documentElement.classList.toggle("dark", initial === "dark");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(initial);
     setMounted(true);
   }, []);
