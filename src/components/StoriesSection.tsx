@@ -157,11 +157,18 @@ function StoryViewer({
       <div className="absolute inset-y-0 left-0 w-1/3 z-10" onClick={prev} />
       <div className="absolute inset-y-0 right-0 w-2/3 z-10" onClick={next} />
 
-      {/* Close — z-20 sits above tap zones */}
+      {/* Close — z-20 sits above tap zones, 44 px min touch target */}
       <button onClick={onClose}
-        className="absolute top-12 right-4 z-20 w-9 h-9 flex items-center justify-center rounded-full cursor-pointer"
-        style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.18)" }}>
-        <X size={18} color="white" />
+        className="absolute top-12 right-4 z-20 w-11 h-11 flex items-center justify-center rounded-full cursor-pointer"
+        style={{
+          background:           "rgba(0,0,0,0.68)",
+          backdropFilter:       "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
+          border:               "1px solid rgba(255,255,255,0.24)",
+          boxShadow:            "0 2px 16px rgba(0,0,0,0.40)",
+        }}
+        aria-label="Close story">
+        <X size={20} color="white" strokeWidth={2.2} />
       </button>
 
       {/* Chevron hints */}
@@ -181,17 +188,35 @@ function StoryViewer({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="absolute bottom-12 left-6 right-6 z-10"
+          className="absolute bottom-12 left-5 right-5 z-10"
         >
-          <p className="text-[11px] font-bold uppercase tracking-[0.2em] mb-1"
-            style={{ color: story.ring[0] }}>
+          {/* ① Quick data badge — location type */}
+          <span className="inline-flex items-center rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] mb-3"
+            style={{
+              background: `${story.ring[0]}28`,
+              border:     `1px solid ${story.ring[0]}55`,
+              color:      story.ring[0],
+            }}>
             {story.sub}
-          </p>
-          <h3 className="text-white font-extrabold text-3xl tracking-tight leading-tight mb-2">
+          </span>
+
+          {/* ② Main headline — Playfair Display bold serif */}
+          <h3 className="text-white font-extrabold leading-[1.04] mb-2"
+            style={{
+              fontFamily:    "var(--font-playfair), Georgia, 'Times New Roman', serif",
+              fontSize:      "clamp(2.4rem, 9vw, 3.8rem)",
+              letterSpacing: "-0.02em",
+            }}>
             {story.name}
           </h3>
-          <p className="text-white/70 text-sm leading-relaxed">{story.caption}</p>
-          <p className="text-white/35 text-xs mt-2">{idx + 1} / {STORIES.length}</p>
+
+          {/* ③ Descriptive subtext — readable sans-serif */}
+          <p className="text-white/68 text-[13px] leading-relaxed mb-3 max-w-[300px]">
+            {story.caption}
+          </p>
+
+          {/* ④ Counter */}
+          <p className="text-white/28 text-[11px] font-medium tabular-nums">{idx + 1} / {STORIES.length}</p>
         </motion.div>
       </AnimatePresence>
     </motion.div>

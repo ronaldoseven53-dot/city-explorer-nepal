@@ -24,17 +24,16 @@ const PALETTE = [
 type DestId = typeof PALETTE[number]["id"];
 
 // ── Geographic coordinates (lat, lng) for nearest-neighbor sort ────────
-// Approximate centroids for each hub
 
 const COORDS: Record<DestId, [number, number]> = {
-  ktm: [27.7172, 85.3240],   // Kathmandu
-  pok: [28.2096, 83.9856],   // Pokhara
-  chi: [27.5291, 84.3542],   // Chitwan
-  lum: [27.4833, 83.2833],   // Lumbini
-  bha: [27.6722, 85.4278],   // Bhaktapur
-  ana: [28.5167, 83.8667],   // Annapurna / Jomsom
-  mus: [28.9958, 83.8506],   // Mustang (Lo Manthang)
-  rar: [29.5167, 82.0833],   // Rara Lake
+  ktm: [27.7172, 85.3240],
+  pok: [28.2096, 83.9856],
+  chi: [27.5291, 84.3542],
+  lum: [27.4833, 83.2833],
+  bha: [27.6722, 85.4278],
+  ana: [28.5167, 83.8667],
+  mus: [28.9958, 83.8506],
+  rar: [29.5167, 82.0833],
 };
 
 function geoDistSq(a: DestId, b: DestId): number {
@@ -43,7 +42,6 @@ function geoDistSq(a: DestId, b: DestId): number {
   return (la - lb) ** 2 + (lo - ob) ** 2;
 }
 
-// Greedy nearest-neighbour starting from ids[0] (first chosen city stays fixed)
 function nearestNeighborSort(ids: DestId[]): DestId[] {
   if (ids.length <= 2) return ids;
   const remaining = new Set(ids.slice(1));
@@ -87,6 +85,14 @@ const ROUTE_ICONS: Record<RouteMode, React.ElementType> = {
   drive:  Car,
 };
 
+const ROUTE_COLORS: Record<RouteMode, string> = {
+  flight: "#0EA5E9", bus: "#F97316", drive: "#84CC16",
+};
+
+const ROUTE_LABELS: Record<RouteMode, string> = {
+  flight: "Fly", bus: "Bus", drive: "Drive",
+};
+
 function getRoute(a: DestId, b: DestId) {
   return ROUTES[`${a}-${b}`] ?? ROUTES[`${b}-${a}`] ?? { mode: "bus" as RouteMode, time: "varies" };
 }
@@ -95,15 +101,12 @@ const MAX_STOPS        = 5;
 const COST_MIN_PER_DAY = 50;
 const COST_MAX_PER_DAY = 80;
 
-// ── Route connector ────────────────────────────────────────────────────
+// ── Desktop: horizontal route connector ───────────────────────────────
 
 function RouteConnector({ from, to }: { from: DestId; to: DestId }) {
   const route = getRoute(from, to);
   const Icon  = ROUTE_ICONS[route.mode];
-  const colors: Record<RouteMode, string> = {
-    flight: "#0EA5E9", bus: "#F97316", drive: "#84CC16",
-  };
-  const col = colors[route.mode];
+  const col   = ROUTE_COLORS[route.mode];
 
   return (
     <div className="flex flex-col items-center justify-center flex-shrink-0"
@@ -123,7 +126,7 @@ function RouteConnector({ from, to }: { from: DestId; to: DestId }) {
   );
 }
 
-// ── Stop node ──────────────────────────────────────────────────────────
+// ── Desktop: horizontal stop node ─────────────────────────────────────
 
 function StopNode({
   dest, dayStart, onRemove,
@@ -145,30 +148,18 @@ function StopNode({
       onMouseLeave={() => setHovered(false)}
     >
       <div className="relative">
-        {/* Glow ring */}
         <div className="absolute rounded-full"
-          style={{
-            inset: -2,
-            background: `conic-gradient(${dest.color}cc, ${dest.color}22, ${dest.color}cc)`,
-            filter: "blur(1.5px)",
-          }}
-        />
+          style={{ inset: -2, background: `conic-gradient(${dest.color}cc, ${dest.color}22, ${dest.color}cc)`, filter: "blur(1.5px)" }} />
         <div className="relative rounded-full p-[2px]"
           style={{ background: "#080c1a", width: 60, height: 60, zIndex: 1 }}>
           <div className="w-full h-full rounded-full overflow-hidden relative">
             <Image src={dest.img} alt={dest.name} fill className="object-cover" sizes="60px" />
           </div>
         </div>
-        {/* Day badge */}
         <div className="absolute -top-1 -right-1 z-10 rounded-full flex items-center justify-center"
-          style={{
-            width: 18, height: 18, background: dest.color,
-            boxShadow: `0 0 8px ${dest.color}99`,
-            fontSize: 8, fontWeight: 800, color: "#fff",
-          }}>
+          style={{ width: 18, height: 18, background: dest.color, boxShadow: `0 0 8px ${dest.color}99`, fontSize: 8, fontWeight: 800, color: "#fff" }}>
           {dest.days}d
         </div>
-        {/* Hover remove */}
         <AnimatePresence>
           {hovered && (
             <motion.button
@@ -186,16 +177,108 @@ function StopNode({
         </AnimatePresence>
       </div>
       <div className="flex flex-col items-center gap-0.5">
-        <span className="text-[10px] font-bold text-center leading-tight"
-          style={{ color: "var(--text-primary)" }}>
+        <span className="text-[10px] font-bold text-center leading-tight" style={{ color: "var(--text-primary)" }}>
           {dest.name}
         </span>
-        <span className="text-[9px] font-medium text-center"
-          style={{ color: "var(--text-tertiary)" }}>
+        <span className="text-[9px] font-medium text-center" style={{ color: "var(--text-tertiary)" }}>
           Day {dayStart}–{dayStart + dest.days - 1}
         </span>
       </div>
     </motion.div>
+  );
+}
+
+// ── Mobile: vertical checklist ─────────────────────────────────────────
+
+function MobileChecklist({
+  dests,
+  onRemove,
+}: {
+  dests: typeof PALETTE[number][];
+  onRemove: (id: DestId) => void;
+}) {
+  return (
+    <div className="px-5 py-5">
+      <AnimatePresence mode="popLayout">
+        {dests.map((dest, i) => {
+          const dayStart = dests.slice(0, i).reduce((s, d) => s + d.days, 1);
+          const isLast   = i === dests.length - 1;
+          const next     = !isLast ? dests[i + 1] : null;
+          const route    = next ? getRoute(dest.id, next.id) : null;
+          const RouteIcon = route ? ROUTE_ICONS[route.mode] : null;
+          const col       = route ? ROUTE_COLORS[route.mode] : "#888";
+
+          return (
+            <motion.div
+              key={dest.id}
+              layout
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ type: "spring", stiffness: 340, damping: 24 }}
+            >
+              {/* ── Stop row ── */}
+              <div className="flex gap-3">
+                {/* Timeline: numbered circle */}
+                <div className="flex flex-col items-center flex-shrink-0" style={{ width: 32 }}>
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full text-white font-extrabold text-[11px] flex-shrink-0"
+                    style={{ background: dest.color, boxShadow: `0 0 10px ${dest.color}55` }}>
+                    {i + 1}
+                  </div>
+                </div>
+
+                {/* Content: image + name + days + remove */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2.5" style={{ minHeight: 52 }}>
+                    <div className="relative rounded-xl overflow-hidden flex-shrink-0" style={{ width: 44, height: 44 }}>
+                      <Image src={dest.img} alt={dest.name} fill className="object-cover" sizes="44px" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-[14px] leading-tight" style={{ color: "var(--text-primary)" }}>
+                        {dest.name}
+                      </p>
+                      <p className="text-[11px] mt-0.5" style={{ color: "var(--text-tertiary)" }}>
+                        {dest.days} day{dest.days !== 1 ? "s" : ""} · Day {dayStart}–{dayStart + dest.days - 1}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => onRemove(dest.id)}
+                      aria-label={`Remove ${dest.name}`}
+                      className="flex items-center justify-center rounded-full cursor-pointer flex-shrink-0"
+                      style={{ width: 32, height: 32, background: "rgba(239,68,68,0.10)", border: "1px solid rgba(239,68,68,0.25)" }}
+                    >
+                      <X size={13} color="#EF4444" strokeWidth={2.5} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Connector: vertical line + transport badge ── */}
+              {!isLast && (
+                <div className="flex gap-3">
+                  {/* Left: vertical line below circle */}
+                  <div className="flex justify-center flex-shrink-0" style={{ width: 32 }}>
+                    <div className="w-[2px] rounded-full" style={{ background: `${dest.color}30`, minHeight: 36 }} />
+                  </div>
+                  {/* Right: transport badge */}
+                  <div className="flex items-center gap-2 py-2">
+                    {RouteIcon && (
+                      <div className="flex items-center justify-center rounded-full flex-shrink-0"
+                        style={{ width: 26, height: 26, background: `${col}18`, border: `1px solid ${col}45` }}>
+                        <RouteIcon size={12} color={col} strokeWidth={2} />
+                      </div>
+                    )}
+                    <span style={{ fontSize: 12, fontWeight: 700, color: col }}>
+                      {route ? `${ROUTE_LABELS[route.mode]} · ${route.time}` : ""}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          );
+        })}
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -205,10 +288,9 @@ export default function ItineraryTimeline() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  const [selected, setSelected]       = useState<DestId[]>([]);
+  const [selected, setSelected]         = useState<DestId[]>([]);
   const [reorderCount, setReorderCount] = useState(0);
 
-  // Auto-dismiss "Route Optimized" badge after 2.5 s
   useEffect(() => {
     if (reorderCount === 0) return;
     const t = setTimeout(() => setReorderCount(0), 2500);
@@ -216,18 +298,12 @@ export default function ItineraryTimeline() {
   }, [reorderCount]);
 
   const toggle = (id: DestId) => {
-    if (selected.includes(id)) {
-      setSelected(prev => prev.filter(x => x !== id));
-      return;
-    }
+    if (selected.includes(id)) { setSelected(prev => prev.filter(x => x !== id)); return; }
     if (selected.length >= MAX_STOPS) return;
-
     const naive  = [...selected, id];
     const sorted = naive.length >= 2 ? nearestNeighborSort(naive) : naive;
-    const didReorder = sorted.some((s, i) => s !== naive[i]);
-
+    if (sorted.some((s, i) => s !== naive[i])) setReorderCount(c => c + 1);
     setSelected(sorted);
-    if (didReorder) setReorderCount(c => c + 1);
   };
 
   const remove = (id: DestId) => setSelected(prev => prev.filter(x => x !== id));
@@ -240,17 +316,10 @@ export default function ItineraryTimeline() {
   return (
     <section className="relative w-full py-8 sm:py-10 overflow-hidden">
 
-      {/* Bottom scrim — transparent → rgba(0,0,0,0.4) */}
-      <div
-        aria-hidden
-        className="absolute inset-x-0 bottom-0 pointer-events-none"
-        style={{
-          height: "45%",
-          background: "linear-gradient(to bottom, transparent, rgba(0,0,0,0.40))",
-        }}
-      />
+      <div aria-hidden className="absolute inset-x-0 bottom-0 pointer-events-none"
+        style={{ height: "45%", background: "linear-gradient(to bottom, transparent, rgba(0,0,0,0.40))" }} />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ zIndex: 1 }}>
+      <div className="relative max-w-7xl mx-auto px-5 sm:px-6 lg:px-8" style={{ zIndex: 1 }}>
 
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
@@ -266,50 +335,38 @@ export default function ItineraryTimeline() {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Route Optimized badge */}
             <AnimatePresence>
               {reorderCount > 0 && (
-                <motion.div
-                  key={reorderCount}
+                <motion.div key={reorderCount}
                   initial={{ opacity: 0, scale: 0.75, x: 8 }}
                   animate={{ opacity: 1, scale: 1, x: 0 }}
                   exit={{ opacity: 0, scale: 0.85, x: 4 }}
                   transition={{ type: "spring", stiffness: 420, damping: 24 }}
                   className="flex items-center gap-1.5 rounded-full px-3 py-1.5"
-                  style={{
-                    background: "rgba(34,197,94,0.15)",
-                    border: "1px solid rgba(34,197,94,0.40)",
-                  }}
-                >
+                  style={{ background: "rgba(34,197,94,0.15)", border: "1px solid rgba(34,197,94,0.40)" }}>
                   <Route size={10} color="#22C55E" strokeWidth={2.5} />
-                  <span style={{ fontSize: 10, fontWeight: 700, color: "#22C55E" }}>
-                    Route Optimized
-                  </span>
+                  <span style={{ fontSize: 10, fontWeight: 700, color: "#22C55E" }}>Route Optimized</span>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            {/* Duration badge */}
             {totalDays > 0 && (
-              <motion.div
-                layout
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
+              <motion.div layout initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
                 className="rounded-full px-3 py-1.5 text-[11px] font-bold"
                 style={{
                   background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
-                  color: "var(--text-primary)",
-                  border: "1px solid var(--glass-border)",
-                }}
-              >
-                {selected.length} stop{selected.length !== 1 ? "s" : ""} · {totalDays} day{totalDays !== 1 ? "s" : ""}
+                  color: "var(--text-primary)", border: "1px solid var(--glass-border)",
+                }}>
+                {selected.length} stop{selected.length !== 1 ? "s" : ""} · {totalDays}d
               </motion.div>
             )}
           </div>
         </div>
 
-        {/* Destination picker */}
-        <div className="flex flex-wrap gap-2 mb-6">
+        {/* ── Destination picker ───────────────────────────────────────────
+            Mobile:  horizontal scroll ribbon (flex-nowrap + overflow-x-auto)
+            Desktop: wrapping pill cloud (sm:flex-wrap + sm:overflow-visible)   */}
+        <div className="flex flex-nowrap sm:flex-wrap overflow-x-auto sm:overflow-visible scrollbar-hide gap-2 mb-6 pb-1">
           {PALETTE.map((dest) => {
             const isSelected = selected.includes(dest.id);
             const isDisabled = !isSelected && selected.length >= MAX_STOPS;
@@ -319,64 +376,53 @@ export default function ItineraryTimeline() {
                 onClick={() => !isDisabled && toggle(dest.id)}
                 whileTap={!isDisabled ? { scale: 0.93 } : {}}
                 transition={{ type: "spring", stiffness: 420, damping: 22 }}
-                className="flex items-center gap-2 rounded-full px-3 py-1.5"
+                className="flex items-center gap-2 rounded-full flex-shrink-0"
                 style={{
-                  background: isSelected
-                    ? `${dest.color}20`
-                    : isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
-                  border: isSelected
-                    ? `1.5px solid ${dest.color}70`
-                    : "1.5px solid var(--glass-border)",
-                  opacity: isDisabled ? 0.35 : 1,
-                  cursor: isDisabled ? "not-allowed" : "pointer",
+                  padding:    "8px 14px",
+                  minHeight:  40,
+                  background: isSelected ? `${dest.color}20` : isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+                  border:     isSelected ? `1.5px solid ${dest.color}70` : "1.5px solid var(--glass-border)",
+                  opacity:    isDisabled ? 0.35 : 1,
+                  cursor:     isDisabled ? "not-allowed" : "pointer",
                 }}
               >
-                <div className="relative rounded-full overflow-hidden flex-shrink-0"
-                  style={{ width: 20, height: 20 }}>
-                  <Image src={dest.img} alt={dest.name} fill className="object-cover" sizes="20px" />
+                <div className="relative rounded-full overflow-hidden flex-shrink-0" style={{ width: 22, height: 22 }}>
+                  <Image src={dest.img} alt={dest.name} fill className="object-cover" sizes="22px" />
                 </div>
-                <span className="text-[11px] font-semibold"
+                <span className="text-[12px] font-semibold whitespace-nowrap"
                   style={{ color: isSelected ? dest.color : "var(--text-secondary)" }}>
                   {dest.name}
                 </span>
                 {isSelected
-                  ? <X size={10} color={dest.color} strokeWidth={2.5} />
-                  : <Plus size={10} color="var(--text-tertiary)" strokeWidth={2.5} />
-                }
+                  ? <X size={11} color={dest.color} strokeWidth={2.5} />
+                  : <Plus size={11} color="var(--text-tertiary)" strokeWidth={2.5} />}
               </motion.button>
             );
           })}
           {selected.length >= MAX_STOPS && (
-            <span className="text-[10px] font-semibold self-center"
+            <span className="text-[10px] font-semibold self-center flex-shrink-0"
               style={{ color: "var(--text-tertiary)" }}>
               Max {MAX_STOPS} stops
             </span>
           )}
         </div>
 
-        {/* Timeline card */}
-        <div
-          className="rounded-[22px] overflow-hidden"
+        {/* ── Route display card ── */}
+        <div className="rounded-[22px] overflow-hidden"
           style={{
             background: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)",
             border: "1px solid var(--glass-border)",
             minHeight: 140,
-          }}
-        >
+          }}>
+
           {selected.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex flex-col items-center justify-center gap-2 py-10"
-            >
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center mb-1"
-                style={{ background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)" }}
-              >
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="flex flex-col items-center justify-center gap-2 py-10">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center mb-1"
+                style={{ background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)" }}>
                 <Plus size={18} color="var(--text-tertiary)" strokeWidth={2} />
               </div>
-              <p className="text-[13px] font-semibold"
-                style={{ color: "var(--text-secondary)" }}>
+              <p className="text-[13px] font-semibold" style={{ color: "var(--text-secondary)" }}>
                 Select destinations above to build your route
               </p>
               <p className="text-[11px]" style={{ color: "var(--text-tertiary)" }}>
@@ -384,27 +430,31 @@ export default function ItineraryTimeline() {
               </p>
             </motion.div>
           ) : (
-            <div className="overflow-x-auto scrollbar-hide px-5 py-5">
-              <div className="flex items-center" style={{ minWidth: "max-content", gap: 0 }}>
-                <AnimatePresence mode="popLayout">
-                  {selectedDests.map((dest, i) => {
-                    const dayStart = selectedDests.slice(0, i).reduce((s, d) => s + d.days, 1);
-                    return (
-                      <div key={dest.id} className="flex items-center">
-                        <StopNode
-                          dest={dest}
-                          dayStart={dayStart}
-                          onRemove={() => remove(dest.id)}
-                        />
-                        {i < selectedDests.length - 1 && (
-                          <RouteConnector from={dest.id} to={selectedDests[i + 1].id} />
-                        )}
-                      </div>
-                    );
-                  })}
-                </AnimatePresence>
+            <>
+              {/* ── Mobile: vertical checklist (hidden on sm+) ── */}
+              <div className="sm:hidden">
+                <MobileChecklist dests={selectedDests} onRemove={remove} />
               </div>
-            </div>
+
+              {/* ── Desktop: horizontal scroll timeline (hidden on mobile) ── */}
+              <div className="hidden sm:block overflow-x-auto scrollbar-hide px-5 py-5">
+                <div className="flex items-center" style={{ minWidth: "max-content", gap: 0 }}>
+                  <AnimatePresence mode="popLayout">
+                    {selectedDests.map((dest, i) => {
+                      const dayStart = selectedDests.slice(0, i).reduce((s, d) => s + d.days, 1);
+                      return (
+                        <div key={dest.id} className="flex items-center">
+                          <StopNode dest={dest} dayStart={dayStart} onRemove={() => remove(dest.id)} />
+                          {i < selectedDests.length - 1 && (
+                            <RouteConnector from={dest.id} to={selectedDests[i + 1].id} />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </AnimatePresence>
+                </div>
+              </div>
+            </>
           )}
         </div>
 
@@ -416,31 +466,31 @@ export default function ItineraryTimeline() {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
-              className="mt-4 rounded-[20px] flex items-center justify-between px-5 py-4"
+              className="mt-4 rounded-[20px] flex items-center justify-between px-5 py-4 gap-3"
               style={{
-                background: isDark ? "rgba(220,38,38,0.10)" : "rgba(220,38,38,0.08)",
-                border: isDark ? "1px solid rgba(220,38,38,0.22)" : "1px solid rgba(220,38,38,0.30)",
-                backdropFilter: "blur(16px)",
+                background:           isDark ? "rgba(220,38,38,0.10)" : "rgba(220,38,38,0.08)",
+                border:               isDark ? "1px solid rgba(220,38,38,0.22)" : "1px solid rgba(220,38,38,0.30)",
+                backdropFilter:       "blur(16px)",
                 WebkitBackdropFilter: "blur(16px)",
               }}
             >
-              <div>
-                <p className="font-bold text-[13px] leading-tight"
-                  style={{ color: "var(--text-primary)" }}>
+              <div className="min-w-0">
+                <p className="font-bold text-[13px] leading-tight" style={{ color: "var(--text-primary)" }}>
                   Est. ${budgetMin}–${budgetMax} total
                 </p>
                 <p className="text-[11px] mt-0.5" style={{ color: "var(--text-secondary)" }}>
-                  ${COST_MIN_PER_DAY}–${COST_MAX_PER_DAY}/day · {totalDays} days · {selected.length} stops
+                  ${COST_MIN_PER_DAY}–${COST_MAX_PER_DAY}/day · {totalDays}d · {selected.length} stops
                 </p>
               </div>
               <motion.button
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.96 }}
                 transition={{ type: "spring", stiffness: 440, damping: 22 }}
-                className="cursor-pointer rounded-full px-4 py-2 text-[12px] font-bold text-white flex-shrink-0"
+                className="cursor-pointer rounded-full px-5 py-2.5 text-[12px] font-bold text-white flex-shrink-0"
                 style={{
                   background: "rgba(220,38,38,0.75)",
-                  boxShadow: "0 0 20px rgba(220,38,38,0.40), inset 0 1px 0 rgba(255,255,255,0.18)",
+                  boxShadow:  "0 0 20px rgba(220,38,38,0.40), inset 0 1px 0 rgba(255,255,255,0.18)",
+                  minHeight:  44,
                 }}
                 onClick={() => document.dispatchEvent(new CustomEvent("open-ai-planner"))}
               >
