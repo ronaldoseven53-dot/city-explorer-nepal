@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
 import { Plane, Bus, Car, X, Plus, Route } from "lucide-react";
@@ -11,14 +11,14 @@ import { useTheme } from "@/context/ThemeContext";
 const U = (id: string) => `https://images.unsplash.com/${id}?w=160&q=80&fit=crop`;
 
 const PALETTE = [
-  { id: "ktm", name: "Kathmandu",  img: U("photo-1592285896110-8d88b5b3a5d8"), days: 2, color: "#F97316" },
-  { id: "pok", name: "Pokhara",    img: U("photo-1546954552-eb2ada4a3654"),     days: 2, color: "#0EA5E9" },
-  { id: "chi", name: "Chitwan",    img: U("photo-1544442069-97dded965a9f"),     days: 2, color: "#84CC16" },
-  { id: "lum", name: "Lumbini",    img: U("photo-1609168494389-230528e6a9c3"),  days: 1, color: "#A855F7" },
-  { id: "bha", name: "Bhaktapur",  img: U("photo-1513614835783-51537729c8ba"), days: 1, color: "#6366F1" },
-  { id: "ana", name: "Annapurna", img: U("photo-1551410224-699683e15636"),     days: 3, color: "#22C55E" },
-  { id: "mus", name: "Mustang",    img: U("photo-1558618666-fcd25c85cd64"),     days: 3, color: "#F59E0B" },
-  { id: "rar", name: "Rara Lake",  img: U("photo-1501854140801-50d01698950b"), days: 2, color: "#14B8A6" },
+  { id: "ktm", name: "Kathmandu",  img: U("photo-1592285896110-8d88b5b3a5d8"), days: 2, color: "#F97316", category: "heritage city"          },
+  { id: "pok", name: "Pokhara",    img: U("photo-1546954552-eb2ada4a3654"),     days: 2, color: "#0EA5E9", category: "lakeside & adventure"   },
+  { id: "chi", name: "Chitwan",    img: U("photo-1544442069-97dded965a9f"),     days: 2, color: "#84CC16", category: "wildlife & nature"       },
+  { id: "lum", name: "Lumbini",    img: U("photo-1609168494389-230528e6a9c3"),  days: 1, color: "#A855F7", category: "Buddhist pilgrimage"     },
+  { id: "bha", name: "Bhaktapur",  img: U("photo-1513614835783-51537729c8ba"), days: 1, color: "#6366F1", category: "medieval heritage"       },
+  { id: "ana", name: "Annapurna",  img: U("photo-1551410224-699683e15636"),     days: 3, color: "#22C55E", category: "high-altitude trekking"  },
+  { id: "mus", name: "Mustang",    img: U("photo-1558618666-fcd25c85cd64"),     days: 3, color: "#F59E0B", category: "high-altitude desert"    },
+  { id: "rar", name: "Rara Lake",  img: U("photo-1501854140801-50d01698950b"), days: 2, color: "#14B8A6", category: "remote nature trek"      },
 ] as const;
 
 type DestId = typeof PALETTE[number]["id"];
@@ -282,6 +282,55 @@ function MobileChecklist({
   );
 }
 
+// ── Packing list line renderer (dark-mode aware) ───────────────────────
+
+function formatPackingLine(line: string, isDark: boolean): React.ReactNode {
+  if (!line.trim()) return null;
+  // **Bold heading**
+  if (/^\*\*.+\*\*$/.test(line.trim())) {
+    return (
+      <p style={{
+        fontWeight: 700, fontSize: 10, textTransform: "uppercase",
+        letterSpacing: "0.14em", marginTop: 14, marginBottom: 4,
+        color: isDark ? "rgba(255,255,255,0.45)" : "#64748b",
+      }}>
+        {line.trim().replace(/\*\*/g, "")}
+      </p>
+    );
+  }
+  // 💡 Cultural Tip
+  if (/^💡/.test(line.trim())) {
+    return (
+      <li style={{
+        display: "flex", alignItems: "flex-start", gap: 6,
+        fontSize: 11, lineHeight: 1.55, padding: "6px 10px", marginTop: 4,
+        borderRadius: 10, listStyle: "none",
+        background: isDark ? "rgba(245,158,11,0.10)" : "rgba(245,158,11,0.12)",
+        border:     isDark ? "1px solid rgba(245,158,11,0.25)" : "1px solid rgba(245,158,11,0.35)",
+        color:      isDark ? "#FCD34D" : "#92400E",
+      }}>
+        <span style={{ flexShrink: 0 }}>{line.trim()}</span>
+      </li>
+    );
+  }
+  // - bullet item
+  if (/^[-•*]\s/.test(line.trim())) {
+    return (
+      <li style={{ display: "flex", alignItems: "flex-start", gap: 6, listStyle: "none",
+        fontSize: 12, lineHeight: 1.5, padding: "2px 0",
+        color: isDark ? "rgba(255,255,255,0.72)" : "#374151" }}>
+        <span style={{ color: "#22C55E", flexShrink: 0, marginTop: 1 }}>✓</span>
+        <span>{line.trim().replace(/^[-•*]\s/, "")}</span>
+      </li>
+    );
+  }
+  return (
+    <p style={{ fontSize: 11, color: isDark ? "rgba(255,255,255,0.45)" : "#6B7280" }}>
+      {line}
+    </p>
+  );
+}
+
 // ── Main section ───────────────────────────────────────────────────────
 
 export default function ItineraryTimeline() {
@@ -290,6 +339,19 @@ export default function ItineraryTimeline() {
 
   const [selected, setSelected]         = useState<DestId[]>([]);
   const [reorderCount, setReorderCount] = useState(0);
+  const [startDate,   setStartDate]     = useState("");
+  const [packOpen,    setPackOpen]      = useState(false);
+  const [packText,    setPackText]      = useState("");
+  const [packLoading, setPackLoading]   = useState(false);
+  const packAbortRef = useRef<AbortController | null>(null);
+
+  // Derive travel month label from the month input (YYYY-MM)
+  const travelMonth = startDate
+    ? new Date(startDate + "-01T00:00:00").toLocaleString("en-US", { month: "long", year: "numeric" })
+    : "";
+  const travelMonthName = startDate
+    ? new Date(startDate + "-01T00:00:00").toLocaleString("en-US", { month: "long" })
+    : new Date().toLocaleString("en-US", { month: "long" });
 
   useEffect(() => {
     if (reorderCount === 0) return;
@@ -313,7 +375,45 @@ export default function ItineraryTimeline() {
   const budgetMin     = totalDays * COST_MIN_PER_DAY;
   const budgetMax     = totalDays * COST_MAX_PER_DAY;
 
+  const generatePacking = async () => {
+    packAbortRef.current?.abort();
+    packAbortRef.current = new AbortController();
+    setPackOpen(true);
+    setPackLoading(true);
+    setPackText("");
+
+    const tripContext = {
+      cities:     selectedDests.map(d => d.name),
+      month:      travelMonthName,
+      totalDays,
+      categories: [...new Set(selectedDests.map(d => d.category))],
+    };
+
+    try {
+      const res = await fetch("/api/generate-packing-list", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify(tripContext),
+        signal:  packAbortRef.current.signal,
+      });
+      setPackLoading(false);
+      const reader  = res.body!.getReader();
+      const decoder = new TextDecoder();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        setPackText(prev => prev + decoder.decode(value, { stream: true }));
+      }
+    } catch (err) {
+      if ((err as Error).name !== "AbortError") {
+        setPackLoading(false);
+        setPackText("Sorry, couldn't generate the packing list. Please try again.");
+      }
+    }
+  };
+
   return (
+    <>
     <section className="relative w-full py-8 sm:py-10 overflow-hidden">
 
       <div aria-hidden className="absolute inset-x-0 bottom-0 pointer-events-none"
@@ -466,7 +566,7 @@ export default function ItineraryTimeline() {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
-              className="mt-4 rounded-[20px] flex items-center justify-between px-5 py-4 gap-3"
+              className="mt-4 rounded-[20px] flex flex-col px-5 py-4 gap-3"
               style={{
                 background:           isDark ? "rgba(220,38,38,0.10)" : "rgba(220,38,38,0.08)",
                 border:               isDark ? "1px solid rgba(220,38,38,0.22)" : "1px solid rgba(220,38,38,0.30)",
@@ -474,37 +574,177 @@ export default function ItineraryTimeline() {
                 WebkitBackdropFilter: "blur(16px)",
               }}
             >
-              <div className="min-w-0">
-                <p className="font-bold text-[13px] leading-tight" style={{ color: "var(--text-primary)" }}>
-                  Est. ${budgetMin}–${budgetMax} total
-                </p>
-                <p className="text-[11px] mt-0.5" style={{ color: "var(--text-secondary)" }}>
-                  ${COST_MIN_PER_DAY}–${COST_MAX_PER_DAY}/day · {totalDays}d · {selected.length} stops
-                </p>
+              {/* Row 1: Budget estimate + Plan with AI */}
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-bold text-[13px] leading-tight" style={{ color: "var(--text-primary)" }}>
+                    Est. ${budgetMin}–${budgetMax} total
+                  </p>
+                  <p className="text-[11px] mt-0.5" style={{ color: "var(--text-secondary)" }}>
+                    ${COST_MIN_PER_DAY}–${COST_MAX_PER_DAY}/day · {totalDays}d · {selected.length} stops
+                  </p>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                  transition={{ type: "spring", stiffness: 440, damping: 22 }}
+                  className="cursor-pointer rounded-full px-5 py-2.5 text-[12px] font-bold text-white flex-shrink-0"
+                  style={{
+                    background: "rgba(220,38,38,0.75)",
+                    boxShadow:  "0 0 20px rgba(220,38,38,0.40), inset 0 1px 0 rgba(255,255,255,0.18)",
+                    minHeight:  40,
+                  }}
+                  onClick={() => {
+                    const cityNames = selectedDests.map(d => d.name);
+                    const prompt = `I have selected these ${cityNames.length} destinations for my Nepal trip: **${cityNames.join(", ")}** (${totalDays} days total).\n\nPlease generate a professional day-by-day itinerary for these locations. For each day include:\n- **Morning / Afternoon / Evening** activities\n- Top landmarks and cultural experiences\n- Local food & restaurant suggestions\n- Practical travel tips\n\nAlso call the buildItinerary tool so the full timeline is displayed.`;
+                    document.dispatchEvent(new CustomEvent("open-ai-planner", { detail: { prompt } }));
+                  }}
+                >
+                  ✨ Plan with AI
+                </motion.button>
               </div>
-              <motion.button
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.96 }}
-                transition={{ type: "spring", stiffness: 440, damping: 22 }}
-                className="cursor-pointer rounded-full px-5 py-2.5 text-[12px] font-bold text-white flex-shrink-0"
-                style={{
-                  background: "rgba(220,38,38,0.75)",
-                  boxShadow:  "0 0 20px rgba(220,38,38,0.40), inset 0 1px 0 rgba(255,255,255,0.18)",
-                  minHeight:  44,
-                }}
-                onClick={() => {
-                  const cityNames = selectedDests.map(d => d.name);
-                  const prompt = `I have selected these ${cityNames.length} destinations for my Nepal trip: **${cityNames.join(", ")}** (${totalDays} days total).\n\nPlease generate a professional day-by-day itinerary for these locations. For each day include:\n- **Morning / Afternoon / Evening** activities\n- Top landmarks and cultural experiences\n- Local food & restaurant suggestions\n- Practical travel tips\n\nAlso call the buildItinerary tool so the full timeline is displayed.`;
-                  document.dispatchEvent(new CustomEvent("open-ai-planner", { detail: { prompt } }));
-                }}
-              >
-                ✨ Plan with AI
-              </motion.button>
+
+              {/* Row 2: Month picker + Smart Packing List */}
+              <div className="flex items-center justify-between gap-3 pt-2.5"
+                style={{ borderTop: isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid rgba(220,38,38,0.15)" }}>
+                <div className="flex items-center gap-2 min-w-0">
+                  <span style={{ fontSize: 14 }}>📅</span>
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.14em] mb-0.5"
+                      style={{ color: "var(--text-tertiary)" }}>
+                      Travel Month
+                    </p>
+                    <input
+                      type="month"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      aria-label="Select travel month"
+                      style={{
+                        background:  isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+                        border:      `1px solid ${isDark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.14)"}`,
+                        borderRadius: 8,
+                        padding:     "3px 8px",
+                        fontSize:    11,
+                        fontWeight:  600,
+                        color:       "var(--text-primary)",
+                        colorScheme: isDark ? "dark" : "light",
+                        outline:     "none",
+                        cursor:      "pointer",
+                      } as React.CSSProperties}
+                    />
+                  </div>
+                  {travelMonth && (
+                    <span className="text-[10px] font-semibold flex-shrink-0"
+                      style={{ color: "var(--text-tertiary)" }}>
+                      {travelMonth}
+                    </span>
+                  )}
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                  transition={{ type: "spring", stiffness: 440, damping: 22 }}
+                  onClick={generatePacking}
+                  className="cursor-pointer rounded-full px-4 py-2 text-[11px] font-bold flex-shrink-0 flex items-center gap-1.5"
+                  style={{
+                    background: isDark ? "rgba(34,197,94,0.18)" : "rgba(34,197,94,0.15)",
+                    border:     isDark ? "1px solid rgba(34,197,94,0.40)" : "1px solid rgba(34,197,94,0.45)",
+                    color:      "#16a34a",
+                    minHeight:  36,
+                  }}
+                >
+                  <span>🎒</span> Smart Packing List
+                </motion.button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
 
       </div>
     </section>
+
+    {/* ── Packing List Modal ── */}
+    {packOpen && (
+      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <motion.div
+          initial={{ opacity: 0, y: 24, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0,  scale: 1    }}
+          exit={{ opacity: 0, y: 16 }}
+          transition={{ type: "spring", stiffness: 380, damping: 28 }}
+          className="w-full max-w-md flex flex-col overflow-hidden"
+          style={{
+            maxHeight:    "85vh",
+            borderRadius: 28,
+            background:   isDark ? "#0e1018" : "#ffffff",
+            border:       isDark ? "1px solid rgba(255,255,255,0.09)" : "1px solid rgba(0,0,0,0.08)",
+            boxShadow:    "0 24px 60px rgba(0,0,0,0.45)",
+          }}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 py-4 flex-shrink-0"
+            style={{ borderBottom: isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid #f1f5f9" }}>
+            <div className="flex items-center gap-2.5">
+              <span className="text-2xl">🎒</span>
+              <div>
+                <p className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>
+                  Smart Packing List
+                </p>
+                <p className="text-[11px] mt-0.5" style={{ color: "var(--text-tertiary)" }}>
+                  {selectedDests.map(d => d.name).join(" → ")}
+                  {travelMonth ? ` · ${travelMonth}` : ""}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => { packAbortRef.current?.abort(); setPackOpen(false); setPackText(""); }}
+              aria-label="Close packing list"
+              className="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer transition-colors"
+              style={{
+                background: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)",
+                color: "var(--text-tertiary)",
+                fontSize: 16,
+              }}
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto px-5 py-4 min-h-0">
+            {packLoading && (
+              <div className="flex items-center gap-2 text-sm py-4" style={{ color: "var(--text-tertiary)" }}>
+                <span className="w-2 h-2 rounded-full bg-green-400 animate-bounce [animation-delay:0ms]"   />
+                <span className="w-2 h-2 rounded-full bg-green-400 animate-bounce [animation-delay:150ms]" />
+                <span className="w-2 h-2 rounded-full bg-green-400 animate-bounce [animation-delay:300ms]" />
+                <span className="ml-1 text-xs">Building your personalised list…</span>
+              </div>
+            )}
+            {packText && (
+              <ul className="space-y-0.5 pb-2">
+                {packText.split("\n").map((line, i) => (
+                  <span key={i}>{formatPackingLine(line, isDark)}</span>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="flex items-center justify-between px-5 py-3 flex-shrink-0"
+            style={{ borderTop: isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid #f1f5f9" }}>
+            <p className="text-[10px]" style={{ color: "var(--text-tertiary)" }}>
+              Tailored to your route, season &amp; culture
+            </p>
+            <button
+              onClick={generatePacking}
+              className="text-xs font-semibold cursor-pointer transition-colors"
+              style={{ color: "#16a34a" }}
+            >
+              Regenerate ↺
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    )}
+    </>
   );
 }
