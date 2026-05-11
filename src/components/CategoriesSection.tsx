@@ -78,7 +78,7 @@ export default function CategoriesSection() {
   };
 
   return (
-    <section className="relative w-full py-10 sm:py-14">
+    <section id="featured-destinations" className="relative w-full py-10 sm:py-14">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header */}

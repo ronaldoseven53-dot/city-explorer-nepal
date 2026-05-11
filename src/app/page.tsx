@@ -6,6 +6,7 @@ import CategoriesSection from "@/components/CategoriesSection";
 import StoriesSection from "@/components/StoriesSection";
 import ItineraryTimeline from "@/components/ItineraryTimeline";
 import FestivalCalendar from "@/components/FestivalCalendar";
+import VideoSection from "@/components/VideoSection";
 import AIAssistantSection from "@/components/AIAssistantSection";
 import BentoDashboard from "@/components/BentoDashboard";
 import BottomNav from "@/components/BottomNav";
@@ -17,6 +18,7 @@ export default function Home() {
       <ParallaxHero />
       <StatsPanel />
       <DestinationsCarousel />
+      <VideoSection />
       <CategoriesSection />
       <StoriesSection />
       <ItineraryTimeline />
