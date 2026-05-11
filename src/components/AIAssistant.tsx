@@ -544,9 +544,16 @@ export default function AIAssistant() {
 
               {/* Error */}
               {error && (
-                <div className="max-w-[85%] px-4 py-2 rounded-2xl bg-amber-500/10 border border-amber-400/20 text-amber-500/80 italic text-xs tracking-tight flex items-center gap-2">
-                  <Wifi className="w-3 h-3 animate-pulse" />
-                  The mountain winds are heavy — trying to reconnect…
+                <div className="max-w-[85%] px-4 py-2.5 rounded-2xl bg-amber-500/10 border border-amber-400/20 text-amber-500/80 text-xs tracking-tight space-y-1.5">
+                  <div className="flex items-center gap-2 italic">
+                    <Wifi className="w-3 h-3 animate-pulse flex-shrink-0" />
+                    The mountain winds are heavy — trying to reconnect…
+                  </div>
+                  {error.message && (
+                    <p className="text-amber-400/60 not-italic font-mono break-all leading-relaxed">
+                      {error.message}
+                    </p>
+                  )}
                 </div>
               )}
 
