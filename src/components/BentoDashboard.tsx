@@ -214,7 +214,7 @@ export default function BentoDashboard() {
         </BentoCard>
 
         {/* ── CELL 3: Interactive Map ── */}
-        <BentoCard className="lg:col-span-2 min-h-[460px] p-0 overflow-hidden" hoverShadow={HOVER_SHADOW}>
+        <BentoCard className="lg:col-span-2 h-[460px] p-0 overflow-hidden" hoverShadow={HOVER_SHADOW}>
           <MapLoader />
         </BentoCard>
 

@@ -193,7 +193,7 @@ export default function MapSection() {
   const [showLegend,  setShowLegend]  = useState(true);
   const [showPoi,     setShowPoi]     = useState(false);
   const [apiLoaded,   setApiLoaded]   = useState(false);
-  const [apiError,    setApiError]    = useState(false);
+  const [apiError,    setApiError]    = useState<string | null>(null);
   const [searchVal,   setSearchVal]   = useState("");
   const [searching,   setSearching]   = useState(false);
 
@@ -204,7 +204,7 @@ export default function MapSection() {
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     if (!apiKey || apiKey === "your_google_maps_api_key_here") {
-      setApiError(true);
+      setApiError("no-key");
       return;
     }
     // New @googlemaps/js-api-loader v2 functional API (key/v, not apiKey/version)
@@ -212,7 +212,10 @@ export default function MapSection() {
     Promise.all([gmImport("maps"), gmImport("places")]).then(() => {
       injectPacStyles();
       setApiLoaded(true);
-    }).catch(() => setApiError(true));
+    }).catch((err: unknown) => {
+      console.error("[MapSection] Google Maps failed to load:", err);
+      setApiError("load-failed");
+    });
   }, []);
 
   // ── Create map + markers + autocomplete once API is ready ─────────
@@ -225,6 +228,8 @@ export default function MapSection() {
     const mapOptions: Record<string, any> = {
       center:             NEPAL_CENTER,
       zoom:               7,
+      mapTypeId:          "roadmap",   // explicit — prevents blank grey/black during load
+      backgroundColor:    "#e8e8e8",   // light grey placeholder while tiles load
       zoomControl:        false,
       streetViewControl:  false,
       fullscreenControl:  false,
@@ -338,13 +343,15 @@ export default function MapSection() {
     mapRef.current.setOptions({ styles: getMapStyles(isDark, showPoi) });
   }, [isDark, showPoi]);
 
-  // ── Category filter: dim/undim markers ───────────────────────────
+  // ── Category filter: hide/show markers via setMap ────────────────
+  // setMap(null) fully removes the marker from the map (no ghosting).
+  // setOpacity was kept before but left faint 0.2 "stuck" pins on click.
   useEffect(() => {
     markersRef.current.forEach((marker, destId) => {
       const dest = destinations.find((d) => d.id === destId);
       if (!dest) return;
-      const dim = active !== null && dest.category !== active;
-      marker.setOpacity(dim ? 0.2 : 1);
+      const hide = active !== null && dest.category !== active;
+      marker.setMap(hide ? null : mapRef.current);
     });
   }, [active]);
 
@@ -382,20 +389,45 @@ export default function MapSection() {
 
   // ── Render ────────────────────────────────────────────────────────
   return (
-    <div className="relative w-full h-full" style={{ minHeight: 460, background: "#0b1020" }}>
+    // height is explicit — NOT h-full. CSS cannot inherit min-height from a
+    // parent that only sets min-h-[460px]; that would resolve to height:0.
+    <div className="relative w-full" style={{ height: 460, background: "#0b1020" }}>
 
-      {/* ── Google Maps container ── */}
-      <div ref={containerRef} className="absolute inset-0 w-full h-full" />
+      {/* ── Google Maps container — fills parent explicitly ── */}
+      <div ref={containerRef} style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }} />
 
-      {/* ── API key missing / error fallback ── */}
+      {/* ── Loading shimmer ── */}
+      {!apiLoaded && !apiError && (
+        <div className="absolute inset-0 z-10 pointer-events-none"
+          style={{ background: "linear-gradient(135deg, #0e1a32 0%, #152244 50%, #0e1a32 100%)" }}>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <p className="text-white/30 text-[12px] font-medium tracking-wide animate-pulse">
+              Loading Google Maps…
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Error fallback — billing / API not enabled / key missing ── */}
       {apiError && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center z-10"
-          style={{ background: "rgba(4,8,22,0.94)" }}>
-          <p className="text-white/70 text-[13px] font-semibold mb-1">Map unavailable</p>
-          <p className="text-white/35 text-[11px] text-center max-w-[260px]">
-            Add <code className="text-orange-400">NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</code> to
-            .env.local and restart the dev server.
-          </p>
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-10 gap-3 px-6"
+          style={{ background: "rgba(4,8,22,0.96)" }}>
+          <p className="text-2xl">🗺️</p>
+          <p className="text-white font-bold text-[14px]">Map unavailable</p>
+          {apiError === "no-key" ? (
+            <p className="text-white/45 text-[11px] text-center max-w-[280px]">
+              Add <code className="text-orange-400">NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</code> to{" "}
+              <code className="text-orange-400">.env.local</code> and restart the dev server.
+            </p>
+          ) : (
+            <ul className="text-white/45 text-[11px] text-left space-y-1.5 max-w-[300px]">
+              <li>① Enable <strong className="text-white/70">Maps JavaScript API</strong> in Google Cloud Console</li>
+              <li>② Enable <strong className="text-white/70">Places API</strong> in Google Cloud Console</li>
+              <li>③ Link a <strong className="text-white/70">billing account</strong> to the project (required by Google)</li>
+              <li>④ Under API key restrictions, allow <strong className="text-white/70">localhost:3000</strong></li>
+            </ul>
+          )}
+          <p className="text-white/20 text-[10px]">Check the browser console for the exact error</p>
         </div>
       )}
 
