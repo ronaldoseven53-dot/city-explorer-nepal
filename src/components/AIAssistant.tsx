@@ -8,7 +8,29 @@ import { motion, AnimatePresence } from "motion/react";
 import Timeline, { type ItineraryEvent } from "./Timeline";
 import { destinations } from "@/data/destinations";
 import { useUserPassport } from "@/context/UserPassportContext";
-import { Wifi, X, ChevronDown } from "lucide-react";
+import { Wifi, X, ChevronDown, RotateCcw } from "lucide-react";
+
+// ── Chat persistence (localStorage, 3-min TTL) ─────────────────────
+
+const CHAT_KEY = "himalaya_chat_v1";
+const CHAT_TTL = 3 * 60 * 1000; // 3 minutes
+
+function loadStoredChat(): UIMessage[] {
+  try {
+    const raw = localStorage.getItem(CHAT_KEY);
+    if (!raw) return [];
+    const { messages: msgs, ts } = JSON.parse(raw) as { messages: UIMessage[]; ts: number };
+    if (Date.now() - ts > CHAT_TTL) { localStorage.removeItem(CHAT_KEY); return []; }
+    return msgs;
+  } catch { return []; }
+}
+
+function saveChat(msgs: UIMessage[]) {
+  try {
+    if (msgs.length === 0) { localStorage.removeItem(CHAT_KEY); return; }
+    localStorage.setItem(CHAT_KEY, JSON.stringify({ messages: msgs, ts: Date.now() }));
+  } catch {}
+}
 
 // ── Responsive hook ────────────────────────────────────────────────
 
@@ -138,6 +160,11 @@ export default function AIAssistant() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [input, setInput] = useState("");
   const [glowingMessageId, setGlowingMessageId] = useState<string | null>(null);
+
+  // Load persisted messages once on mount (SSR-safe lazy init)
+  const [chatInitialMessages] = useState<UIMessage[]>(() =>
+    typeof window !== "undefined" ? loadStoredChat() : []
+  );
   const bottomRef      = useRef<HTMLDivElement>(null);
   const lastAssistantId = useRef<string | null>(null);
   const autoPromptRef  = useRef<string | null>(null);
@@ -161,7 +188,18 @@ export default function AIAssistant() {
   );
 
   const { visitedIds } = useUserPassport();
-  const { messages, sendMessage, status, error, setMessages } = useChat({ transport });
+  const { messages, sendMessage, status, error, setMessages } = useChat({
+    transport,
+    messages: chatInitialMessages,
+  });
+
+  // Persist messages to localStorage whenever they change
+  useEffect(() => { saveChat(messages); }, [messages]);
+
+  const clearChat = useCallback(() => {
+    setMessages([]);
+    localStorage.removeItem(CHAT_KEY);
+  }, [setMessages]);
   const isThinking = status === "streaming" || status === "submitted";
 
   const appendMockResponse = useCallback(() => {
@@ -361,6 +399,17 @@ export default function AIAssistant() {
                 </p>
               </div>
 
+              {/* New Plan button */}
+              <button
+                onClick={clearChat}
+                aria-label="New plan"
+                title="Clear chat and start fresh"
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-white/40 hover:text-white/80 hover:bg-white/[0.08] transition-all duration-200 cursor-pointer flex-shrink-0 text-[10px] font-semibold tracking-wide"
+              >
+                <RotateCcw size={11} strokeWidth={2.2} />
+                <span className="hidden sm:inline">New</span>
+              </button>
+
               {/* Close — desktop X, mobile chevron-down */}
               <button
                 onClick={() => setIsChatOpen(false)}
@@ -517,7 +566,8 @@ export default function AIAssistant() {
                 onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(); } }}
                 placeholder="Ask about Nepal travel…"
                 disabled={isThinking}
-                className={`flex-1 text-sm px-4 py-2.5 rounded-xl bg-white/[0.06] border text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-amber-500/40 focus:border-amber-500/30 disabled:opacity-40 transition-all tracking-tight ${input.trim() ? "border-amber-500/50 shadow-lg shadow-amber-500/20" : "border-white/[0.10]"}`}
+                style={{ fontSize: 16, touchAction: "manipulation" }}
+                className={`flex-1 px-4 py-2.5 rounded-xl bg-white/[0.06] border text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-amber-500/40 focus:border-amber-500/30 disabled:opacity-40 transition-all tracking-tight ${input.trim() ? "border-amber-500/50 shadow-lg shadow-amber-500/20" : "border-white/[0.10]"}`}
               />
               <motion.button
                 onClick={submit}

@@ -492,7 +492,11 @@ export default function ItineraryTimeline() {
                   boxShadow:  "0 0 20px rgba(220,38,38,0.40), inset 0 1px 0 rgba(255,255,255,0.18)",
                   minHeight:  44,
                 }}
-                onClick={() => document.dispatchEvent(new CustomEvent("open-ai-planner"))}
+                onClick={() => {
+                  const cityNames = selectedDests.map(d => d.name);
+                  const prompt = `I have selected these ${cityNames.length} destinations for my Nepal trip: **${cityNames.join(", ")}** (${totalDays} days total).\n\nPlease generate a professional day-by-day itinerary for these locations. For each day include:\n- **Morning / Afternoon / Evening** activities\n- Top landmarks and cultural experiences\n- Local food & restaurant suggestions\n- Practical travel tips\n\nAlso call the buildItinerary tool so the full timeline is displayed.`;
+                  document.dispatchEvent(new CustomEvent("open-ai-planner", { detail: { prompt } }));
+                }}
               >
                 ✨ Plan with AI
               </motion.button>
