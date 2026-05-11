@@ -5,6 +5,7 @@ import { motion, useScroll, useTransform } from "motion/react";
 import dynamic from "next/dynamic";
 import AIPlannerTrigger from "./AIPlannerTrigger";
 import LiveInsights from "./LiveInsights";
+import FeaturedAdventureCard from "./FeaturedAdventureCard";
 import { useTheme } from "@/context/ThemeContext";
 
 const MapLoader = dynamic(() => import("./MapLoader"), { ssr: false });
@@ -163,6 +164,9 @@ export default function BentoDashboard() {
       >
 
 
+
+        {/* ── CELL 1: Featured Adventure ── */}
+        <FeaturedAdventureCard />
 
         {/* ── CELL 2: Interactive Map ── */}
         <BentoCard className="lg:col-span-2 h-[460px] p-0 overflow-hidden" hoverShadow={HOVER_SHADOW}>
