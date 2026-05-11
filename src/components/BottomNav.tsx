@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "motion/react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { Home, Compass, Map, Bookmark, User } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -13,7 +13,16 @@ const NAV_ITEMS = [
 ] as const;
 
 export default function BottomNav() {
-  const [active, setActive] = useState<string>("home");
+  const [active, setActive]     = useState<string>("home");
+  const [chatOpen, setChatOpen] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      setChatOpen((e as CustomEvent<{ open: boolean }>).detail.open);
+    };
+    document.addEventListener("himalaya-chat-state", handler);
+    return () => document.removeEventListener("himalaya-chat-state", handler);
+  }, []);
 
   const handleTap = (id: string) => {
     setActive(id);
@@ -23,8 +32,14 @@ export default function BottomNav() {
   };
 
   return (
-    <nav
-      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[900] flex items-center gap-1 px-2 py-2"
+    <AnimatePresence>
+    {!chatOpen && (
+    <motion.nav
+      key="bottom-nav"
+      initial={{ opacity: 1, y: 0 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 24, transition: { duration: 0.2, ease: "easeIn" } }}
+      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[900] flex items-center gap-1 px-2 py-2 sm:flex"
       style={{
         background:          "rgba(8,12,28,0.78)",
         backdropFilter:      "blur(28px)",
@@ -83,6 +98,8 @@ export default function BottomNav() {
           </button>
         );
       })}
-    </nav>
+    </motion.nav>
+    )}
+    </AnimatePresence>
   );
 }

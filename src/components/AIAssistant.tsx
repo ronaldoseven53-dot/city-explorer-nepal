@@ -220,6 +220,11 @@ export default function AIAssistant() {
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
+  // Tell BottomNav to hide/show on mobile
+  useEffect(() => {
+    document.dispatchEvent(new CustomEvent("himalaya-chat-state", { detail: { open: isChatOpen } }));
+  }, [isChatOpen]);
+
   // Passport "what next" suggestion
   const lastUserText = useMemo(() => {
     const m = [...messages].reverse().find((m) => m.role === "user");
@@ -292,14 +297,14 @@ export default function AIAssistant() {
             exit="exit"
             className={[
               // shared
-              "fixed z-50 flex flex-col overflow-hidden",
-              "bg-zinc-950/85 backdrop-blur-2xl",
+              "fixed flex flex-col overflow-hidden",
+              "bg-zinc-950/90 backdrop-blur-2xl",
               "border border-white/[0.10]",
               "shadow-[0_20px_60px_rgba(0,0,0,0.55)]",
-              // mobile: full-width bottom sheet
-              "bottom-0 left-0 right-0 h-[92svh] rounded-t-[28px]",
+              // mobile: true full-screen overlay (covers BottomNav, keyboard area, everything)
+              "inset-0 z-[9999] rounded-none",
               // desktop: floating bottom-right window
-              "sm:bottom-20 sm:right-6 sm:left-auto sm:w-[400px] sm:h-auto sm:max-h-[75vh] sm:rounded-3xl sm:origin-bottom-right",
+              "sm:inset-auto sm:z-50 sm:bottom-20 sm:right-6 sm:w-[400px] sm:h-auto sm:max-h-[75vh] sm:rounded-3xl sm:origin-bottom-right",
             ].join(" ")}
           >
             {/* Film grain */}
