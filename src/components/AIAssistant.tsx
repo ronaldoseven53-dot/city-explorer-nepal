@@ -8,7 +8,8 @@ import { motion, AnimatePresence } from "motion/react";
 import Timeline, { type ItineraryEvent } from "./Timeline";
 import { destinations } from "@/data/destinations";
 import { useUserPassport } from "@/context/UserPassportContext";
-import { Wifi, X, ChevronDown, RotateCcw } from "lucide-react";
+import { Wifi, X, ChevronDown, RotateCcw, CalendarPlus, Calendar } from "lucide-react";
+import { type CalendarEvent, googleCalUrl, downloadICS } from "@/lib/calendarUtils";
 
 // ── Chat persistence (sessionStorage — auto-wipes on tab close) ────
 
@@ -160,6 +161,7 @@ export default function AIAssistant() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [input, setInput] = useState("");
   const [glowingMessageId, setGlowingMessageId] = useState<string | null>(null);
+  const [festivalCtx, setFestivalCtx] = useState<CalendarEvent | null>(null);
 
   // Load persisted messages once on mount (SSR-safe lazy init)
   const [chatInitialMessages] = useState<UIMessage[]>(() =>
@@ -209,6 +211,7 @@ export default function AIAssistant() {
   const clearChat = useCallback(() => {
     setMessages([]);
     clearError();
+    setFestivalCtx(null);
     sessionStorage.removeItem(CHAT_KEY);
   }, [setMessages, clearError]);
   const isThinking = status === "streaming" || status === "submitted";
@@ -244,15 +247,18 @@ export default function AIAssistant() {
     return () => window.removeEventListener("ai-assistant-open", handler);
   }, [handleSend]);
 
-  // Open from "open-ai-planner" events (HimalayanAICard, AIAssistantSection, BottomNav)
+  // Open from "open-ai-planner" events (HimalayanAICard, AIAssistantSection, BottomNav, FestivalCalendar)
   useEffect(() => {
     const handler = (e: Event) => {
-      const prompt = (e as CustomEvent<{ prompt?: string }>).detail?.prompt;
+      const detail = (e as CustomEvent<{ prompt?: string; festival?: CalendarEvent }>).detail;
+      const prompt = detail?.prompt;
+      const festival = detail?.festival;
       if (prompt) {
-        // "Plan with AI" clicked — wipe old history so new plan starts clean
+        // Wipe old history so new plan/festival starts clean
         clearChat();
         autoPromptRef.current = prompt;
       }
+      if (festival) setFestivalCtx(festival);
       setIsChatOpen(true);
     };
     document.addEventListener("open-ai-planner", handler);
@@ -558,6 +564,72 @@ export default function AIAssistant() {
                     </p>
                   )}
                 </div>
+              )}
+
+              {/* Festival calendar strip */}
+              {festivalCtx && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.28 }}
+                  className="flex justify-start"
+                >
+                  <div className="max-w-[85%] rounded-2xl overflow-hidden border border-white/[0.09]"
+                    style={{ background: "rgba(20,14,6,0.85)" }}
+                  >
+                    <div className="px-4 pt-3 pb-3 space-y-2">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-amber-400/60">
+                        Add to Calendar
+                      </p>
+                      <p className="text-white/85 text-xs font-semibold tracking-tight">
+                        {festivalCtx.emoji} {festivalCtx.name}
+                      </p>
+                      <p className="text-zinc-500 text-[10px]">
+                        {new Date(festivalCtx.dateISO).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                        {festivalCtx.endDateISO && festivalCtx.endDateISO !== festivalCtx.dateISO && (
+                          <> – {new Date(festivalCtx.endDateISO).toLocaleDateString("en-US", { month: "long", day: "numeric" })}</>
+                        )}
+                      </p>
+                      <div className="flex gap-2 pt-0.5">
+                        <a
+                          href={googleCalUrl(festivalCtx)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1.5 transition-opacity hover:opacity-80"
+                          style={{
+                            background:     "rgba(66,133,244,0.15)",
+                            border:         "1px solid rgba(66,133,244,0.35)",
+                            borderRadius:   9999,
+                            padding:        "5px 12px",
+                            color:          "#7ab4f5",
+                            fontSize:       11,
+                            fontWeight:     600,
+                            textDecoration: "none",
+                          }}
+                        >
+                          <CalendarPlus size={11} strokeWidth={2.5} />
+                          Google
+                        </a>
+                        <button
+                          onClick={() => downloadICS(festivalCtx)}
+                          className="flex items-center gap-1.5 cursor-pointer transition-opacity hover:opacity-80"
+                          style={{
+                            background:   "rgba(255,255,255,0.08)",
+                            border:       "1px solid rgba(255,255,255,0.18)",
+                            borderRadius: 9999,
+                            padding:      "5px 12px",
+                            color:        "rgba(255,255,255,0.75)",
+                            fontSize:     11,
+                            fontWeight:   600,
+                          }}
+                        >
+                          <Calendar size={11} strokeWidth={2.5} />
+                          Apple
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
               )}
 
               {/* Thinking skeleton */}

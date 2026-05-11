@@ -3,51 +3,10 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { motion } from "motion/react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, Bell, BellRing, CalendarPlus, Calendar } from "lucide-react";
+import { ChevronLeft, ChevronRight, Bell, BellRing, CalendarPlus, Calendar, Sparkles } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 import { FESTIVALS, CATEGORY_CONFIG, type Festival, type FestivalCategory } from "@/data/festivals";
-
-// ── Calendar helpers ──────────────────────────────────────────────────
-
-function toCompact(iso: string) { return iso.replace(/-/g, ""); }
-
-function googleCalUrl(f: Festival) {
-  const s = toCompact(f.dateISO);
-  const e = toCompact(f.endDateISO ?? f.dateISO);
-  const p = new URLSearchParams({
-    action:   "TEMPLATE",
-    text:     `${f.name} ${f.emoji}`,
-    dates:    `${s}/${e}`,
-    details:  f.description,
-    location: f.location,
-  });
-  return `https://calendar.google.com/calendar/render?${p.toString()}`;
-}
-
-function downloadICS(f: Festival) {
-  const s = toCompact(f.dateISO);
-  const e = toCompact(f.endDateISO ?? f.dateISO);
-  const ics = [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//City Explorer Nepal//Cultural Hub//EN",
-    "BEGIN:VEVENT",
-    `UID:${f.id}@cityexplorernepal`,
-    `DTSTART;VALUE=DATE:${s}`,
-    `DTEND;VALUE=DATE:${e}`,
-    `SUMMARY:${f.name} ${f.emoji}`,
-    `DESCRIPTION:${f.description.replace(/[\\;,]/g, "\\$&")}`,
-    `LOCATION:${f.location}`,
-    "STATUS:CONFIRMED",
-    "END:VEVENT",
-    "END:VCALENDAR",
-  ].join("\r\n");
-  const a = Object.assign(document.createElement("a"), {
-    href:     URL.createObjectURL(new Blob([ics], { type: "text/calendar" })),
-    download: `${f.id}.ics`,
-  });
-  a.click();
-}
+import { googleCalUrl, downloadICS } from "@/lib/calendarUtils";
 
 // ── Date helpers ──────────────────────────────────────────────────────
 
@@ -87,9 +46,10 @@ interface CardProps {
   isFocus:    boolean;
   isReminded: boolean;
   onRemind:   (e: React.MouseEvent) => void;
+  onAskAI:    (e: React.MouseEvent) => void;
 }
 
-function FestivalCard({ fest, isFocus, isReminded, onRemind }: CardProps) {
+function FestivalCard({ fest, isFocus, isReminded, onRemind, onAskAI }: CardProps) {
   const label  = dayLabel(fest.dateISO);
   const urgent = daysUntil(fest.dateISO) <= 7 && daysUntil(fest.dateISO) >= 0;
   const cat    = CATEGORY_CONFIG[fest.category];
@@ -302,6 +262,25 @@ function FestivalCard({ fest, isFocus, isReminded, onRemind }: CardProps) {
           >
             <Calendar size={11} strokeWidth={2.5} />
             Apple
+          </button>
+
+          {/* Ask AI */}
+          <button
+            onClick={onAskAI}
+            aria-label="Ask AI about this festival"
+            className="flex items-center gap-1.5 cursor-pointer transition-all duration-150 hover:opacity-80 ml-auto"
+            style={{
+              background:   `${fest.accent}22`,
+              border:       `1px solid ${fest.accent}55`,
+              borderRadius: 9999,
+              padding:      "5px 12px",
+              color:        fest.accent,
+              fontSize:     11,
+              fontWeight:   600,
+            }}
+          >
+            <Sparkles size={11} strokeWidth={2.5} />
+            Ask AI
           </button>
         </div>
       </div>
@@ -611,6 +590,22 @@ export default function FestivalCalendar() {
                   isFocus={i === idx}
                   isReminded={reminders.has(fest.id)}
                   onRemind={(e) => handleRemind(fest, e)}
+                  onAskAI={(e) => {
+                    e.stopPropagation();
+                    document.dispatchEvent(new CustomEvent("open-ai-planner", {
+                      detail: {
+                        prompt: `Tell me about ${fest.name} ${fest.emoji} in Nepal — its story, what happens during the celebration, and where it's best experienced. It falls on ${new Date(fest.dateISO).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}.`,
+                        festival: {
+                          name:        fest.name,
+                          emoji:       fest.emoji,
+                          dateISO:     fest.dateISO,
+                          endDateISO:  fest.endDateISO,
+                          description: fest.description,
+                          location:    fest.location,
+                        },
+                      },
+                    }));
+                  }}
                 />
               </div>
             ))}
