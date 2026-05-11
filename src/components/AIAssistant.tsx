@@ -27,8 +27,12 @@ function loadStoredChat(): UIMessage[] {
 
 function saveChat(msgs: UIMessage[]) {
   try {
-    if (msgs.length === 0) { localStorage.removeItem(CHAT_KEY); return; }
-    localStorage.setItem(CHAT_KEY, JSON.stringify({ messages: msgs, ts: Date.now() }));
+    // Strip tool-call parts — only text survives to the next session
+    const textOnly = msgs
+      .map(m => ({ ...m, parts: m.parts.filter((p: { type: string }) => p.type === "text") }))
+      .filter(m => m.parts.length > 0);
+    if (textOnly.length === 0) { localStorage.removeItem(CHAT_KEY); return; }
+    localStorage.setItem(CHAT_KEY, JSON.stringify({ messages: textOnly, ts: Date.now() }));
   } catch {}
 }
 
@@ -175,14 +179,24 @@ export default function AIAssistant() {
     () => new DefaultChatTransport({
       api: "/api/chat",
       fetch: (url, options) => fetch(url, { ...options, signal: AbortSignal.timeout(30000) }),
-      prepareSendMessagesRequest: async ({ messages, body }) => ({
-        body: {
-          ...body,
-          messages: messages
-            .map((m) => ({ role: m.role, content: m.parts.filter((p) => p.type === "text").map((p) => p.text).join(" ").trim() }))
-            .filter((m) => m.content.length > 0),
-        },
-      }),
+      prepareSendMessagesRequest: async ({ messages, body }) => {
+        type SimpleMsg = { role: string; content: string };
+        const formatted: SimpleMsg[] = messages
+          .map((m) => {
+            const text = m.parts.filter((p) => p.type === "text").map((p) => p.text).join(" ").trim();
+            // Preserve assistant turns that had only tool calls — Gemini requires strict alternation
+            const hasToolPart = m.parts.some((p) => (p as { type: string }).type.startsWith("tool-"));
+            return { role: m.role, content: text || (hasToolPart ? "[itinerary built]" : "") };
+          })
+          .filter((m) => m.content.length > 0)
+          // Merge any remaining consecutive same-role messages to satisfy the strict turn model
+          .reduce<SimpleMsg[]>((acc, m) => {
+            const prev = acc[acc.length - 1];
+            if (prev?.role === m.role) { prev.content += `\n\n${m.content}`; return acc; }
+            return [...acc, { ...m }];
+          }, []);
+        return { body: { ...body, messages: formatted } };
+      },
     }),
     []
   );
