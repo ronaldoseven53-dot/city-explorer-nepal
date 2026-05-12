@@ -594,7 +594,7 @@ export default function FestivalCalendar() {
                     e.stopPropagation();
                     document.dispatchEvent(new CustomEvent("open-ai-planner", {
                       detail: {
-                        prompt: `Tell me about ${fest.name} ${fest.emoji} in Nepal — its story, what happens during the celebration, and where it's best experienced. It falls on ${new Date(fest.dateISO).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}.`,
+                        prompt: `You are a Nepali cultural expert and storyteller. First, tell me the ancient legend or myth behind ${fest.name} ${fest.emoji} — the gods, heroes, or historical event at its origin. Then describe what actually happens during the celebration and where in Nepal to experience it best. It falls on ${new Date(fest.dateISO).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}.`,
                         festival: {
                           name:        fest.name,
                           emoji:       fest.emoji,

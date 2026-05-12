@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "motion/react";
 import Timeline, { type ItineraryEvent } from "./Timeline";
 import { destinations } from "@/data/destinations";
 import { useUserPassport } from "@/context/UserPassportContext";
+import { useTripContext } from "@/context/TripContext";
 import { Wifi, X, ChevronDown, RotateCcw, CalendarPlus, Calendar } from "lucide-react";
 import { type CalendarEvent, googleCalUrl, downloadICS } from "@/lib/calendarUtils";
 
@@ -200,6 +201,7 @@ export default function AIAssistant() {
   );
 
   const { visitedIds } = useUserPassport();
+  const { selectedCities, totalDays, budgetUSD, travelMonth } = useTripContext();
   const { messages, sendMessage, status, error, setMessages, clearError } = useChat({
     transport,
     messages: chatInitialMessages,
@@ -461,10 +463,16 @@ export default function AIAssistant() {
                   </div>
                   <div>
                     <p className="text-white/80 text-sm font-semibold tracking-tight">
-                      Namaste, traveler. I am Himalaya AI.
+                      {selectedCities.length > 0
+                        ? `Namaste! I see you're planning ${totalDays} day${totalDays !== 1 ? "s" : ""} in ${selectedCities.map((c) => c.name).join(" & ")}.`
+                        : "Namaste, traveler. I am Himalaya AI."
+                      }
                     </p>
                     <p className="text-zinc-500 text-xs mt-1 leading-relaxed">
-                      Your expert guide through Nepal — ask me about temples, treks, festivals, and hidden mountain routes.
+                      {selectedCities.length > 0
+                        ? `With your $${budgetUSD.min}–$${budgetUSD.max} budget${travelMonth ? ` in ${travelMonth}` : ""}, I can build the perfect mountain-focused route. Tap a prompt below or ask me anything.`
+                        : "Your expert guide through Nepal — ask me about temples, treks, festivals, and hidden mountain routes."
+                      }
                     </p>
                   </div>
                   <div className="space-y-1.5">

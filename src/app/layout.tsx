@@ -5,7 +5,9 @@ import PWARegistrar from "@/components/PWARegistrar";
 import AIAssistant from "@/components/AIAssistant";
 import { UserPassportProvider } from "@/context/UserPassportContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { TripProvider } from "@/context/TripContext";
 import MasterExplorerModal from "@/components/MasterExplorerModal";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -60,10 +62,14 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <ThemeProvider>
           <UserPassportProvider>
-            {children}
-            <PWARegistrar />
-            <AIAssistant />
-            <MasterExplorerModal />
+            <TripProvider>
+              <ErrorBoundary>
+                {children}
+              </ErrorBoundary>
+              <PWARegistrar />
+              <AIAssistant />
+              <MasterExplorerModal />
+            </TripProvider>
           </UserPassportProvider>
         </ThemeProvider>
       </body>

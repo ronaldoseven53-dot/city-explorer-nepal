@@ -1,110 +1,52 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
+import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
-import { Plane, Bus, Car, X, Plus, Route } from "lucide-react";
+import { Plane, Bus, Car, X, Plus } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import { useTripContext, MAX_STOPS, COST_MIN_PER_DAY, COST_MAX_PER_DAY, type TripCityId } from "@/context/TripContext";
+import { getRoute, ROUTE_COLORS, type RouteMode } from "@/data/tripRoutes";
 
-// ── Destination palette ────────────────────────────────────────────────
+// ── Lazy-load the Mapbox map (avoids SSR crash) ────────────────────────
+
+const TripRouteMap = dynamic(() => import("./TripRouteMap"), { ssr: false });
+
+// ── Images palette (display-only — state lives in TripContext) ─────────
 
 const U = (id: string) => `https://images.unsplash.com/${id}?w=160&q=80&fit=crop`;
 
 const PALETTE = [
-  { id: "ktm", name: "Kathmandu",  img: U("photo-1592285896110-8d88b5b3a5d8"), days: 2, color: "#F97316", category: "heritage city"          },
-  { id: "pok", name: "Pokhara",    img: U("photo-1546954552-eb2ada4a3654"),     days: 2, color: "#0EA5E9", category: "lakeside & adventure"   },
-  { id: "chi", name: "Chitwan",    img: U("photo-1544442069-97dded965a9f"),     days: 2, color: "#84CC16", category: "wildlife & nature"       },
-  { id: "lum", name: "Lumbini",    img: U("photo-1609168494389-230528e6a9c3"),  days: 1, color: "#A855F7", category: "Buddhist pilgrimage"     },
-  { id: "bha", name: "Bhaktapur",  img: U("photo-1513614835783-51537729c8ba"), days: 1, color: "#6366F1", category: "medieval heritage"       },
-  { id: "ana", name: "Annapurna",  img: U("photo-1551410224-699683e15636"),     days: 3, color: "#22C55E", category: "high-altitude trekking"  },
-  { id: "mus", name: "Mustang",    img: U("photo-1558618666-fcd25c85cd64"),     days: 3, color: "#F59E0B", category: "high-altitude desert"    },
-  { id: "rar", name: "Rara Lake",  img: U("photo-1501854140801-50d01698950b"), days: 2, color: "#14B8A6", category: "remote nature trek"      },
-] as const;
+  { id: "ktm" as TripCityId, name: "Kathmandu",  img: U("photo-1592285896110-8d88b5b3a5d8"), days: 2, color: "#F97316" },
+  { id: "pok" as TripCityId, name: "Pokhara",    img: U("photo-1546954552-eb2ada4a3654"),     days: 2, color: "#0EA5E9" },
+  { id: "chi" as TripCityId, name: "Chitwan",    img: U("photo-1544442069-97dded965a9f"),     days: 2, color: "#84CC16" },
+  { id: "lum" as TripCityId, name: "Lumbini",    img: U("photo-1609168494389-230528e6a9c3"),  days: 1, color: "#A855F7" },
+  { id: "bha" as TripCityId, name: "Bhaktapur",  img: U("photo-1513614835783-51537729c8ba"), days: 1, color: "#6366F1" },
+  { id: "ana" as TripCityId, name: "Annapurna",  img: U("photo-1551410224-699683e15636"),     days: 3, color: "#22C55E" },
+  { id: "mus" as TripCityId, name: "Mustang",    img: U("photo-1558618666-fcd25c85cd64"),     days: 3, color: "#F59E0B" },
+  { id: "rar" as TripCityId, name: "Rara Lake",  img: U("photo-1501854140801-50d01698950b"), days: 2, color: "#14B8A6" },
+];
 
-type DestId = typeof PALETTE[number]["id"];
-
-// ── Geographic coordinates (lat, lng) for nearest-neighbor sort ────────
-
-const COORDS: Record<DestId, [number, number]> = {
-  ktm: [27.7172, 85.3240],
-  pok: [28.2096, 83.9856],
-  chi: [27.5291, 84.3542],
-  lum: [27.4833, 83.2833],
-  bha: [27.6722, 85.4278],
-  ana: [28.5167, 83.8667],
-  mus: [28.9958, 83.8506],
-  rar: [29.5167, 82.0833],
-};
-
-function geoDistSq(a: DestId, b: DestId): number {
-  const [la, lo] = COORDS[a];
-  const [lb, ob] = COORDS[b];
-  return (la - lb) ** 2 + (lo - ob) ** 2;
-}
-
-function nearestNeighborSort(ids: DestId[]): DestId[] {
-  if (ids.length <= 2) return ids;
-  const remaining = new Set(ids.slice(1));
-  const path: DestId[] = [ids[0]];
-  while (remaining.size > 0) {
-    const cur = path[path.length - 1];
-    let best: DestId = remaining.values().next().value as DestId;
-    let bestDist = geoDistSq(cur, best);
-    remaining.forEach((id) => {
-      const d = geoDistSq(cur, id);
-      if (d < bestDist) { bestDist = d; best = id; }
-    });
-    path.push(best);
-    remaining.delete(best);
-  }
-  return path;
-}
-
-// ── Route lookup ───────────────────────────────────────────────────────
-
-type RouteMode = "flight" | "bus" | "drive";
-
-const ROUTES: Record<string, { mode: RouteMode; time: string }> = {
-  "ktm-pok": { mode: "flight", time: "25 min" },
-  "ktm-chi": { mode: "bus",    time: "5 hr"   },
-  "ktm-lum": { mode: "bus",    time: "6 hr"   },
-  "ktm-bha": { mode: "drive",  time: "30 min" },
-  "ktm-ana": { mode: "flight", time: "35 min" },
-  "ktm-mus": { mode: "flight", time: "1 hr"   },
-  "ktm-rar": { mode: "flight", time: "45 min" },
-  "pok-chi": { mode: "bus",    time: "5 hr"   },
-  "pok-ana": { mode: "drive",  time: "4 hr"   },
-  "pok-mus": { mode: "drive",  time: "5 hr"   },
-  "chi-lum": { mode: "bus",    time: "3 hr"   },
-  "bha-pok": { mode: "bus",    time: "6 hr"   },
-};
-
+// Lucide icons kept here (React component refs — not serialisable)
 const ROUTE_ICONS: Record<RouteMode, React.ElementType> = {
   flight: Plane,
   bus:    Bus,
   drive:  Car,
 };
 
-const ROUTE_COLORS: Record<RouteMode, string> = {
-  flight: "#0EA5E9", bus: "#F97316", drive: "#84CC16",
-};
-
-const ROUTE_LABELS: Record<RouteMode, string> = {
+const ROUTE_TEXT_LABELS: Record<RouteMode, string> = {
   flight: "Fly", bus: "Bus", drive: "Drive",
 };
 
-function getRoute(a: DestId, b: DestId) {
-  return ROUTES[`${a}-${b}`] ?? ROUTES[`${b}-${a}`] ?? { mode: "bus" as RouteMode, time: "varies" };
+function getRouteDisplay(a: TripCityId, b: TripCityId) {
+  return getRoute(a, b);
 }
-
-const MAX_STOPS        = 5;
-const COST_MIN_PER_DAY = 50;
-const COST_MAX_PER_DAY = 80;
 
 // ── Desktop: horizontal route connector ───────────────────────────────
 
-function RouteConnector({ from, to }: { from: DestId; to: DestId }) {
-  const route = getRoute(from, to);
+function RouteConnector({ from, to }: { from: TripCityId; to: TripCityId }) {
+  const route = getRouteDisplay(from, to);
   const Icon  = ROUTE_ICONS[route.mode];
   const col   = ROUTE_COLORS[route.mode];
 
@@ -128,11 +70,9 @@ function RouteConnector({ from, to }: { from: DestId; to: DestId }) {
 
 // ── Desktop: horizontal stop node ─────────────────────────────────────
 
-function StopNode({
-  dest, dayStart, onRemove,
-}: {
-  dest: typeof PALETTE[number]; dayStart: number; onRemove: () => void;
-}) {
+type PaletteEntry = typeof PALETTE[number];
+
+function StopNode({ dest, dayStart, onRemove }: { dest: PaletteEntry; dayStart: number; onRemove: () => void }) {
   const [hovered, setHovered] = useState(false);
 
   return (
@@ -190,21 +130,15 @@ function StopNode({
 
 // ── Mobile: vertical checklist ─────────────────────────────────────────
 
-function MobileChecklist({
-  dests,
-  onRemove,
-}: {
-  dests: typeof PALETTE[number][];
-  onRemove: (id: DestId) => void;
-}) {
+function MobileChecklist({ dests, onRemove }: { dests: PaletteEntry[]; onRemove: (id: TripCityId) => void }) {
   return (
     <div className="px-5 py-5">
       <AnimatePresence mode="popLayout">
         {dests.map((dest, i) => {
-          const dayStart = dests.slice(0, i).reduce((s, d) => s + d.days, 1);
-          const isLast   = i === dests.length - 1;
-          const next     = !isLast ? dests[i + 1] : null;
-          const route    = next ? getRoute(dest.id, next.id) : null;
+          const dayStart  = dests.slice(0, i).reduce((s, d) => s + d.days, 1);
+          const isLast    = i === dests.length - 1;
+          const next      = !isLast ? dests[i + 1] : null;
+          const route     = next ? getRouteDisplay(dest.id, next.id) : null;
           const RouteIcon = route ? ROUTE_ICONS[route.mode] : null;
           const col       = route ? ROUTE_COLORS[route.mode] : "#888";
 
@@ -217,26 +151,20 @@ function MobileChecklist({
               exit={{ opacity: 0, y: -8 }}
               transition={{ type: "spring", stiffness: 340, damping: 24 }}
             >
-              {/* ── Stop row ── */}
               <div className="flex gap-3">
-                {/* Timeline: numbered circle */}
                 <div className="flex flex-col items-center flex-shrink-0" style={{ width: 32 }}>
                   <div className="flex items-center justify-center w-8 h-8 rounded-full text-white font-extrabold text-[11px] flex-shrink-0"
                     style={{ background: dest.color, boxShadow: `0 0 10px ${dest.color}55` }}>
                     {i + 1}
                   </div>
                 </div>
-
-                {/* Content: image + name + days + remove */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2.5" style={{ minHeight: 52 }}>
                     <div className="relative rounded-xl overflow-hidden flex-shrink-0" style={{ width: 44, height: 44 }}>
                       <Image src={dest.img} alt={dest.name} fill className="object-cover" sizes="44px" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-[14px] leading-tight" style={{ color: "var(--text-primary)" }}>
-                        {dest.name}
-                      </p>
+                      <p className="font-bold text-[14px] leading-tight" style={{ color: "var(--text-primary)" }}>{dest.name}</p>
                       <p className="text-[11px] mt-0.5" style={{ color: "var(--text-tertiary)" }}>
                         {dest.days} day{dest.days !== 1 ? "s" : ""} · Day {dayStart}–{dayStart + dest.days - 1}
                       </p>
@@ -252,15 +180,11 @@ function MobileChecklist({
                   </div>
                 </div>
               </div>
-
-              {/* ── Connector: vertical line + transport badge ── */}
               {!isLast && (
                 <div className="flex gap-3">
-                  {/* Left: vertical line below circle */}
                   <div className="flex justify-center flex-shrink-0" style={{ width: 32 }}>
                     <div className="w-[2px] rounded-full" style={{ background: `${dest.color}30`, minHeight: 36 }} />
                   </div>
-                  {/* Right: transport badge */}
                   <div className="flex items-center gap-2 py-2">
                     {RouteIcon && (
                       <div className="flex items-center justify-center rounded-full flex-shrink-0"
@@ -269,7 +193,7 @@ function MobileChecklist({
                       </div>
                     )}
                     <span style={{ fontSize: 12, fontWeight: 700, color: col }}>
-                      {route ? `${ROUTE_LABELS[route.mode]} · ${route.time}` : ""}
+                      {route ? `${ROUTE_TEXT_LABELS[route.mode]} · ${route.time} · ${route.cost}` : ""}
                     </span>
                   </div>
                 </div>
@@ -286,7 +210,6 @@ function MobileChecklist({
 
 function formatPackingLine(line: string, isDark: boolean): React.ReactNode {
   if (!line.trim()) return null;
-  // **Bold heading**
   if (/^\*\*.+\*\*$/.test(line.trim())) {
     return (
       <p style={{
@@ -298,7 +221,6 @@ function formatPackingLine(line: string, isDark: boolean): React.ReactNode {
       </p>
     );
   }
-  // 💡 Cultural Tip
   if (/^💡/.test(line.trim())) {
     return (
       <li style={{
@@ -313,7 +235,6 @@ function formatPackingLine(line: string, isDark: boolean): React.ReactNode {
       </li>
     );
   }
-  // - bullet item
   if (/^[-•*]\s/.test(line.trim())) {
     return (
       <li style={{ display: "flex", alignItems: "flex-start", gap: 6, listStyle: "none",
@@ -324,57 +245,34 @@ function formatPackingLine(line: string, isDark: boolean): React.ReactNode {
       </li>
     );
   }
-  return (
-    <p style={{ fontSize: 11, color: isDark ? "rgba(255,255,255,0.45)" : "#6B7280" }}>
-      {line}
-    </p>
-  );
+  return <p style={{ fontSize: 11, color: isDark ? "rgba(255,255,255,0.45)" : "#6B7280" }}>{line}</p>;
 }
 
 // ── Main section ───────────────────────────────────────────────────────
 
 export default function ItineraryTimeline() {
   const { theme } = useTheme();
-  const isDark = theme === "dark";
+  const isDark    = theme === "dark";
 
-  const [selected, setSelected]         = useState<DestId[]>([]);
-  const [reorderCount, setReorderCount] = useState(0);
-  const [startDate,   setStartDate]     = useState("");
-  const [packOpen,    setPackOpen]      = useState(false);
-  const [packText,    setPackText]      = useState("");
-  const [packLoading, setPackLoading]   = useState(false);
+  // ── Trip state from global context ──────────────────────────────────
+  const {
+    selectedIds, selectedCities, totalDays, budgetUSD,
+    startDate, travelMonth, travelMonthName,
+    toggleCity, removeCity, setStartDate,
+  } = useTripContext();
+
+  // ── Local UI state ───────────────────────────────────────────────────
+  const [packOpen,    setPackOpen]    = useState(false);
+  const [packText,    setPackText]    = useState("");
+  const [packLoading, setPackLoading] = useState(false);
   const packAbortRef = useRef<AbortController | null>(null);
 
-  // Derive travel month label from the month input (YYYY-MM)
-  const travelMonth = startDate
-    ? new Date(startDate + "-01T00:00:00").toLocaleString("en-US", { month: "long", year: "numeric" })
-    : "";
-  const travelMonthName = startDate
-    ? new Date(startDate + "-01T00:00:00").toLocaleString("en-US", { month: "long" })
-    : new Date().toLocaleString("en-US", { month: "long" });
+  // Palette entries for currently selected IDs (images + display colours)
+  const selectedDests = selectedIds.map((id) => PALETTE.find((p) => p.id === id)!);
+  const budgetMin     = budgetUSD.min;
+  const budgetMax     = budgetUSD.max;
 
-  useEffect(() => {
-    if (reorderCount === 0) return;
-    const t = setTimeout(() => setReorderCount(0), 2500);
-    return () => clearTimeout(t);
-  }, [reorderCount]);
-
-  const toggle = (id: DestId) => {
-    if (selected.includes(id)) { setSelected(prev => prev.filter(x => x !== id)); return; }
-    if (selected.length >= MAX_STOPS) return;
-    const naive  = [...selected, id];
-    const sorted = naive.length >= 2 ? nearestNeighborSort(naive) : naive;
-    if (sorted.some((s, i) => s !== naive[i])) setReorderCount(c => c + 1);
-    setSelected(sorted);
-  };
-
-  const remove = (id: DestId) => setSelected(prev => prev.filter(x => x !== id));
-
-  const selectedDests = selected.map(id => PALETTE.find(p => p.id === id)!);
-  const totalDays     = selectedDests.reduce((s, d) => s + d.days, 0);
-  const budgetMin     = totalDays * COST_MIN_PER_DAY;
-  const budgetMax     = totalDays * COST_MAX_PER_DAY;
-
+  // ── Packing list generator ───────────────────────────────────────────
   const generatePacking = async () => {
     packAbortRef.current?.abort();
     packAbortRef.current = new AbortController();
@@ -383,10 +281,10 @@ export default function ItineraryTimeline() {
     setPackText("");
 
     const tripContext = {
-      cities:     selectedDests.map(d => d.name),
+      cities:     selectedCities.map((c) => c.name),
       month:      travelMonthName,
       totalDays,
-      categories: [...new Set(selectedDests.map(d => d.category))],
+      categories: [...new Set(selectedCities.map((c) => c.category))],
     };
 
     try {
@@ -402,7 +300,7 @@ export default function ItineraryTimeline() {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        setPackText(prev => prev + decoder.decode(value, { stream: true }));
+        setPackText((prev) => prev + decoder.decode(value, { stream: true }));
       }
     } catch (err) {
       if ((err as Error).name !== "AbortError") {
@@ -435,21 +333,6 @@ export default function ItineraryTimeline() {
           </div>
 
           <div className="flex items-center gap-2">
-            <AnimatePresence>
-              {reorderCount > 0 && (
-                <motion.div key={reorderCount}
-                  initial={{ opacity: 0, scale: 0.75, x: 8 }}
-                  animate={{ opacity: 1, scale: 1, x: 0 }}
-                  exit={{ opacity: 0, scale: 0.85, x: 4 }}
-                  transition={{ type: "spring", stiffness: 420, damping: 24 }}
-                  className="flex items-center gap-1.5 rounded-full px-3 py-1.5"
-                  style={{ background: "rgba(34,197,94,0.15)", border: "1px solid rgba(34,197,94,0.40)" }}>
-                  <Route size={10} color="#22C55E" strokeWidth={2.5} />
-                  <span style={{ fontSize: 10, fontWeight: 700, color: "#22C55E" }}>Route Optimized</span>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
             {totalDays > 0 && (
               <motion.div layout initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
                 className="rounded-full px-3 py-1.5 text-[11px] font-bold"
@@ -457,23 +340,21 @@ export default function ItineraryTimeline() {
                   background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
                   color: "var(--text-primary)", border: "1px solid var(--glass-border)",
                 }}>
-                {selected.length} stop{selected.length !== 1 ? "s" : ""} · {totalDays}d
+                {selectedIds.length} stop{selectedIds.length !== 1 ? "s" : ""} · {totalDays}d
               </motion.div>
             )}
           </div>
         </div>
 
-        {/* ── Destination picker ───────────────────────────────────────────
-            Mobile:  horizontal scroll ribbon (flex-nowrap + overflow-x-auto)
-            Desktop: wrapping pill cloud (sm:flex-wrap + sm:overflow-visible)   */}
+        {/* ── Destination picker ── */}
         <div className="flex flex-nowrap sm:flex-wrap overflow-x-auto sm:overflow-visible scrollbar-hide gap-2 mb-6 pb-1">
           {PALETTE.map((dest) => {
-            const isSelected = selected.includes(dest.id);
-            const isDisabled = !isSelected && selected.length >= MAX_STOPS;
+            const isSelected = selectedIds.includes(dest.id);
+            const isDisabled = !isSelected && selectedIds.length >= MAX_STOPS;
             return (
               <motion.button
                 key={dest.id}
-                onClick={() => !isDisabled && toggle(dest.id)}
+                onClick={() => !isDisabled && toggleCity(dest.id)}
                 whileTap={!isDisabled ? { scale: 0.93 } : {}}
                 transition={{ type: "spring", stiffness: 420, damping: 22 }}
                 className="flex items-center gap-2 rounded-full flex-shrink-0"
@@ -499,7 +380,7 @@ export default function ItineraryTimeline() {
               </motion.button>
             );
           })}
-          {selected.length >= MAX_STOPS && (
+          {selectedIds.length >= MAX_STOPS && (
             <span className="text-[10px] font-semibold self-center flex-shrink-0"
               style={{ color: "var(--text-tertiary)" }}>
               Max {MAX_STOPS} stops
@@ -515,7 +396,7 @@ export default function ItineraryTimeline() {
             minHeight: 140,
           }}>
 
-          {selected.length === 0 ? (
+          {selectedIds.length === 0 ? (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
               className="flex flex-col items-center justify-center gap-2 py-10">
               <div className="w-10 h-10 rounded-full flex items-center justify-center mb-1"
@@ -531,12 +412,9 @@ export default function ItineraryTimeline() {
             </motion.div>
           ) : (
             <>
-              {/* ── Mobile: vertical checklist (hidden on sm+) ── */}
               <div className="sm:hidden">
-                <MobileChecklist dests={selectedDests} onRemove={remove} />
+                <MobileChecklist dests={selectedDests} onRemove={removeCity} />
               </div>
-
-              {/* ── Desktop: horizontal scroll timeline (hidden on mobile) ── */}
               <div className="hidden sm:block overflow-x-auto scrollbar-hide px-5 py-5">
                 <div className="flex items-center" style={{ minWidth: "max-content", gap: 0 }}>
                   <AnimatePresence mode="popLayout">
@@ -544,7 +422,7 @@ export default function ItineraryTimeline() {
                       const dayStart = selectedDests.slice(0, i).reduce((s, d) => s + d.days, 1);
                       return (
                         <div key={dest.id} className="flex items-center">
-                          <StopNode dest={dest} dayStart={dayStart} onRemove={() => remove(dest.id)} />
+                          <StopNode dest={dest} dayStart={dayStart} onRemove={() => removeCity(dest.id)} />
                           {i < selectedDests.length - 1 && (
                             <RouteConnector from={dest.id} to={selectedDests[i + 1].id} />
                           )}
@@ -558,7 +436,10 @@ export default function ItineraryTimeline() {
           )}
         </div>
 
-        {/* Budget + CTA strip */}
+        {/* ── Mapbox route map (appears when 2+ cities selected) ── */}
+        <TripRouteMap />
+
+        {/* ── Budget + CTA strip ── */}
         <AnimatePresence>
           {totalDays > 0 && (
             <motion.div
@@ -574,14 +455,14 @@ export default function ItineraryTimeline() {
                 WebkitBackdropFilter: "blur(16px)",
               }}
             >
-              {/* Row 1: Budget estimate + Plan with AI */}
+              {/* Row 1: Budget + Plan with AI */}
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-bold text-[13px] leading-tight" style={{ color: "var(--text-primary)" }}>
                     Est. ${budgetMin}–${budgetMax} total
                   </p>
                   <p className="text-[11px] mt-0.5" style={{ color: "var(--text-secondary)" }}>
-                    ${COST_MIN_PER_DAY}–${COST_MAX_PER_DAY}/day · {totalDays}d · {selected.length} stops
+                    ${COST_MIN_PER_DAY}–${COST_MAX_PER_DAY}/day · {totalDays}d · {selectedIds.length} stops
                   </p>
                 </div>
                 <motion.button
@@ -595,8 +476,10 @@ export default function ItineraryTimeline() {
                     minHeight:  40,
                   }}
                   onClick={() => {
-                    const cityNames = selectedDests.map(d => d.name);
-                    const prompt = `I have selected these ${cityNames.length} destinations for my Nepal trip: **${cityNames.join(", ")}** (${totalDays} days total).\n\nPlease generate a professional day-by-day itinerary for these locations. For each day include:\n- **Morning / Afternoon / Evening** activities\n- Top landmarks and cultural experiences\n- Local food & restaurant suggestions\n- Practical travel tips\n\nAlso call the buildItinerary tool so the full timeline is displayed.`;
+                    const names  = selectedCities.map((c) => c.name);
+                    const budget = `$${budgetMin}–$${budgetMax}`;
+                    const when   = travelMonth ? ` in ${travelMonth}` : "";
+                    const prompt = `I'm planning ${totalDays} days in Nepal: **${names.join(" → ")}**${when}. My estimated budget is ${budget}.\n\nPlease build a day-by-day itinerary for this trip. For each day include morning / afternoon / evening activities, top landmarks, local food, and practical tips. Call the buildItinerary tool.`;
                     document.dispatchEvent(new CustomEvent("open-ai-planner", { detail: { prompt } }));
                   }}
                 >
@@ -620,16 +503,16 @@ export default function ItineraryTimeline() {
                       onChange={(e) => setStartDate(e.target.value)}
                       aria-label="Select travel month"
                       style={{
-                        background:  isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
-                        border:      `1px solid ${isDark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.14)"}`,
+                        background:   isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+                        border:       `1px solid ${isDark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.14)"}`,
                         borderRadius: 8,
-                        padding:     "3px 8px",
-                        fontSize:    11,
-                        fontWeight:  600,
-                        color:       "var(--text-primary)",
-                        colorScheme: isDark ? "dark" : "light",
-                        outline:     "none",
-                        cursor:      "pointer",
+                        padding:      "3px 8px",
+                        fontSize:     11,
+                        fontWeight:   600,
+                        color:        "var(--text-primary)",
+                        colorScheme:  isDark ? "dark" : "light",
+                        outline:      "none",
+                        cursor:       "pointer",
                       } as React.CSSProperties}
                     />
                   </div>
@@ -680,17 +563,14 @@ export default function ItineraryTimeline() {
             boxShadow:    "0 24px 60px rgba(0,0,0,0.45)",
           }}
         >
-          {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 flex-shrink-0"
             style={{ borderBottom: isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid #f1f5f9" }}>
             <div className="flex items-center gap-2.5">
               <span className="text-2xl">🎒</span>
               <div>
-                <p className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>
-                  Smart Packing List
-                </p>
+                <p className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>Smart Packing List</p>
                 <p className="text-[11px] mt-0.5" style={{ color: "var(--text-tertiary)" }}>
-                  {selectedDests.map(d => d.name).join(" → ")}
+                  {selectedCities.map((c) => c.name).join(" → ")}
                   {travelMonth ? ` · ${travelMonth}` : ""}
                 </p>
               </div>
@@ -699,17 +579,11 @@ export default function ItineraryTimeline() {
               onClick={() => { packAbortRef.current?.abort(); setPackOpen(false); setPackText(""); }}
               aria-label="Close packing list"
               className="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer transition-colors"
-              style={{
-                background: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)",
-                color: "var(--text-tertiary)",
-                fontSize: 16,
-              }}
+              style={{ background: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)", color: "var(--text-tertiary)", fontSize: 16 }}
             >
               ✕
             </button>
           </div>
-
-          {/* Content */}
           <div className="flex-1 overflow-y-auto px-5 py-4 min-h-0">
             {packLoading && (
               <div className="flex items-center gap-2 text-sm py-4" style={{ color: "var(--text-tertiary)" }}>
@@ -727,18 +601,12 @@ export default function ItineraryTimeline() {
               </ul>
             )}
           </div>
-
-          {/* Footer */}
           <div className="flex items-center justify-between px-5 py-3 flex-shrink-0"
             style={{ borderTop: isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid #f1f5f9" }}>
             <p className="text-[10px]" style={{ color: "var(--text-tertiary)" }}>
               Tailored to your route, season &amp; culture
             </p>
-            <button
-              onClick={generatePacking}
-              className="text-xs font-semibold cursor-pointer transition-colors"
-              style={{ color: "#16a34a" }}
-            >
+            <button onClick={generatePacking} className="text-xs font-semibold cursor-pointer transition-colors" style={{ color: "#16a34a" }}>
               Regenerate ↺
             </button>
           </div>
