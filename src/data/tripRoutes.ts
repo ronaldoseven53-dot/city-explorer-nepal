@@ -36,7 +36,7 @@ export const ROUTE_COLORS: Record<RouteMode, string> = {
 };
 
 export const ROUTE_LABELS: Record<RouteMode, string> = {
-  flight: "✈ Fly",
-  bus:    "🚌 Bus",
-  drive:  "🚗 Drive",
+  flight: "Fly",
+  bus:    "Bus",
+  drive:  "Drive",
 };

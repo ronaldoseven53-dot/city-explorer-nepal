@@ -439,41 +439,80 @@ export default function ItineraryTimeline() {
         {/* ── Mapbox route map (appears when 2+ cities selected) ── */}
         <TripRouteMap />
 
-        {/* ── Budget + CTA strip ── */}
+        {/* ── Planning Bar (iOS-style glassmorphism card) ── */}
         <AnimatePresence>
           {totalDays > 0 && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
               transition={{ duration: 0.3 }}
-              className="mt-4 rounded-[20px] flex flex-col px-5 py-4 gap-3"
+              className="mt-4 rounded-[24px] overflow-hidden"
               style={{
-                background:           isDark ? "rgba(220,38,38,0.10)" : "rgba(220,38,38,0.08)",
-                border:               isDark ? "1px solid rgba(220,38,38,0.22)" : "1px solid rgba(220,38,38,0.30)",
-                backdropFilter:       "blur(16px)",
-                WebkitBackdropFilter: "blur(16px)",
+                background:           "rgba(255,255,255,0.10)",
+                backdropFilter:       "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
+                border:               "1px solid rgba(255,255,255,0.20)",
               }}
             >
-              {/* Row 1: Budget + Plan with AI */}
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="font-bold text-[13px] leading-tight" style={{ color: "var(--text-primary)" }}>
+              {/* Top half: Est. total + Travel Month */}
+              <div className="px-5 pt-5 pb-4 flex flex-col gap-4">
+                {/* Budget summary */}
+                <div>
+                  <p className="font-bold leading-tight"
+                    style={{ fontSize: 18, color: "var(--text-primary)" }}>
                     Est. ${budgetMin}–${budgetMax} total
                   </p>
-                  <p className="text-[11px] mt-0.5" style={{ color: "var(--text-secondary)" }}>
-                    ${COST_MIN_PER_DAY}–${COST_MAX_PER_DAY}/day · {totalDays}d · {selectedIds.length} stops
+                  <p className="text-[12px] mt-1"
+                    style={{ color: isDark ? "rgba(255,255,255,0.40)" : "rgba(0,0,0,0.40)" }}>
+                    ${COST_MIN_PER_DAY}–${COST_MAX_PER_DAY}/day · {totalDays}d · {selectedIds.length} stop{selectedIds.length !== 1 ? "s" : ""}
                   </p>
                 </div>
+
+                {/* Travel month — native iOS picker look */}
+                <div>
+                  <p className="text-[9px] font-bold uppercase tracking-[0.14em] mb-1.5"
+                    style={{ color: isDark ? "rgba(255,255,255,0.38)" : "rgba(0,0,0,0.38)" }}>
+                    Travel Month
+                  </p>
+                  <input
+                    type="month"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    aria-label="Select travel month"
+                    style={{
+                      background:   isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+                      border:       `1px solid ${isDark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.12)"}`,
+                      borderRadius: 12,
+                      padding:      "9px 14px",
+                      fontSize:     16,
+                      fontWeight:   500,
+                      color:        "var(--text-primary)",
+                      colorScheme:  isDark ? "dark" : "light",
+                      outline:      "none",
+                      cursor:       "pointer",
+                      width:        "100%",
+                    } as React.CSSProperties}
+                  />
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div style={{ height: 1, background: isDark ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.08)", margin: "0 20px" }} />
+
+              {/* Bottom half: two full-width stacked buttons */}
+              <div className="px-5 pt-4 pb-5 flex flex-col gap-2.5">
+                {/* Plan with AI — solid red */}
                 <motion.button
-                  whileHover={{ scale: 1.04 }}
-                  whileTap={{ scale: 0.96 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
                   transition={{ type: "spring", stiffness: 440, damping: 22 }}
-                  className="cursor-pointer rounded-full px-5 py-2.5 text-[12px] font-bold text-white flex-shrink-0"
+                  className="w-full cursor-pointer rounded-[14px] text-[14px] font-bold text-white"
                   style={{
-                    background: "rgba(220,38,38,0.75)",
-                    boxShadow:  "0 0 20px rgba(220,38,38,0.40), inset 0 1px 0 rgba(255,255,255,0.18)",
-                    minHeight:  40,
+                    background: "#DC2626",
+                    boxShadow:  "0 4px 20px rgba(220,38,38,0.35)",
+                    minHeight:  48,
+                    border:     "none",
                   }}
                   onClick={() => {
                     const names  = selectedCities.map((c) => c.name);
@@ -483,60 +522,24 @@ export default function ItineraryTimeline() {
                     document.dispatchEvent(new CustomEvent("open-ai-planner", { detail: { prompt } }));
                   }}
                 >
-                  ✨ Plan with AI
+                  Plan with AI
                 </motion.button>
-              </div>
 
-              {/* Row 2: Month picker + Smart Packing List */}
-              <div className="flex items-center justify-between gap-3 pt-2.5"
-                style={{ borderTop: isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid rgba(220,38,38,0.15)" }}>
-                <div className="flex items-center gap-2 min-w-0">
-                  <span style={{ fontSize: 14 }}>📅</span>
-                  <div>
-                    <p className="text-[9px] font-bold uppercase tracking-[0.14em] mb-0.5"
-                      style={{ color: "var(--text-tertiary)" }}>
-                      Travel Month
-                    </p>
-                    <input
-                      type="month"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      aria-label="Select travel month"
-                      style={{
-                        background:   isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
-                        border:       `1px solid ${isDark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.14)"}`,
-                        borderRadius: 8,
-                        padding:      "3px 8px",
-                        fontSize:     11,
-                        fontWeight:   600,
-                        color:        "var(--text-primary)",
-                        colorScheme:  isDark ? "dark" : "light",
-                        outline:      "none",
-                        cursor:       "pointer",
-                      } as React.CSSProperties}
-                    />
-                  </div>
-                  {travelMonth && (
-                    <span className="text-[10px] font-semibold flex-shrink-0"
-                      style={{ color: "var(--text-tertiary)" }}>
-                      {travelMonth}
-                    </span>
-                  )}
-                </div>
+                {/* Smart Packing List — ghost green */}
                 <motion.button
-                  whileHover={{ scale: 1.04 }}
-                  whileTap={{ scale: 0.96 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
                   transition={{ type: "spring", stiffness: 440, damping: 22 }}
                   onClick={generatePacking}
-                  className="cursor-pointer rounded-full px-4 py-2 text-[11px] font-bold flex-shrink-0 flex items-center gap-1.5"
+                  className="w-full cursor-pointer rounded-[14px] text-[14px] font-bold"
                   style={{
-                    background: isDark ? "rgba(34,197,94,0.18)" : "rgba(34,197,94,0.15)",
-                    border:     isDark ? "1px solid rgba(34,197,94,0.40)" : "1px solid rgba(34,197,94,0.45)",
-                    color:      "#16a34a",
-                    minHeight:  36,
+                    background: "transparent",
+                    border:     "1px solid rgba(34,197,94,0.55)",
+                    color:      "#22C55E",
+                    minHeight:  48,
                   }}
                 >
-                  <span>🎒</span> Smart Packing List
+                  Smart Packing List
                 </motion.button>
               </div>
             </motion.div>

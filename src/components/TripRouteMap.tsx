@@ -1,6 +1,6 @@
 "use client";
 
-import Map, { Source, Layer, Marker, NavigationControl, type MapRef } from "react-map-gl/mapbox";
+import Map, { Source, Layer, Marker, type MapRef } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useMemo, useRef, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
@@ -116,18 +116,26 @@ export default function TripRouteMap() {
       className="mt-4 rounded-[22px] overflow-hidden"
       style={{ height: 240 }}
     >
+      {/* Subtle attribution — Mapbox logo required by ToS but made unobtrusive */}
+      <style>{`
+        .mapboxgl-ctrl-logo { opacity: 0.22 !important; transform: scale(0.75) !important; transform-origin: bottom left !important; }
+        .mapboxgl-ctrl-attrib { display: none !important; }
+      `}</style>
+
       <Map
         ref={mapRef}
         mapboxAccessToken={TOKEN}
         initialViewState={{ bounds, fitBoundsOptions: { padding: 48 } }}
         style={{ width: "100%", height: "100%" }}
         mapStyle="mapbox://styles/mapbox/dark-v11"
-        scrollZoom={false}
-        touchZoomRotate={false}
+        scrollZoom={true}
+        touchZoomRotate={true}
+        doubleClickZoom={true}
+        cooperativeGestures={true}
+        attributionControl={false}
         dragPan
         onLoad={() => setMapLoaded(true)}
       >
-        <NavigationControl position="top-right" />
 
         {/* Route glow + marching-dashes line */}
         <Source id="route" type="geojson" data={lineGeoJSON}>

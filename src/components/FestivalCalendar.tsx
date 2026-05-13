@@ -58,8 +58,12 @@ function FestivalCard({ fest, isFocus, isReminded, onRemind, onAskAI }: CardProp
     <motion.div
       className="relative rounded-[24px] overflow-hidden w-full"
       style={{ height: 480 }}
-      animate={{ scale: isFocus ? 1 : 0.93, opacity: isFocus ? 1 : 0.50 }}
-      transition={{ type: "spring", stiffness: 320, damping: 28 }}
+      animate={{
+        scale:   isFocus ? 1 : 0.93,
+        opacity: isFocus ? 1 : 0.50,
+        filter:  isFocus ? "grayscale(0%)" : "grayscale(100%)",
+      }}
+      transition={{ duration: 0.4, ease: "easeInOut" }}
     >
       {/* Background image */}
       <Image
@@ -111,7 +115,7 @@ function FestivalCard({ fest, isFocus, isReminded, onRemind, onAskAI }: CardProp
           fontWeight:    700,
           letterSpacing: "0.07em",
         }}>
-          {cat.emoji} {cat.label.toUpperCase()}
+          {cat.label.toUpperCase()}
         </span>
       </div>
 
@@ -196,12 +200,15 @@ function FestivalCard({ fest, isFocus, isReminded, onRemind, onAskAI }: CardProp
           </p>
         </div>
 
-        {/* ── Pinned bottom action row ──────────────────────────────── */}
+        {/* ── Pinned bottom action row — visible only on focused card ── */}
         <div
           className="flex items-center gap-2 flex-wrap flex-shrink-0"
           style={{
-            padding:   "10px 20px 14px",
-            borderTop: "1px solid rgba(255,255,255,0.08)",
+            padding:       "10px 20px 14px",
+            borderTop:     "1px solid rgba(255,255,255,0.08)",
+            opacity:       isFocus ? 1 : 0,
+            transition:    "opacity 0.4s ease-in-out",
+            pointerEvents: isFocus ? "auto" : "none",
           }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -399,15 +406,28 @@ export default function FestivalCalendar() {
     scrollToCard(i);
   };
 
-  // After a native swipe, read scroll position to sync the active index + dots
-  const handleTouchEnd = () => {
+  // Auto-focus: Intersection Observer via scroll listener — detects whichever card
+  // center is closest to the scroll container center on every scroll frame.
+  useEffect(() => {
     const el = scrollRef.current;
-    if (!el || !el.children.length) return;
-    const firstChild = el.children[0] as HTMLElement;
-    const cardW = firstChild.offsetWidth + 12; // card width + gap
-    const i = Math.round(el.scrollLeft / cardW);
-    setCurrent(Math.max(0, Math.min(i, filtered.length - 1)));
-  };
+    if (!el) return;
+    const onScroll = () => {
+      const containerCenter = el.scrollLeft + el.clientWidth / 2;
+      let closest = 0;
+      let minDist = Infinity;
+      Array.from(el.children).forEach((child, i) => {
+        const c = child as HTMLElement;
+        const cardCenter = c.offsetLeft + c.offsetWidth / 2;
+        const dist = Math.abs(containerCenter - cardCenter);
+        if (dist < minDist) { minDist = dist; closest = i; }
+      });
+      setCurrent(closest);
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  // Re-attach when filtered list changes so children[] matches
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtered]);
 
   // ── Pill style helpers ─────────────────────────────────────────────
   const mutedText    = isDark ? "rgba(255,255,255,0.45)" : "#64748b";
@@ -559,7 +579,6 @@ export default function FestivalCalendar() {
           */
           <div
             ref={scrollRef}
-            onTouchEnd={handleTouchEnd}
             className="scrollbar-hide"
             style={{
               display:              "flex",
@@ -584,7 +603,7 @@ export default function FestivalCalendar() {
                   width:           "min(360px, calc(100% - 40px))",
                   scrollSnapAlign: "start",
                 }}
-                onClick={() => { if (i !== idx) goTo(i); }}
+                onClick={() => { if (i !== idx) goTo(i); /* still lets prev/next arrows work */ }}
               >
                 <FestivalCard
                   fest={fest}
