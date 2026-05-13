@@ -417,18 +417,19 @@ export default function FestivalCalendar() {
   const activeBorder = isDark ? "1px solid rgba(255,255,255,0.20)" : "1px solid rgba(0,0,0,0.12)";
 
   const pillBase: React.CSSProperties = {
-    borderRadius: 9999,
-    padding:      "5px 14px",
-    fontSize:     11,
-    fontWeight:   600,
-    cursor:       "pointer",
-    whiteSpace:   "nowrap",
-    flexShrink:   0,
-    border:       "1px solid transparent",
-    transition:   "all 0.15s ease",
-    display:      "flex",
-    alignItems:   "center",
-    gap:          5,
+    borderRadius:  9999,
+    padding:       "5px 14px",
+    fontSize:      11,
+    fontWeight:    600,
+    cursor:        "pointer",
+    whiteSpace:    "nowrap",
+    flexShrink:    0,
+    border:        "1px solid transparent",
+    transition:    "all 0.15s ease",
+    display:       "flex",
+    alignItems:    "center",
+    gap:           5,
+    letterSpacing: "0.02em",
   };
 
   const allCats = Object.entries(CATEGORY_CONFIG) as [FestivalCategory, typeof CATEGORY_CONFIG[FestivalCategory]][];
@@ -536,7 +537,7 @@ export default function FestivalCalendar() {
                 flexShrink:   0,
                 boxShadow:    activeCategory === key ? `0 0 5px ${color}` : "none",
               }} />
-              {emoji} {label}
+              {label}
             </button>
           ))}
         </div>

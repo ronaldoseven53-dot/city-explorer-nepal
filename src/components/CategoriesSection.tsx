@@ -145,7 +145,7 @@ export default function CategoriesSection() {
                   {/* Accent pill */}
                   <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold mb-2.5"
                     style={{ background: `${slide.accent}28`, border: `1px solid ${slide.accent}55`, color: slide.accent }}>
-                    {categoryGroups[current]?.emoji} {slide.id.charAt(0).toUpperCase() + slide.id.slice(1)}
+                    {slide.id.charAt(0).toUpperCase() + slide.id.slice(1)}
                   </span>
 
                   <h3 className="text-white font-extrabold text-[22px] sm:text-[26px] tracking-tight leading-tight mb-2">

@@ -2,9 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, useInView } from "motion/react";
-import { Maximize2, ChevronRight, Volume2, VolumeX } from "lucide-react";
+import { Maximize2, Volume2, VolumeX } from "lucide-react";
 
 const VIDEO_ID = "APiIPm6P-EA";
+
+const MARQUEE_TEXT =
+  "Discover the Heart of the Himalayas — Ancient temples, sky-high peaks, and culture unchanged for 1,400 years.";
 
 /* Minimal YT stubs — avoids pulling in @types/youtube just for one component */
 type YTPlayer = {
@@ -22,14 +25,15 @@ export default function VideoSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const playerRef  = useRef<YTPlayer | null>(null);
-  const [apiReady, setApiReady] = useState(() => typeof window !== "undefined" && !!w().YT?.Player);
-  const [muted,    setMuted]    = useState(true);
+  const [apiReady,      setApiReady]      = useState(() => typeof window !== "undefined" && !!w().YT?.Player);
+  const [muted,         setMuted]         = useState(true);
+  const [marqueePaused, setMarqueePaused] = useState(false);
 
   const isInView = useInView(sectionRef, { amount: 0.3 });
 
-  // ── Load YouTube IFrame API (once per page) ───────────────────────
+  // ── Load YouTube IFrame API (once per page) ────────────────────────────
   useEffect(() => {
-    if (w().YT?.Player) return; // already loaded (lazy init handled it)
+    if (w().YT?.Player) return;
 
     const prev = w().onYouTubeIframeAPIReady;
     w().onYouTubeIframeAPIReady = () => { setApiReady(true); prev?.(); };
@@ -42,7 +46,7 @@ export default function VideoSection() {
     }
   }, []);
 
-  // ── Instantiate player once API is ready ─────────────────────────
+  // ── Instantiate player once API is ready ──────────────────────────────
   useEffect(() => {
     if (!apiReady || playerRef.current) return;
 
@@ -52,14 +56,15 @@ export default function VideoSection() {
         autoplay:       1,
         mute:           1,
         loop:           1,
-        playlist:       VIDEO_ID,   // required for loop
+        playlist:       VIDEO_ID,
         controls:       0,
         modestbranding: 1,
+        showinfo:       0,   // deprecated but harmless
         rel:            0,
-        playsinline:    1,          // iOS inline play
-        iv_load_policy: 3,          // no annotations
+        playsinline:    1,
+        iv_load_policy: 3,
         disablekb:      1,
-        fs:             0,          // hide YT's own fullscreen btn
+        fs:             0,
         origin:         window.location.origin,
       },
       events: {
@@ -74,7 +79,7 @@ export default function VideoSection() {
     };
   }, [apiReady]);
 
-  // ── Pause/resume as section enters/leaves viewport ────────────────
+  // ── Pause / resume on viewport ─────────────────────────────────────────
   useEffect(() => {
     const p = playerRef.current;
     if (!p) return;
@@ -82,19 +87,14 @@ export default function VideoSection() {
     else p.pauseVideo();
   }, [isInView]);
 
-  // ── Toggle mute/unmute ────────────────────────────────────────────
+  // ── Mute toggle ────────────────────────────────────────────────────────
   const toggleMute = useCallback(() => {
     if (!playerRef.current) return;
-    if (muted) {
-      playerRef.current.unMute();
-      setMuted(false);
-    } else {
-      playerRef.current.mute();
-      setMuted(true);
-    }
+    if (muted) { playerRef.current.unMute(); setMuted(false); }
+    else        { playerRef.current.mute();  setMuted(true);  }
   }, [muted]);
 
-  // ── Fullscreen: webkit fallback for iOS Safari + Android Chrome ───
+  // ── Fullscreen ─────────────────────────────────────────────────────────
   const handleFullscreen = useCallback(() => {
     const el  = wrapperRef.current as (HTMLDivElement & { webkitRequestFullscreen?(): Promise<void> }) | null;
     const doc = document as Document & { webkitFullscreenElement?: Element; webkitExitFullscreen?(): Promise<void> };
@@ -112,7 +112,7 @@ export default function VideoSection() {
     }
   }, []);
 
-  // Re-mute when user exits fullscreen via Esc or system back (both std + webkit)
+  // Re-mute on Esc / system back
   useEffect(() => {
     const doc = document as Document & { webkitFullscreenElement?: Element };
     const onFSChange = () => {
@@ -129,9 +129,6 @@ export default function VideoSection() {
     };
   }, []);
 
-  const scrollToFeatured = () =>
-    document.getElementById("featured-destinations")?.scrollIntoView({ behavior: "smooth" });
-
   return (
     <section ref={sectionRef} className="relative w-full py-8 sm:py-10 overflow-hidden">
 
@@ -139,9 +136,10 @@ export default function VideoSection() {
       <div aria-hidden className="absolute inset-x-0 bottom-0 pointer-events-none"
         style={{ height: "40%", background: "linear-gradient(to bottom, transparent, rgba(0,0,0,0.40))" }} />
 
+      {/* ── Section header + video ────────────────────────────────────────── */}
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ zIndex: 1 }}>
 
-        {/* Section header */}
+        {/* Header row */}
         <div className="flex items-center justify-between mb-5">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.22em] mb-0.5"
@@ -153,96 +151,38 @@ export default function VideoSection() {
               Watch Nepal in 60 Sec
             </h2>
           </div>
-          {/* Audio toggle button — works on mobile and desktop */}
+
+          {/* Mute toggle */}
           <button
             onClick={toggleMute}
             aria-label={muted ? "Unmute video" : "Mute video"}
             className="flex items-center gap-1.5 text-[11px] font-semibold cursor-pointer transition-opacity hover:opacity-70"
             style={{
-              color:               "var(--text-tertiary)",
-              background:          "none",
-              border:              "none",
-              padding:             "8px 4px",
-              minHeight:           44,
-              minWidth:            44,
+              color: "var(--text-tertiary)", background: "none", border: "none",
+              padding: "8px 4px", minHeight: 44, minWidth: 44,
               WebkitTapHighlightColor: "transparent",
             }}
           >
-            {muted
-              ? <VolumeX size={13} strokeWidth={2} />
-              : <Volume2 size={13} strokeWidth={2} />}
+            {muted ? <VolumeX size={13} strokeWidth={2} /> : <Volume2 size={13} strokeWidth={2} />}
             {muted ? "Muted" : "Audio On"}
           </button>
         </div>
 
-        {/* ── Video wrapper — 16:9 desktop / 9:16 mobile ───────────── */}
+        {/* ── Video wrapper — 16:9 desktop / 9:16 mobile ──────────────── */}
         <div ref={wrapperRef} className="yt-video-wrapper relative overflow-hidden rounded-[24px]">
 
-          {/* YouTube replaces this div with an iframe */}
-          <div id="yt-player-inner" />
+          {/* YouTube replaces this div with an iframe.
+              The scale pushes any lingering title-bar overlay outside the
+              overflow:hidden boundary without distorting the aspect ratio. */}
+          <div id="yt-player-inner" className="yt-player-scaled" />
 
           {/* Cinematic gradient overlays */}
           <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 2,
-            background: "linear-gradient(to right, rgba(4,8,22,0.72) 0%, rgba(4,8,22,0.22) 55%, transparent 100%)" }} />
+            background: "linear-gradient(to right, rgba(4,8,22,0.55) 0%, rgba(4,8,22,0.12) 55%, transparent 100%)" }} />
           <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 2,
             background: "linear-gradient(to top, rgba(4,8,22,0.55) 0%, transparent 45%)" }} />
 
-          {/* ── Glassmorphism overlay (left panel) ───────────────── */}
-          {/* Outer div handles absolute centering; motion.div handles slide-in */}
-          <div className="absolute z-10"
-            style={{ left: "max(16px, 4%)", top: "50%", transform: "translateY(-50%)", maxWidth: "min(300px, 44%)" }}>
-            <motion.div
-              initial={{ opacity: 0, x: -22 }}
-              animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -22 }}
-              transition={{ type: "spring", stiffness: 240, damping: 28, delay: 0.2 }}
-            >
-              <div style={{
-                background:           "rgba(4,8,22,0.52)",
-                backdropFilter:       "blur(22px)",
-                WebkitBackdropFilter: "blur(22px)",
-                border:               "1px solid rgba(255,255,255,0.14)",
-                borderRadius:         20,
-                padding:              "20px 22px",
-              }}>
-                <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold mb-3"
-                  style={{ background: "rgba(220,38,38,0.18)", border: "1px solid rgba(220,38,38,0.40)", color: "#f87171" }}>
-                  🇳🇵 Cinematic Nepal
-                </span>
-
-                <h3 style={{
-                  color: "#fff", fontWeight: 800, lineHeight: 1.2, letterSpacing: "-0.02em",
-                  fontSize: "clamp(0.92rem, 2vw, 1.22rem)", marginBottom: 10,
-                }}>
-                  Discover the Heart<br />of the Himalayas
-                </h3>
-
-                <p style={{ color: "rgba(255,255,255,0.58)", fontSize: 11.5, lineHeight: 1.6, marginBottom: 18 }}>
-                  Ancient temples, sky-high peaks, and culture unchanged for 1,400 years — in 60 seconds.
-                </p>
-
-                <motion.button
-                  onClick={scrollToFeatured}
-                  whileHover={{ x: 3 }}
-                  whileTap={{ scale: 0.94 }}
-                  className="flex items-center gap-1.5 cursor-pointer rounded-full"
-                  style={{
-                    background:  "rgba(220,38,38,0.20)",
-                    border:      "1px solid rgba(220,38,38,0.45)",
-                    boxShadow:   "0 0 18px rgba(220,38,38,0.22)",
-                    color:       "#fff",
-                    fontSize:    12,
-                    fontWeight:  700,
-                    padding:     "8px 16px",
-                  }}
-                >
-                  Learn More
-                  <ChevronRight size={12} strokeWidth={2.5} />
-                </motion.button>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* ── Full Screen button ───────────────────────────────── */}
+          {/* Fullscreen button */}
           <motion.button
             onClick={handleFullscreen}
             whileHover={{ scale: 1.06 }}
@@ -267,37 +207,71 @@ export default function VideoSection() {
         </div>
       </div>
 
-      {/*
-        Scoped CSS:
-        - Desktop 16:9, iframe fills wrapper via absolute inset
-        - Mobile 9:16 (portrait Reel/Short), iframe is scaled up to fill
-          height and clipped on the sides (fills by height, crops width)
-        - Fullscreen: remove aspect-ratio + reset iframe positioning
-      */}
+      {/* ── Marquee bar — full width, flush below video ────────────────── */}
+      <div
+        className="marquee-container"
+        style={{
+          width:                "100%",
+          marginTop:            12,
+          background:           "rgba(0,0,0,0.70)",
+          backdropFilter:       "blur(10px)",
+          WebkitBackdropFilter: "blur(10px)",
+          borderTop:            "1px solid rgba(255,255,255,0.07)",
+          borderBottom:         "1px solid rgba(255,255,255,0.07)",
+          padding:              "11px 0",
+          overflow:             "hidden",
+          cursor:               "default",
+          userSelect:           "none",
+        }}
+        onMouseEnter={() => setMarqueePaused(true)}
+        onMouseLeave={() => setMarqueePaused(false)}
+        onTouchStart={() => setMarqueePaused(true)}
+        onTouchEnd={() => setMarqueePaused(false)}
+      >
+        {/* 4 copies — animation translates by -25% (= width of 1 copy) for seamless loop */}
+        <div
+          className="marquee-track"
+          style={{ animationPlayState: marqueePaused ? "paused" : "running" }}
+        >
+          {Array.from({ length: 4 }, (_, i) => (
+            <span key={i} className="marquee-segment">
+              {MARQUEE_TEXT}
+              <span className="marquee-dot" aria-hidden>·</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
       <style>{`
+        /* ── Video wrapper aspect ratios ── */
         .yt-video-wrapper {
           aspect-ratio: 16 / 9;
         }
-        .yt-video-wrapper #yt-player-inner {
+        .yt-video-wrapper .yt-player-scaled,
+        .yt-video-wrapper .yt-player-scaled iframe {
           position: absolute;
           inset: 0;
-          width: 100%;
+          width:  100%;
           height: 100%;
           pointer-events: none;
           border: 0;
+          /* Scale up slightly: pushes any YT title overlay outside overflow:hidden
+             while keeping visible content centred. 1.06 = ~6% crop on each edge. */
+          transform: scale(1.06);
+          transform-origin: center center;
         }
 
         @media (max-width: 639px) {
           .yt-video-wrapper {
             aspect-ratio: 9 / 16;
           }
-          /* Scale 16:9 iframe to fill the 9:16 container by height,
-             then center it — crops left/right like a Reel/Short */
-          .yt-video-wrapper #yt-player-inner {
+          .yt-video-wrapper .yt-player-scaled,
+          .yt-video-wrapper .yt-player-scaled iframe {
             width:  316%;
             height: 100%;
             left:  -108%;
             top:    0;
+            transform: scale(1.06);
           }
         }
 
@@ -306,14 +280,68 @@ export default function VideoSection() {
           aspect-ratio: auto;
           border-radius: 0 !important;
         }
-        .yt-video-wrapper:fullscreen #yt-player-inner,
-        .yt-video-wrapper:-webkit-full-screen #yt-player-inner {
-          width:  100% !important;
-          height: 100% !important;
-          left:   0 !important;
-          top:    0 !important;
+        .yt-video-wrapper:fullscreen .yt-player-scaled,
+        .yt-video-wrapper:fullscreen .yt-player-scaled iframe,
+        .yt-video-wrapper:-webkit-full-screen .yt-player-scaled,
+        .yt-video-wrapper:-webkit-full-screen .yt-player-scaled iframe {
+          width:     100% !important;
+          height:    100% !important;
+          left:      0 !important;
+          top:       0 !important;
+          transform: none !important;
+        }
+
+        /* ── Marquee ── */
+        @keyframes marquee-scroll {
+          from { transform: translateX(0);     }
+          to   { transform: translateX(-25%);  }
+        }
+
+        .marquee-track {
+          display:       inline-flex;
+          align-items:   center;
+          white-space:   nowrap;
+          animation:     marquee-scroll 25s linear infinite;
+          will-change:   transform;
+        }
+
+        .marquee-segment {
+          display:      inline-flex;
+          align-items:  center;
+          font-family:  var(--font-geist-sans), "Inter", ui-sans-serif, system-ui, sans-serif;
+          font-size:    13px;
+          font-weight:  600;
+          letter-spacing: 0.01em;
+          color:        rgba(255, 255, 255, 0.88);
+          padding-right: 0;
+        }
+
+        .marquee-dot {
+          margin: 0 32px;
+          opacity: 0.35;
+          font-size: 18px;
+          line-height: 1;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .marquee-track {
+            animation: none;
+          }
+          /* On reduced motion: show text statically, centered */
+          .marquee-container {
+            display: flex;
+            justify-content: center;
+          }
+          .marquee-track {
+            white-space: normal;
+            text-align: center;
+          }
+          .marquee-segment:not(:first-child) {
+            display: none;
+          }
         }
       `}</style>
+
     </section>
   );
 }
