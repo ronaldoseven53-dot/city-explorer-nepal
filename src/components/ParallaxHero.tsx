@@ -2,16 +2,33 @@
 
 import { useRef } from "react";
 import { motion, useScroll, useTransform, type Transition } from "motion/react";
-import { Sparkles, Headphones, Play } from "lucide-react";
+import { Sparkles, ChevronRight, Play } from "lucide-react";
 
 const BTN_TRANSITION: Transition = { type: "tween", duration: 0.18, ease: "easeInOut" };
 
 const PHOTO = "/images/nepal-landscape.jpg";
 
-// ─── Title font-size shared between the z=5 NEPAL layer and the z=30 spacer ─
-// 30–40 % of viewport width. At 1280 px: 10 vw = 128 px ≈ 8 rem.
-// With Playfair metrics, 5 chars at 8 rem ≈ 410 px ≈ 32 % of 1280 px. ✓
-const NEPAL_SIZE = "clamp(3rem, 10vw, 9rem)";
+const ALPENGLOW = `linear-gradient(
+  to bottom,
+  #2d1b4e 0%,
+  #6b2d6b 10%,
+  #c4527a 22%,
+  #e8825a 35%,
+  #f2b07a 50%,
+  #f5d5a8 65%,
+  #e8e4d8 80%,
+  #c8dce8 92%,
+  #b8ccd8 100%
+)`;
+
+// Shared font-size between z=5 "Beyond" layer and z=30 invisible spacer
+const TITLE_SIZE = "clamp(2.6rem, 8vw, 6rem)";
+
+const STATS = [
+  { value: "8",    label: "UNESCO Sites"           },
+  { value: "14",   label: "Peaks Above 8000m"      },
+  { value: "100+", label: "Cultural Experiences"   },
+];
 
 export default function ParallaxHero() {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -21,12 +38,15 @@ export default function ParallaxHero() {
     offset: ["start start", "end start"],
   });
 
-  const skyY     = useTransform(scrollYProgress, [0, 1], ["0%", "10%"]);
-  const midY     = useTransform(scrollYProgress, [0, 1], ["0%", "26%"]);
-  const foreY    = useTransform(scrollYProgress, [0, 1], ["0%", "46%"]);
-  // NEPAL (z=5) and content (z=30) share the same transform — no drift
-  const contentY       = useTransform(scrollYProgress, [0, 1], ["0%", "22%"]);
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.38, 0.52], [1, 1, 0]);
+  // Sky: nearly stationary — alpenglow stays painted behind everything
+  const skyY    = useTransform(scrollYProgress, [0, 1], ["0%", "90%"]);
+  // Mid mountains: rises fast → opaque edge sweeps UP and covers "Beyond" text at p≈0.16
+  const midY    = useTransform(scrollYProgress, [0, 1], ["0%", "5%"]);
+  // Foreground lake layer
+  const foreY   = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+  // Title layers: identical transform → zero drift between z=5 and z=30
+  const titleY  = useTransform(scrollYProgress, [0, 1], ["0%", "38%"]);
+  const titleOpacity = useTransform(scrollYProgress, [0, 0.35, 0.5], [1, 1, 0]);
 
   return (
     <div
@@ -35,18 +55,21 @@ export default function ParallaxHero() {
       style={{ height: "100svh", isolation: "isolate" }}
     >
 
-      {/* ══ Layer 0 — Sky / Peak  z=0 ════════════════════════════════════════ */}
+      {/* ══ z=0 — Alpenglow sky ═══════════════════════════════════════════════ */}
       <motion.div
         style={{ y: skyY, willChange: "transform" }}
         className="absolute inset-0"
         aria-hidden
       >
+        <div className="absolute inset-0" style={{ background: ALPENGLOW }} />
         <motion.div
           className="absolute inset-0"
           style={{
             backgroundImage: `url('${PHOTO}')`,
             backgroundSize: "cover",
             backgroundPosition: "center 6%",
+            mixBlendMode: "luminosity",
+            opacity: 0.55,
             willChange: "transform",
           }}
           animate={{ scale: [1, 1.055, 1] }}
@@ -56,12 +79,12 @@ export default function ParallaxHero() {
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(to bottom, rgba(4,8,18,0.68) 0%, rgba(4,8,18,0.30) 20%, rgba(4,8,18,0.04) 44%, rgba(4,8,18,0.18) 65%, rgba(4,8,18,0.65) 100%)",
+              "linear-gradient(to bottom, rgba(4,8,18,0.55) 0%, transparent 30%, transparent 60%, rgba(4,8,18,0.50) 100%)",
           }}
         />
       </motion.div>
 
-      {/* ══ Layer 1 — Monastery / Village  z=10 ═════════════════════════════ */}
+      {/* ══ z=10 — Mid mountain photo (rises fast, covers "Beyond" at p≈0.16) ═ */}
       <motion.div
         style={{
           y: midY,
@@ -78,12 +101,12 @@ export default function ParallaxHero() {
             backgroundPosition: "center 52%",
             maskImage: "linear-gradient(to bottom, transparent 0%, black 18%, black 100%)",
             WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 18%, black 100%)",
-            filter: "saturate(0.82) brightness(0.74)",
+            filter: "saturate(0.88) brightness(0.80)",
           }}
         />
       </motion.div>
 
-      {/* ══ Layer 2 — Lake / Prayer Flags  z=18 ═════════════════════════════ */}
+      {/* ══ z=18 — Lake / Prayer Flags ════════════════════════════════════════ */}
       <motion.div
         style={{
           y: foreY,
@@ -109,167 +132,121 @@ export default function ParallaxHero() {
         />
       </motion.div>
 
-      {/* ══ Mist bands ═══════════════════════════════════════════════════════ */}
-      <div aria-hidden className="absolute pointer-events-none" style={{ zIndex: 9,  top: "27%",    left: 0, right: 0, height: "5%", background: "linear-gradient(to bottom, transparent, rgba(180,208,230,0.20) 50%, transparent)", filter: "blur(10px)", mixBlendMode: "screen" }} />
-      <div aria-hidden className="absolute pointer-events-none" style={{ zIndex: 14, bottom: "25%", left: 0, right: 0, height: "8%", background: "linear-gradient(to bottom, transparent, rgba(195,215,235,0.50) 50%, transparent)", filter: "blur(20px)", mixBlendMode: "screen" }} />
-      <div aria-hidden className="absolute pointer-events-none" style={{ zIndex: 19, top: "52%",    left: 0, right: 0, height: "6%", background: "linear-gradient(to bottom, transparent, rgba(185,210,232,0.34) 50%, transparent)", filter: "blur(14px)", mixBlendMode: "screen" }} />
+      {/* ══ Mist bands ════════════════════════════════════════════════════════ */}
+      <div aria-hidden className="absolute pointer-events-none" style={{ zIndex: 15, bottom: "20%", left: 0, right: 0, height: "8%", background: "linear-gradient(to bottom, transparent, rgba(220,215,205,0.65) 50%, transparent)", filter: "blur(20px)", mixBlendMode: "screen" }} />
+      <div aria-hidden className="absolute pointer-events-none" style={{ zIndex: 20, top: "48%",    left: 0, right: 0, height: "7%", background: "linear-gradient(to bottom, transparent, rgba(210,225,238,0.45) 50%, transparent)", filter: "blur(14px)", mixBlendMode: "screen" }} />
+      <div aria-hidden className="absolute pointer-events-none" style={{ zIndex: 25, top: "28%",    left: 0, right: 0, height: "5%", background: "linear-gradient(to bottom, transparent, rgba(200,220,240,0.28) 50%, transparent)", filter: "blur(10px)", mixBlendMode: "screen" }} />
 
-      {/* ════════════════════════════════════════════════════════════════════ */}
-      {/* ══ z=5 — "NEPAL" label + title — BEHIND mid mountain layer ════════ */}
-      {/* ════════════════════════════════════════════════════════════════════ */}
+      {/* ══ z=26 — Colour-grade vignette ══════════════════════════════════════ */}
+      <div
+        aria-hidden
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          zIndex: 26,
+          background: "linear-gradient(to bottom, rgba(45,27,78,0.12) 0%, transparent 40%, transparent 70%, rgba(4,8,18,0.40) 100%)",
+        }}
+      />
+
+      {/* ══════════════════════════════════════════════════════════════════════ */}
+      {/* ══ z=5 — "Beyond the Tourist Map" — BEHIND mid mountain layer ══════ */}
+      {/* ══════════════════════════════════════════════════════════════════════ */}
       <motion.div
         style={{
-          y: contentY, opacity: contentOpacity,
+          y: titleY,
           position: "absolute", inset: 0, zIndex: 5,
-          pointerEvents: "none", userSelect: "none", willChange: "transform, opacity",
+          pointerEvents: "none", userSelect: "none", willChange: "transform",
         }}
       >
-        <div
-          style={{
-            position: "absolute", top: "10vh", left: 0, right: 0,
-            display: "flex", flexDirection: "column", alignItems: "center",
-            padding: "0 max(1.5rem, 4vw)",
-          }}
-        >
-          {/* Small brand label */}
-          <p
+        <div style={{ paddingTop: "22vh", paddingLeft: "max(1.5rem, 8vw)", paddingRight: "max(1.5rem, 8vw)" }}>
+          {/* Spacer — matches flag label + margin in z=30 */}
+          <div aria-hidden style={{ height: "calc(0.75rem * 2.5)", visibility: "hidden" }} />
+          {/* Spacer — matches "Explore Nepal" h1 line in z=30 */}
+          <div aria-hidden style={{ height: `calc(${TITLE_SIZE} * 1.1)`, visibility: "hidden" }} />
+          {/* VISIBLE — mountains sweep over this at p≈0.16 */}
+          <h1
             style={{
-              fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.16em",
-              textTransform: "uppercase", color: "rgba(240,240,240,0.78)",
-              margin: "0 0 0.6rem", textShadow: "0 1px 8px rgba(0,0,0,0.6)",
+              fontFamily: "var(--font-playfair), Georgia, serif",
+              fontSize: TITLE_SIZE,
+              lineHeight: 1.1,
+              fontWeight: 500,
+              letterSpacing: "-0.025em",
+              background: "linear-gradient(135deg, #f59e0b 0%, #dc2626 50%, #c026d3 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              filter: "drop-shadow(0 2px 8px rgba(220,100,40,0.4))",
+              margin: 0,
             }}
           >
-            NP HIMALAYAN KINGDOM
-          </p>
-
-          {/* Ornamental rule */}
-          <div
-            style={{
-              display: "flex", alignItems: "center", gap: "10px",
-              marginBottom: "0.55rem",
-            }}
-          >
-            <div style={{ height: "1px", width: "36px", background: "linear-gradient(to right, transparent, rgba(210,175,90,0.60))" }} />
-            <span style={{ color: "rgba(210,175,90,0.75)", fontSize: "0.65rem", lineHeight: 1 }}>✦</span>
-            <div style={{ height: "1px", width: "36px", background: "linear-gradient(to left, transparent, rgba(210,175,90,0.60))" }} />
-          </div>
-
-          {/* ── NEPAL wrapper — inline-block so mountain % positions hit exact letters ── */}
-          <div style={{ position: "relative", display: "inline-block" }}>
-
-            {/* Mountain silhouette above "A" (4th letter ≈ 71 % from left) */}
-            <svg
-              aria-hidden
-              viewBox="0 0 120 80"
-              xmlns="http://www.w3.org/2000/svg"
-              style={{
-                position: "absolute", bottom: "93%", left: "71%",
-                transform: "translateX(-50%)",
-                width: "clamp(1.8rem, 3vw, 4rem)", height: "auto", overflow: "visible",
-              }}
-            >
-              <polygon points="18,72 42,28 66,72" fill="white" opacity="0.36" />
-              <polygon points="60,0 108,80 12,80" fill="white" opacity="0.88" />
-              <polygon points="60,0 70,30 50,30" fill="rgba(240,248,255,0.26)" />
-            </svg>
-
-            {/* Smaller mountain above "L" (5th letter ≈ 90 % from left) */}
-            <svg
-              aria-hidden
-              viewBox="0 0 80 56"
-              xmlns="http://www.w3.org/2000/svg"
-              style={{
-                position: "absolute", bottom: "93%", left: "90%",
-                transform: "translateX(-50%)",
-                width: "clamp(1.2rem, 2vw, 2.8rem)", height: "auto", overflow: "visible",
-              }}
-            >
-              <polygon points="40,0 80,56 0,56" fill="white" opacity="0.80" />
-              <polygon points="40,0 48,24 32,24" fill="rgba(240,248,255,0.20)" />
-            </svg>
-
-            <h1
-              style={{
-                fontFamily: "var(--font-playfair), Georgia, 'Times New Roman', serif",
-                fontSize: NEPAL_SIZE,
-                fontWeight: 500,
-                lineHeight: 1,
-                letterSpacing: "-0.025em",
-                color: "rgba(232,232,232,0.93)",
-                textShadow: "0 4px 48px rgba(0,0,0,0.52)",
-                margin: 0,
-                userSelect: "none",
-                display: "block",
-              }}
-            >
-              NEPAL
-            </h1>
-          </div>
+            Beyond the Tourist Map
+          </h1>
         </div>
       </motion.div>
 
-      {/* ════════════════════════════════════════════════════════════════════ */}
-      {/* ══ z=30 — Subtitle · Description · CTA buttons ════════════════════ */}
-      {/* ════════════════════════════════════════════════════════════════════ */}
+      {/* ══════════════════════════════════════════════════════════════════════ */}
+      {/* ══ z=30 — "Explore Nepal" + subtitle + stats + CTAs ════════════════ */}
+      {/* ══════════════════════════════════════════════════════════════════════ */}
       <motion.div
         style={{
-          y: contentY, opacity: contentOpacity,
-          zIndex: 30, willChange: "transform, opacity",
+          y: titleY,
+          opacity: titleOpacity,
+          zIndex: 30,
+          willChange: "transform, opacity",
         }}
         className="absolute inset-0 pointer-events-none select-none"
       >
-        <div
-          style={{
-            position: "absolute", top: "10vh", left: 0, right: 0,
-            display: "flex", flexDirection: "column", alignItems: "center",
-            textAlign: "center", padding: "0 max(1.5rem, 4vw)",
-          }}
-        >
-          {/* Invisible spacer: label (~1rem) + ornamental (~1.2rem) + NEPAL height */}
-          <div
-            aria-hidden
-            style={{ height: `calc(2.2rem + ${NEPAL_SIZE})` }}
-          />
+        <div style={{ paddingTop: "22vh", paddingLeft: "max(1.5rem, 8vw)", paddingRight: "max(1.5rem, 8vw)" }}>
 
-          {/* Subtitle */}
-          <h2
+          {/* Flag label */}
+          <p
             style={{
-              fontFamily: "var(--font-geist-sans), system-ui, sans-serif",
-              fontSize: "clamp(1.15rem, 2.6vw, 2.1rem)",
-              fontWeight: 700,
-              color: "#F5F5F5",
-              lineHeight: 1.15,
-              letterSpacing: "-0.02em",
-              textShadow: "0 2px 22px rgba(0,0,0,0.72)",
-              marginTop: "0.6rem",
-              marginBottom: 0,
-              maxWidth: "min(640px, 92vw)",
+              fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.16em",
+              textTransform: "uppercase", color: "rgba(240,240,240,0.78)",
+              margin: "0 0 0.5rem", textShadow: "0 1px 8px rgba(0,0,0,0.6)",
             }}
           >
-            Discover the Roof of the World
-          </h2>
+            🇳🇵 Himalayan Kingdom
+          </p>
 
-          {/* Description */}
+          {/* "Explore Nepal" — above the mountains */}
+          <h1
+            style={{
+              fontFamily: "var(--font-playfair), Georgia, serif",
+              fontSize: TITLE_SIZE,
+              lineHeight: 1.1,
+              fontWeight: 500,
+              letterSpacing: "-0.025em",
+              color: "rgba(232,232,232,0.95)",
+              textShadow: "0 4px 48px rgba(0,0,0,0.52)",
+              margin: 0,
+            }}
+          >
+            Explore Nepal
+          </h1>
+
+          {/* Invisible spacer — reserves the exact space "Beyond the Tourist Map" occupies in z=5 */}
+          <div aria-hidden style={{ height: `calc(${TITLE_SIZE} * 1.1)`, visibility: "hidden" }} />
+
+          {/* Subtitle */}
           <p
             style={{
               fontSize: "clamp(0.82rem, 1.4vw, 1rem)",
               color: "rgba(225,225,225,0.72)",
               lineHeight: 1.65,
               textShadow: "0 1px 10px rgba(0,0,0,0.55)",
-              marginTop: "0.9rem",
-              marginBottom: "1.8rem",
-              maxWidth: "min(460px, 86vw)",
+              marginTop: "0.8rem",
+              marginBottom: "1.6rem",
+              maxWidth: "min(480px, 86vw)",
             }}
           >
-            AI-crafted journeys, local experiences, and spiritual adventures.
+            AI-powered journeys through mountains, culture, festivals, and hidden Himalayan experiences.
           </p>
 
-          {/* CTA buttons */}
+          {/* CTAs */}
           <div
             className="pointer-events-auto"
-            style={{ display: "flex", flexWrap: "wrap", gap: "12px", justifyContent: "center" }}
+            style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginBottom: "1.6rem" }}
           >
-            {/* Plan My Journey — crimson */}
             <motion.button
               onClick={() => document.dispatchEvent(new CustomEvent("open-ai-planner"))}
               whileHover={{ scale: 1.04, boxShadow: "0 0 36px rgba(220,20,60,0.62)" }}
@@ -279,7 +256,7 @@ export default function ParallaxHero() {
                 display: "flex", alignItems: "center", gap: "8px",
                 background: "linear-gradient(135deg, #FF2D5C 0%, #DC143C 55%, #B00A2A 100%)",
                 border: "none", color: "#fff",
-                padding: "12px 24px", borderRadius: "9999px",
+                padding: "11px 22px", borderRadius: "9999px",
                 fontWeight: 700, fontSize: "0.88rem", cursor: "pointer",
                 letterSpacing: "0.01em",
                 boxShadow: "0 4px 26px rgba(220,20,60,0.52)",
@@ -287,10 +264,9 @@ export default function ParallaxHero() {
               }}
             >
               <Sparkles size={14} strokeWidth={2} />
-              Plan My Journey
+              Build AI Trip
             </motion.button>
 
-            {/* Talk to Concierge — frosted glass */}
             <motion.button
               onClick={() => document.getElementById("discover")?.scrollIntoView({ behavior: "smooth" })}
               whileHover={{ scale: 1.04, background: "rgba(255,255,255,0.16)" }}
@@ -302,21 +278,41 @@ export default function ParallaxHero() {
                 backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
                 border: "1px solid rgba(255,255,255,0.20)",
                 color: "rgba(255,255,255,0.90)",
-                padding: "12px 24px", borderRadius: "9999px",
+                padding: "11px 22px", borderRadius: "9999px",
                 fontWeight: 600, fontSize: "0.88rem", cursor: "pointer",
                 willChange: "transform",
               }}
             >
-              <Headphones size={14} strokeWidth={2} />
-              Talk to Concierge
+              Start Exploring
+              <ChevronRight size={14} strokeWidth={2} />
             </motion.button>
           </div>
+
+          {/* Floating stats */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+            {STATS.map((stat) => (
+              <div
+                key={stat.label}
+                style={{
+                  background: "rgba(6,8,20,0.55)",
+                  backdropFilter: "blur(16px)",
+                  WebkitBackdropFilter: "blur(16px)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  borderRadius: "9999px",
+                  padding: "6px 14px",
+                  display: "flex", alignItems: "center", gap: "6px",
+                }}
+              >
+                <span style={{ fontSize: "0.9rem", fontWeight: 800, color: "#f59e0b" }}>{stat.value}</span>
+                <span style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.60)", whiteSpace: "nowrap" }}>{stat.label}</span>
+              </div>
+            ))}
+          </div>
+
         </div>
       </motion.div>
 
-      {/* ════════════════════════════════════════════════════════════════════ */}
-      {/* ══ Watch Nepal — bottom-right  z=40 ═══════════════════════════════ */}
-      {/* ════════════════════════════════════════════════════════════════════ */}
+      {/* ══ Watch Nepal — bottom-right  z=40 ══════════════════════════════════ */}
       <motion.div
         className="pointer-events-auto"
         style={{ position: "absolute", bottom: "6.5rem", right: "max(1.5rem, 5vw)", zIndex: 40 }}
@@ -353,8 +349,7 @@ export default function ParallaxHero() {
         </motion.button>
       </motion.div>
 
-
-      {/* ══ Scroll cue  z=50 ═════════════════════════════════════════════════ */}
+      {/* ══ Scroll cue  z=50 ══════════════════════════════════════════════════ */}
       <motion.div
         className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-none"
         style={{ zIndex: 50 }}
