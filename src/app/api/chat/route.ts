@@ -37,6 +37,9 @@ When the user mentions a city or destination, the client may fly the Interactive
 
 Plan trips using ONLY the locations and activities in this data. If a user asks for something not covered here, politely tell them you specialize in these specific Nepal experiences and suggest the closest match from the list.
 
+When a user asks to "show me", "show a picture", "show a photo", "show an image", or "what does X look like":
+- Call the generateDestinationImage tool immediately with the destination name and a short atmospheric caption.
+
 When suggesting an itinerary:
 - Recommend a logical order based on geography (group nearby destinations)
 - Mention the best time to visit each stop
@@ -237,6 +240,28 @@ const getTransportOptions = tool({
   },
 });
 
+// ── Destination image tool ───────────────────────────────────────
+const generateDestinationImage = tool({
+  description:
+    "Show a high-quality photo of a Nepal destination when the user asks to 'show me', 'show a picture', 'show a photo', 'show an image', or 'what does X look like'. Returns the destination's official HD image.",
+  inputSchema: z.object({
+    destinationName: z.string().describe("Name of the Nepal destination (e.g. 'Kathmandu', 'Pokhara')"),
+    caption: z.string().describe("A short atmospheric caption describing what the image shows (1–2 sentences)"),
+  }),
+  execute: async ({ destinationName, caption }) => {
+    const dest = destinations.find((d) =>
+      d.name.toLowerCase().includes(destinationName.toLowerCase()) ||
+      destinationName.toLowerCase().includes(d.name.toLowerCase())
+    );
+    return {
+      destinationName,
+      caption,
+      imageUrl: dest?.placeholderImage ?? null,
+      found:    !!dest,
+    };
+  },
+});
+
 // ── Itinerary tool ───────────────────────────────────────────────
 const buildItinerary = tool({
   description:
@@ -275,7 +300,7 @@ export async function POST(req: Request) {
       model:    google("gemini-2.5-flash"),
       system:   SYSTEM_PROMPT,
       messages,
-      tools:    { getTransportOptions, buildItinerary },
+      tools:    { getTransportOptions, buildItinerary, generateDestinationImage },
       stopWhen: stepCountIs(5),
     });
 

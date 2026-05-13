@@ -201,7 +201,7 @@ export default function AIAssistant() {
   );
 
   const { visitedIds } = useUserPassport();
-  const { selectedCities, totalDays, budgetUSD, travelMonth } = useTripContext();
+  const { selectedCities, totalDays, budgetUSD, travelMonth, toggleCity } = useTripContext();
   const { messages, sendMessage, status, error, setMessages, clearError } = useChat({
     transport,
     messages: chatInitialMessages,
@@ -526,17 +526,74 @@ export default function AIAssistant() {
                   }
 
                   if (part.type === "tool-buildItinerary" && part.state === "output-available") {
-                    const { tripTitle, totalDays, events } = part.output as {
+                    const { tripTitle, totalDays: td, events } = part.output as {
                       tripTitle: string; totalDays: number; events: ItineraryEvent[];
                     };
                     segments.push(
                       <Timeline
                         key={`${m.id}-timeline-${segments.length}`}
                         tripTitle={tripTitle}
-                        totalDays={totalDays}
+                        totalDays={td}
                         initialEvents={events}
+                        onSaveToTrip={(cityIds) => {
+                          const alreadySelected = new Set(selectedCities.map((c) => c.id));
+                          cityIds.forEach((id) => { if (!alreadySelected.has(id)) toggleCity(id); });
+                          setIsChatOpen(false);
+                        }}
                       />
                     );
+                  }
+
+                  // Destination image — skeleton while loading, HD photo when ready
+                  if (part.type === "tool-generateDestinationImage") {
+                    if (part.state !== "output-available") {
+                      segments.push(
+                        <motion.div
+                          key={`${m.id}-img-skel-${segments.length}`}
+                          variants={bubbleVariants} initial="hidden" animate="visible"
+                          className="flex justify-start"
+                        >
+                          <div className="max-w-[90%] rounded-2xl overflow-hidden border border-white/10 bg-zinc-900/60 animate-pulse" style={{ minWidth: 220 }}>
+                            <div style={{ width: "100%", height: 170, background: "rgba(255,255,255,0.06)" }} />
+                            <div style={{ padding: "10px 14px" }}>
+                              <div style={{ width: "55%", height: 10, borderRadius: 4, background: "rgba(255,255,255,0.09)", marginBottom: 6 }} />
+                              <div style={{ width: "38%", height: 8, borderRadius: 4, background: "rgba(255,255,255,0.05)" }} />
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    } else {
+                      const out = part.output as { destinationName: string; caption: string; imageUrl: string | null; found: boolean };
+                      if (out.imageUrl) {
+                        segments.push(
+                          <motion.div
+                            key={`${m.id}-img-${segments.length}`}
+                            variants={bubbleVariants} initial="hidden" animate="visible"
+                            className="flex justify-start"
+                          >
+                            <div className="max-w-[90%] rounded-2xl overflow-hidden border border-white/10" style={{ background: "rgba(18,18,22,0.90)" }}>
+                              <div className="relative" style={{ height: 200 }}>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={`${out.imageUrl.split("?")[0]}?w=640&q=85`}
+                                  alt={out.destinationName}
+                                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                                />
+                                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 55%)" }} />
+                                <div style={{ position: "absolute", bottom: 10, left: 12 }}>
+                                  <p style={{ color: "#fff", fontWeight: 700, fontSize: 13, lineHeight: 1.2, margin: 0 }}>{out.destinationName}</p>
+                                </div>
+                              </div>
+                              {out.caption && (
+                                <div style={{ padding: "9px 14px" }}>
+                                  <p style={{ color: "rgba(255,255,255,0.52)", fontSize: 11, lineHeight: 1.55, margin: 0 }}>{out.caption}</p>
+                                </div>
+                              )}
+                            </div>
+                          </motion.div>
+                        );
+                      }
+                    }
                   }
                 }
 
