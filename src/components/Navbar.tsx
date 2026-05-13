@@ -62,22 +62,7 @@ export default function Navbar() {
           <div className="flex items-center justify-between gap-3 h-[60px]">
 
             {/* ── Logo ── */}
-            <TransitionLink href="/" className="flex items-center gap-2.5 flex-shrink-0">
-              <div
-                className="flex items-center justify-center rounded-[10px]"
-                style={{
-                  width: 40, height: 40,
-                  background: glassBg,
-                  backdropFilter: "blur(12px)",
-                  WebkitBackdropFilter: "blur(12px)",
-                  border: `1px solid ${glassBorder}`,
-                }}
-              >
-                <svg width="22" height="18" viewBox="0 0 22 18" fill="none" aria-hidden>
-                  <path d="M1 17 L7 5 L12 11 L16 5 L21 17 Z" fill="var(--fill-primary)" opacity="0.85" />
-                  <path d="M12 5 L14.2 10 L12 8.6 L9.8 10 Z" fill="var(--fill-primary)" />
-                </svg>
-              </div>
+            <TransitionLink href="/" className="flex items-center flex-shrink-0">
               <div className="leading-tight">
                 <p className="font-bold text-[15px] text-[#1a1a1a] dark:text-white tracking-tight">City Explorer</p>
                 <p className="text-[10px] text-[#1a1a1a]/50 dark:text-white/45 font-medium">Himalayan Kingdom</p>

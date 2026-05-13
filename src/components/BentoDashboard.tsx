@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
 import dynamic from "next/dynamic";
-import HimalayanAICard from "./HimalayanAICard";
 import LiveInsights from "./LiveInsights";
 import FeaturedAdventureCard from "./FeaturedAdventureCard";
 import { useTheme } from "@/context/ThemeContext";
@@ -173,12 +172,7 @@ export default function BentoDashboard() {
           <MapLoader />
         </BentoCard>
 
-        {/* ── CELL 4: Himalaya AI ── */}
-        <BentoCard className="min-h-[300px] flex flex-col p-8" hoverShadow={HOVER_SHADOW}>
-          <HimalayanAICard />
-        </BentoCard>
-
-        {/* ── CELL 5: Live Insights ── */}
+        {/* ── CELL 4: Live Insights ── */}
         <BentoCard className="lg:col-span-3 sm:col-span-2" hoverShadow={HOVER_SHADOW}>
           <LiveInsights isDark={isDark} />
         </BentoCard>
