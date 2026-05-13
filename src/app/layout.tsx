@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import { TripProvider } from "@/context/TripContext";
 import MasterExplorerModal from "@/components/MasterExplorerModal";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import ScrollProgressBar from "@/components/ScrollProgressBar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -60,6 +61,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
       <body className="min-h-full flex flex-col">
+        <ScrollProgressBar />
         <ThemeProvider>
           <UserPassportProvider>
             <TripProvider>

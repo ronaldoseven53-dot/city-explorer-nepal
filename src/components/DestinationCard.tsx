@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
 import TransitionLink from "@/components/TransitionLink";
@@ -32,8 +32,23 @@ const categoryGlow: Record<Destination["category"], string> = {
 
 export default function DestinationCard({ destination }: { destination: Destination }) {
   const [expanded, setExpanded] = useState(false);
-  const s = categoryStyles[destination.category];
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [spotlight, setSpotlight] = useState({ x: 50, y: 50, visible: false });
+
+  const s    = categoryStyles[destination.category];
   const glow = categoryGlow[destination.category];
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    setSpotlight({
+      x: ((e.clientX - rect.left) / rect.width)  * 100,
+      y: ((e.clientY - rect.top)  / rect.height) * 100,
+      visible: true,
+    });
+  };
+
+  const handleMouseLeave = () => setSpotlight((s) => ({ ...s, visible: false }));
 
   const previewActivities = destination.activities.slice(0, 4);
   const extraCount = destination.activities.length - previewActivities.length;
@@ -41,14 +56,32 @@ export default function DestinationCard({ destination }: { destination: Destinat
 
   return (
     <motion.div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
       whileHover={{
-        scale: 1.02,
-        boxShadow: `0 0 0 1px rgba(255,255,255,0.08), 0 24px 48px -12px ${glow}, 0 8px 24px -8px rgba(0,0,0,0.5)`,
+        scale: 1.022,
+        y: -5,
+        boxShadow: `0 0 0 1px rgba(255,255,255,0.10), 0 28px 56px -12px ${glow}, 0 8px 24px -8px rgba(0,0,0,0.55)`,
       }}
-      transition={{ duration: 0.25, ease: "easeOut" }}
+      whileTap={{ scale: 0.985 }}
+      transition={{ type: "spring", stiffness: 340, damping: 28 }}
       style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12), 0 0 0 1px rgba(255,255,255,0.06), 0 4px 24px -4px rgba(0,0,0,0.5)" }}
-      className="bg-zinc-900/40 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden flex flex-col group will-change-transform"
+      className="bg-zinc-900/40 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden flex flex-col group will-change-transform relative"
     >
+      {/* Spotlight / cursor-tracking glow */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute", inset: 0, borderRadius: "inherit",
+          background: spotlight.visible
+            ? `radial-gradient(circle at ${spotlight.x}% ${spotlight.y}%, rgba(255,255,255,0.065) 0%, transparent 55%)`
+            : "none",
+          transition: "background 0.12s ease",
+          pointerEvents: "none",
+          zIndex: 2,
+        }}
+      />
       {/* ── Image ─────────────────────────────────────────── */}
       <div className="relative h-52 overflow-hidden flex-shrink-0">
         <Image

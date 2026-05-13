@@ -3,6 +3,8 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform, type Transition } from "motion/react";
 import { Sparkles, ChevronRight, Play } from "lucide-react";
+import AtmosphericFog from "@/components/AtmosphericFog";
+import { useReducedMotion } from "@/hooks/useScrollAnimation";
 
 const BTN_TRANSITION: Transition = { type: "tween", duration: 0.18, ease: "easeInOut" };
 
@@ -32,6 +34,8 @@ const STATS = [
 
 export default function ParallaxHero() {
   const heroRef = useRef<HTMLDivElement>(null);
+
+  const reduced = useReducedMotion();
 
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -82,7 +86,60 @@ export default function ParallaxHero() {
               "linear-gradient(to bottom, rgba(4,8,18,0.55) 0%, transparent 30%, transparent 60%, rgba(4,8,18,0.50) 100%)",
           }}
         />
+
+        {/* ── Ambient light orbs — warm alpenglow pools ── */}
+        {!reduced && (
+          <>
+            {/* Primary warm orb — sunrise-pink, top-left quadrant */}
+            <motion.div
+              aria-hidden
+              style={{
+                position: "absolute",
+                top: "8%", left: "18%",
+                width: "38vw", height: "38vw",
+                borderRadius: "50%",
+                background: "radial-gradient(circle, rgba(200,90,80,0.28) 0%, transparent 70%)",
+                filter: "blur(60px)",
+                mixBlendMode: "screen",
+                willChange: "transform, opacity",
+              }}
+              animate={{
+                x:       [0, 18, -8, 12, 0],
+                y:       [0, -14, 8, -6, 0],
+                opacity: [0.75, 1, 0.6, 0.9, 0.75],
+              }}
+              transition={{ duration: 28, ease: "easeInOut", repeat: Infinity }}
+            />
+            {/* Secondary orb — violet zenith, right side */}
+            <motion.div
+              aria-hidden
+              style={{
+                position: "absolute",
+                top: "2%", right: "12%",
+                width: "28vw", height: "28vw",
+                borderRadius: "50%",
+                background: "radial-gradient(circle, rgba(120,60,160,0.22) 0%, transparent 70%)",
+                filter: "blur(50px)",
+                mixBlendMode: "screen",
+                willChange: "transform, opacity",
+              }}
+              animate={{
+                x:       [0, -20, 10, -6, 0],
+                y:       [0, 10, -12, 4, 0],
+                opacity: [0.55, 0.85, 0.45, 0.70, 0.55],
+              }}
+              transition={{ duration: 36, ease: "easeInOut", repeat: Infinity, delay: 4 }}
+            />
+          </>
+        )}
       </motion.div>
+
+      {/* ══ z=8 — Atmospheric fog (sits between sky and mountains) ══════════ */}
+      <AtmosphericFog
+        style={{ zIndex: 8 }}
+        maxLayers={3}
+        opacityScale={0.75}
+      />
 
       {/* ══ z=10 — Mid mountain photo (rises fast, covers "Beyond" at p≈0.16) ═ */}
       <motion.div

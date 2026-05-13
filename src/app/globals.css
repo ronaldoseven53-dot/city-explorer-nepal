@@ -89,10 +89,26 @@
   --font-mono: var(--font-geist-mono);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ── Reduced-motion global reset ────────────────────────────────────────── */
+/* Collapses all CSS-driven durations to near-zero for users who prefer less motion.
+   Framer Motion checks this separately via its own reduced-motion hook. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration:        0.01ms !important;
+    animation-iteration-count: 1      !important;
+    transition-duration:       0.01ms !important;
+    scroll-behavior:           auto   !important;
+  }
 }
 
 /* Smooth cross-fade only while the theme is switching */
@@ -135,6 +151,40 @@ body {
   ::view-transition-new(hero) {
     animation: none;
   }
+}
+
+/* ── Cinematic float — use class "animate-float" ─────────────────────────── */
+@keyframes float-cinematic {
+  0%   { transform: translateY(0px)   rotate(-0.5deg); }
+  30%  { transform: translateY(-9px)  rotate(0.4deg);  }
+  60%  { transform: translateY(-5px)  rotate(-0.3deg); }
+  100% { transform: translateY(0px)   rotate(-0.5deg); }
+}
+
+.animate-float {
+  animation: float-cinematic 7s ease-in-out infinite;
+}
+
+/* ── Gradient shimmer — use class "animate-shimmer" ─────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+.animate-shimmer {
+  background-size: 200% auto;
+  animation: shimmer 3s linear infinite;
+}
+
+/* ── Gradient drift — ambient background motion ──────────────────────────── */
+@keyframes gradient-drift {
+  0%, 100% { background-position: 0%   50%; }
+  50%       { background-position: 100% 50%; }
+}
+
+.animate-gradient-drift {
+  background-size: 200% 200%;
+  animation: gradient-drift 12s ease infinite;
 }
 
 /* ── 3-D Confetti ────────────────────────────────────────────── */
