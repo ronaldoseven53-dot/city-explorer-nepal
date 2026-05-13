@@ -210,6 +210,33 @@ body {
   [class*="confetti-"] { animation: none !important; opacity: 0 !important; }
 }
 
+/* ── HD image rendering — apply to full-bleed hero images ───────────────── */
+.optimize-contrast {
+  image-rendering: -webkit-optimize-contrast; /* Webkit/Blink: sharper downscaling */
+  image-rendering: crisp-edges;               /* Firefox fallback                  */
+}
+
+/* ── 16px input rule — prevents iOS auto-zoom on focus ──────────────────── */
+/* Any input/textarea/select with font-size < 16px triggers iOS zoom.        */
+/* This global rule keeps everything at 16px minimum on touch devices.       */
+@media (hover: none) and (pointer: coarse) {
+  input, textarea, select {
+    font-size: max(16px, 1em) !important;
+  }
+}
+
+/* ── Bottom nav — glass bar helper class ────────────────────────────────── */
+/* Use on position:fixed bottom-nav wrappers for consistent glass effect.    */
+.bottom-nav-glass {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 100;
+}
+
 /* ── Scrollbar hide utility ──────────────────────────────── */
 .scrollbar-hide {
   -ms-overflow-style: none;
