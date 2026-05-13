@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ChevronDown } from "lucide-react";
 
-// ── Static city config (weather data fetched at runtime) ───────────────
+// ── Static city config ────────────────────────────────────────────────────
 
 interface CityConfig {
   id: string;
@@ -22,219 +22,45 @@ const CITIES: CityConfig[] = [
   { id: "namche",    name: "Namche Bazaar", bestSeason: "Apr – May",  currentSeason: "Spring Trek",  seasonColor: "#8B5CF6" },
 ];
 
-// ── Live weather payload shape ─────────────────────────────────────────
+// ── Weather API shape ─────────────────────────────────────────────────────
 
 type IconType = "sun" | "partly-cloudy" | "hazy" | "snow" | "rain";
 
 interface WeatherData {
-  temp: number;
-  condition: string;
-  icon: IconType;
+  temp:            number;
+  condition:       string;
+  icon:            IconType;
   visibilityLabel: string;
   visibilityScore: number;
-  skyCondition: string;
+  skyCondition:    string;
 }
 
-const ICON_GLOW: Record<IconType, string> = {
-  "sun":           "drop-shadow(0 6px 18px rgba(255,165,0,0.48))",
-  "partly-cloudy": "drop-shadow(0 6px 16px rgba(100,160,240,0.40))",
-  "hazy":          "drop-shadow(0 6px 14px rgba(200,160,80,0.38))",
-  "snow":          "drop-shadow(0 6px 16px rgba(100,160,230,0.55))",
-  "rain":          "drop-shadow(0 6px 14px rgba(70,130,200,0.45))",
-};
-
-// ── SVG Weather Icons ──────────────────────────────────────────────────
-
-function SunIcon() {
-  return (
-    <svg width="58" height="58" viewBox="0 0 58 58" fill="none">
-      <defs>
-        <radialGradient id="li-sg-core" cx="42%" cy="30%" r="58%">
-          <stop offset="0%" stopColor="#FFF9C4" />
-          <stop offset="35%" stopColor="#FFD600" />
-          <stop offset="100%" stopColor="#FF8C00" />
-        </radialGradient>
-        <radialGradient id="li-sg-halo" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#FFD600" stopOpacity="0.32" />
-          <stop offset="100%" stopColor="#FF6B00" stopOpacity="0" />
-        </radialGradient>
-        <filter id="li-sg-blur"><feGaussianBlur stdDeviation="3.5" /></filter>
-      </defs>
-      <circle cx="29" cy="29" r="25" fill="url(#li-sg-halo)" filter="url(#li-sg-blur)" />
-      {Array.from({ length: 8 }, (_, i) => {
-        const a = (i * 45 * Math.PI) / 180;
-        return (
-          <line key={i}
-            x1={29 + Math.cos(a) * 17} y1={29 + Math.sin(a) * 17}
-            x2={29 + Math.cos(a) * 25} y2={29 + Math.sin(a) * 25}
-            stroke="#FFB300" strokeWidth="2.6" strokeLinecap="round"
-          />
-        );
-      })}
-      <circle cx="29" cy="29" r="13.5" fill="url(#li-sg-core)" />
-      <ellipse cx="24" cy="23" rx="4.5" ry="2.8" fill="rgba(255,255,255,0.52)" />
-    </svg>
-  );
-}
-
-function PartlyCloudyIcon() {
-  return (
-    <svg width="62" height="58" viewBox="0 0 62 58" fill="none">
-      <defs>
-        <radialGradient id="li-pc-sun" cx="42%" cy="30%" r="60%">
-          <stop offset="0%" stopColor="#FFF9C4" />
-          <stop offset="40%" stopColor="#FFD600" />
-          <stop offset="100%" stopColor="#FFA500" />
-        </radialGradient>
-        <linearGradient id="li-pc-cloud" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#FFFFFF" />
-          <stop offset="100%" stopColor="#C8DCEE" />
-        </linearGradient>
-        <filter id="li-pc-shadow">
-          <feDropShadow dx="0" dy="2.5" stdDeviation="3.5" floodColor="#7AAACE" floodOpacity="0.45" />
-        </filter>
-      </defs>
-      <circle cx="20" cy="23" r="12" fill="url(#li-pc-sun)" opacity="0.95" />
-      {[315, 0, 45].map((deg, i) => {
-        const a = (deg * Math.PI) / 180;
-        return (
-          <line key={i}
-            x1={20 + Math.cos(a) * 14} y1={23 + Math.sin(a) * 14}
-            x2={20 + Math.cos(a) * 20} y2={23 + Math.sin(a) * 20}
-            stroke="#FFB300" strokeWidth="2.2" strokeLinecap="round"
-          />
-        );
-      })}
-      <ellipse cx="16" cy="17.5" rx="3.5" ry="2.2" fill="rgba(255,255,255,0.55)" />
-      <g filter="url(#li-pc-shadow)">
-        <circle cx="22" cy="42" r="9.5" fill="url(#li-pc-cloud)" />
-        <circle cx="34" cy="39" r="11" fill="url(#li-pc-cloud)" />
-        <circle cx="46" cy="42" r="8.5" fill="url(#li-pc-cloud)" />
-        <rect x="12.5" y="41.5" width="42" height="9.5" fill="url(#li-pc-cloud)" />
-      </g>
-      <ellipse cx="34" cy="32" rx="9.5" ry="3" fill="rgba(255,255,255,0.58)" />
-    </svg>
-  );
-}
-
-function HazyIcon() {
-  return (
-    <svg width="58" height="58" viewBox="0 0 58 58" fill="none">
-      <defs>
-        <radialGradient id="li-hz-sun" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#FFF0B0" stopOpacity="0.95" />
-          <stop offset="60%" stopColor="#FFB347" stopOpacity="0.65" />
-          <stop offset="100%" stopColor="#FF8C00" stopOpacity="0.15" />
-        </radialGradient>
-        <filter id="li-hz-blur"><feGaussianBlur stdDeviation="3" /></filter>
-      </defs>
-      <circle cx="29" cy="22" r="17" fill="url(#li-hz-sun)" filter="url(#li-hz-blur)" />
-      <circle cx="29" cy="22" r="10" fill="#FFD060" opacity="0.55" />
-      {[34, 41, 48, 54].map((y, i) => (
-        <rect key={i} x={7 + i * 2} y={y - 1.5} width={44 - i * 4} height="3.5" rx="1.75"
-          fill={`rgba(190,210,230,${0.55 - i * 0.09})`}
-        />
-      ))}
-    </svg>
-  );
-}
-
-function SnowIcon() {
-  return (
-    <svg width="62" height="62" viewBox="0 0 62 62" fill="none">
-      <defs>
-        <linearGradient id="li-sn-cloud" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#AABDD8" />
-          <stop offset="100%" stopColor="#7898BC" />
-        </linearGradient>
-        <filter id="li-sn-shadow">
-          <feDropShadow dx="0" dy="2.5" stdDeviation="3.5" floodColor="#4466AA" floodOpacity="0.40" />
-        </filter>
-      </defs>
-      <g filter="url(#li-sn-shadow)">
-        <circle cx="18" cy="35" r="9.5" fill="url(#li-sn-cloud)" />
-        <circle cx="29" cy="31" r="11.5" fill="url(#li-sn-cloud)" />
-        <circle cx="42" cy="35" r="9" fill="url(#li-sn-cloud)" />
-        <rect x="8.5" y="34.5" width="45" height="10" fill="url(#li-sn-cloud)" />
-      </g>
-      {[[16, 51], [29, 57], [42, 51], [22, 58], [36, 58]].map(([cx, cy], i) => (
-        <g key={i} opacity={i > 2 ? 0.60 : 0.92}>
-          <line x1={cx} y1={cy - 5.5} x2={cx} y2={cy + 5.5} stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-          <line x1={cx - 5.5} y1={cy} x2={cx + 5.5} y2={cy} stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-          <line x1={cx - 3.5} y1={cy - 3.5} x2={cx + 3.5} y2={cy + 3.5} stroke="white" strokeWidth="1.1" strokeLinecap="round" />
-          <line x1={cx + 3.5} y1={cy - 3.5} x2={cx - 3.5} y2={cy + 3.5} stroke="white" strokeWidth="1.1" strokeLinecap="round" />
-          <circle cx={cx} cy={cy} r="1.8" fill="white" />
-        </g>
-      ))}
-    </svg>
-  );
-}
-
-function RainIcon() {
-  return (
-    <svg width="62" height="62" viewBox="0 0 62 62" fill="none">
-      <defs>
-        <linearGradient id="li-rn-cloud" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#7A9CC0" />
-          <stop offset="100%" stopColor="#4E6E90" />
-        </linearGradient>
-        <filter id="li-rn-shadow">
-          <feDropShadow dx="0" dy="2.5" stdDeviation="3.5" floodColor="#2244AA" floodOpacity="0.35" />
-        </filter>
-      </defs>
-      <g filter="url(#li-rn-shadow)">
-        <circle cx="18" cy="32" r="9.5" fill="url(#li-rn-cloud)" />
-        <circle cx="29" cy="28" r="11.5" fill="url(#li-rn-cloud)" />
-        <circle cx="42" cy="32" r="9" fill="url(#li-rn-cloud)" />
-        <rect x="8.5" y="31.5" width="42.5" height="9.5" fill="url(#li-rn-cloud)" />
-      </g>
-      {[[16, 48, 55], [23, 46, 53], [30, 49, 57], [37, 47, 54], [44, 50, 58]].map(([x, y1, y2], i) => (
-        <line key={i}
-          x1={x - 1.5} y1={y1} x2={x + 1.5} y2={y2}
-          stroke="#7EC8F0" strokeWidth="2.4" strokeLinecap="round"
-          opacity={i % 2 === 0 ? 1 : 0.65}
-        />
-      ))}
-    </svg>
-  );
-}
-
-function WeatherIcon({ type }: { type: IconType }) {
-  if (type === "sun")           return <SunIcon />;
-  if (type === "partly-cloudy") return <PartlyCloudyIcon />;
-  if (type === "hazy")          return <HazyIcon />;
-  if (type === "snow")          return <SnowIcon />;
-  if (type === "rain")          return <RainIcon />;
-  return <SunIcon />;
-}
-
-// ── Transition variants ────────────────────────────────────────────────
+// ── Slide variants ────────────────────────────────────────────────────────
 
 const slideVariants = {
-  enter: (dir: number) => ({ opacity: 0, y: dir * 20, filter: "blur(4px)" }),
+  enter: (dir: number) => ({ opacity: 0, y: dir * 18, filter: "blur(4px)" }),
   center: {
     opacity: 1, y: 0, filter: "blur(0px)",
     transition: { type: "spring" as const, stiffness: 340, damping: 28 },
   },
   exit: (dir: number) => ({
-    opacity: 0, y: dir * -14, filter: "blur(2px)",
+    opacity: 0, y: dir * -12, filter: "blur(2px)",
     transition: { duration: 0.16, ease: "easeIn" as const },
   }),
 };
 
-// ── Component ──────────────────────────────────────────────────────────
+// ── Component ─────────────────────────────────────────────────────────────
 
 export default function LiveInsights({ isDark }: { isDark: boolean }) {
-  const [cityIdx, setCityIdx]   = useState(0);
-  const [dir, setDir]           = useState(1);
-  const [open, setOpen]         = useState(false);
-  const [weather, setWeather]   = useState<WeatherData | null>(null);
-  const [loading, setLoading]   = useState(true);
-  const dropRef                 = useRef<HTMLDivElement>(null);
+  const [cityIdx, setCityIdx] = useState(0);
+  const [dir, setDir]         = useState(1);
+  const [open, setOpen]       = useState(false);
+  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const dropRef               = useRef<HTMLDivElement>(null);
 
   const city = CITIES[cityIdx];
 
-  // Close dropdown on outside click
   useEffect(() => {
     const h = (e: MouseEvent) => {
       if (dropRef.current && !dropRef.current.contains(e.target as Node))
@@ -244,25 +70,19 @@ export default function LiveInsights({ isDark }: { isDark: boolean }) {
     return () => document.removeEventListener("mousedown", h);
   }, []);
 
-  // Fetch weather whenever city changes
   const fetchWeather = useCallback((id: string) => {
     const ctrl = new AbortController();
     setLoading(true);
 
     fetch(`/api/weather?city=${id}`, { signal: ctrl.signal })
-      .then(async r => {
+      .then(async (r) => {
         const d = await r.json();
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return d;
       })
-      .then(d => {
-        setWeather(d as WeatherData);
-        setLoading(false);
-      })
-      .catch(e => {
+      .then((d) => { setWeather(d as WeatherData); setLoading(false); })
+      .catch((e) => {
         if (e.name !== "AbortError") {
-          console.warn("[LiveInsights] Fetch failed, using fallback:", e.message);
-          // Client-side fallback so the card never shows empty
           setWeather({ temp: 24, condition: "Partly Cloudy", icon: "partly-cloudy", visibilityLabel: "Good", visibilityScore: 0.70, skyCondition: "Overcast" });
           setLoading(false);
         }
@@ -284,17 +104,23 @@ export default function LiveInsights({ isDark }: { isDark: boolean }) {
   };
 
   // Theme tokens
-  const textPrimary   = isDark ? "#ffffff"                   : "#0a0a14";
-  const textSecondary = isDark ? "rgba(255,255,255,0.50)"    : "rgba(0,0,0,0.50)";
-  const textMuted     = isDark ? "rgba(255,255,255,0.38)"    : "rgba(0,0,0,0.38)";
-  const trackBg       = isDark ? "rgba(255,255,255,0.10)"    : "rgba(0,0,0,0.08)";
+  const textPrimary   = isDark ? "#ffffff"                : "#0a0a14";
+  const textSecondary = isDark ? "rgba(255,255,255,0.50)" : "rgba(0,0,0,0.50)";
+  const textMuted     = isDark ? "rgba(255,255,255,0.38)" : "rgba(0,0,0,0.38)";
 
   const INNER_CARD: React.CSSProperties = {
     background: isDark ? "rgba(255,255,255,0.035)" : "rgba(0,0,0,0.028)",
-    border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.065)"}`,
+    border:     `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.065)"}`,
     borderRadius: 18,
-    padding: "18px 16px 16px",
+    padding:    "18px 16px 16px",
   };
+
+  // CSS variables forwarded to mobile unified-card stylesheet
+  const cssVars = {
+    ["--li-unified-bg" as string]:     isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+    ["--li-unified-border" as string]: isDark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.09)",
+    ["--li-divider" as string]:        isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
+  } as React.CSSProperties;
 
   return (
     <div className="relative px-5 pt-6 pb-5 sm:px-7 sm:pt-7 flex flex-col gap-5 h-full">
@@ -305,12 +131,8 @@ export default function LiveInsights({ isDark }: { isDark: boolean }) {
           Right Now In
         </p>
 
-        {/* City dropdown — centred */}
         <div ref={dropRef} className="relative flex justify-center">
-          <button
-            onClick={() => setOpen(v => !v)}
-            className="flex items-center gap-1.5 cursor-pointer group"
-          >
+          <button onClick={() => setOpen((v) => !v)} className="flex items-center gap-1.5 cursor-pointer group">
             <span className="text-[26px] font-extrabold tracking-tight leading-none" style={{ color: textPrimary }}>
               {city.name}
             </span>
@@ -341,8 +163,8 @@ export default function LiveInsights({ isDark }: { isDark: boolean }) {
                   <button key={c.id} onClick={() => pick(i)}
                     className="w-full flex items-center justify-between px-4 py-2.5 transition-colors duration-100"
                     style={{ background: i === cityIdx ? (isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.055)") : "transparent" }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = i === cityIdx ? (isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.055)") : "transparent"; }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = i === cityIdx ? (isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.055)") : "transparent"; }}
                   >
                     <span style={{ fontSize: 13, fontWeight: i === cityIdx ? 700 : 500, color: i === cityIdx ? textPrimary : textSecondary }}>
                       {c.name}
@@ -358,7 +180,7 @@ export default function LiveInsights({ isDark }: { isDark: boolean }) {
         </div>
       </div>
 
-      {/* ── Cards (animated on city change) ── */}
+      {/* ── Data columns (animated on city change) ── */}
       <AnimatePresence mode="wait" custom={dir}>
         <motion.div
           key={city.id}
@@ -368,92 +190,63 @@ export default function LiveInsights({ isDark }: { isDark: boolean }) {
           animate="center"
           exit="exit"
           className="li-cards-row"
-          style={{ willChange: "transform, opacity" }}
+          style={{ willChange: "transform, opacity", ...cssVars }}
         >
 
-          {/* ── Card 1: Weather ── */}
+          {/* ── Col 1: Weather — temp + condition, no icon ── */}
           <div className="li-card" style={INNER_CARD}>
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] mb-3.5 text-center" style={{ color: "#FB923C" }}>
-              Weather
-            </p>
+            <p className="li-label" style={{ color: "#FB923C" }}>Weather</p>
 
             {loading ? (
-              <div className="flex flex-col items-center gap-2">
-                <div className="w-12 h-12 rounded-full animate-pulse" style={{ background: trackBg }} />
-                <p className="animate-pulse text-[13px] font-semibold" style={{ color: textSecondary }}>
-                  Loading…
-                </p>
+              <div className="flex flex-col items-center gap-2 mt-1">
+                <div className="w-8 h-8 rounded animate-pulse" style={{ background: "rgba(255,255,255,0.08)" }} />
+                <div className="w-16 h-3 rounded animate-pulse" style={{ background: "rgba(255,255,255,0.06)" }} />
               </div>
             ) : (
-              <div className="flex flex-col items-center gap-1.5 text-center">
-                <motion.div
-                  animate={{ y: [0, -5, 0] }}
-                  transition={{ duration: 3.8, repeat: Infinity, ease: "easeInOut" }}
-                  className="flex-shrink-0"
-                  style={{ filter: ICON_GLOW[weather!.icon], willChange: "transform" }}
-                >
-                  <WeatherIcon type={weather!.icon} />
-                </motion.div>
-                <p className="text-[42px] font-black tracking-tight leading-none li-temp" style={{ color: textPrimary }}>
+              <div className="flex flex-col items-center text-center gap-1 mt-1">
+                <p className="font-black tracking-tight leading-none li-temp" style={{ color: textPrimary }}>
                   {weather!.temp}
-                  <span className="text-xl font-semibold ml-0.5" style={{ color: textSecondary }}>°C</span>
+                  <span className="li-deg" style={{ color: textSecondary }}>°C</span>
                 </p>
-                <p className="text-[12px] font-medium" style={{ color: textSecondary }}>
+                <p className="li-sub" style={{ color: textSecondary }}>
                   {weather!.condition}
                 </p>
               </div>
             )}
           </div>
 
-          {/* ── Card 2: Season (always static) ── */}
+          {/* ── Col 2: Season — name + window, no pill ── */}
           <div className="li-card" style={INNER_CARD}>
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] mb-3.5" style={{ color: city.seasonColor }}>
-              Season
-            </p>
-            <div className="flex items-center gap-2 mb-2.5">
-              <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-bold"
-                style={{ background: `${city.seasonColor}1C`, border: `1px solid ${city.seasonColor}45`, color: city.seasonColor }}>
+            <p className="li-label" style={{ color: city.seasonColor }}>Season</p>
+            <div className="flex flex-col gap-0.5 mt-1">
+              <p className="li-season-title font-extrabold tracking-tight leading-none" style={{ color: textPrimary }}>
                 {city.currentSeason}
-              </span>
+              </p>
+              <p className="li-season-window font-bold" style={{ color: city.seasonColor }}>
+                {city.bestSeason}
+              </p>
+              <p className="li-sub mt-0.5" style={{ color: textMuted }}>Best window</p>
             </div>
-            <p className="text-[19px] font-extrabold tracking-tight leading-none li-season-title" style={{ color: textPrimary }}>
-              {city.bestSeason}
-            </p>
-            <p className="text-[11px] mt-1.5" style={{ color: textMuted }}>Best travel window</p>
           </div>
 
-          {/* ── Card 3: Visibility ── */}
+          {/* ── Col 3: Visibility — label + condition, no bar ── */}
           <div className="li-card" style={INNER_CARD}>
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] mb-3.5" style={{ color: "#60A5FA" }}>
-              Visibility
-            </p>
+            <p className="li-label" style={{ color: "#60A5FA" }}>Visibility</p>
 
             {loading ? (
-              <p className="animate-pulse text-[13px] font-semibold" style={{ color: textSecondary }}>
-                Loading…
-              </p>
+              <div className="flex flex-col gap-2 mt-1">
+                <div className="w-12 h-4 rounded animate-pulse" style={{ background: "rgba(255,255,255,0.08)" }} />
+                <div className="w-16 h-3 rounded animate-pulse" style={{ background: "rgba(255,255,255,0.06)" }} />
+              </div>
             ) : (
-              <>
-                <p className="text-[22px] font-extrabold tracking-tight leading-none li-vis-label" style={{ color: textPrimary }}>
+              <div className="flex flex-col gap-0.5 mt-1">
+                <p className="li-vis-label font-extrabold tracking-tight leading-none" style={{ color: textPrimary }}>
                   {weather!.visibilityLabel}
                 </p>
-                <p className="text-[12px] mt-1.5 font-medium" style={{ color: textSecondary }}>
+                <p className="li-sub" style={{ color: textSecondary }}>
                   {weather!.skyCondition}
                 </p>
-                <div className="mt-4 h-1.5 rounded-full overflow-hidden" style={{ background: trackBg }}>
-                  <motion.div
-                    className="h-full rounded-full"
-                    style={{
-                      background: "linear-gradient(90deg, #3B82F6 0%, #60A5FA 60%, #93C5FD 100%)",
-                      transformOrigin: "left",
-                      willChange: "transform",
-                    }}
-                    initial={{ scaleX: 0 }}
-                    animate={{ scaleX: weather!.visibilityScore }}
-                    transition={{ type: "spring", stiffness: 200, damping: 26, delay: 0.08 }}
-                  />
-                </div>
-              </>
+              </div>
             )}
           </div>
 
@@ -461,31 +254,69 @@ export default function LiveInsights({ isDark }: { isDark: boolean }) {
       </AnimatePresence>
 
       <style>{`
+        /* ── Label: WEATHER / SEASON / VISIBILITY ── */
+        .li-label {
+          font-size: 10px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.18em;
+          margin-bottom: 0;
+        }
+
+        /* ── Desktop: 3 separate glass cards ── */
         .li-cards-row {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
           gap: 12px;
         }
+
+        /* Desktop type scale */
+        .li-temp        { font-size: 42px; }
+        .li-deg         { font-size: 20px; font-weight: 600; margin-left: 2px; }
+        .li-sub         { font-size: 12px; font-weight: 500; }
+        .li-season-title  { font-size: 19px; }
+        .li-season-window { font-size: 15px; }
+        .li-vis-label   { font-size: 22px; }
+
+        /* ── Mobile: single unified glassmorphism card ── */
         @media (max-width: 639px) {
           .li-cards-row {
             display: flex;
-            flex-direction: row;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            gap: 10px;
+            gap: 0;
+            overflow: visible;
+            background:           var(--li-unified-bg);
+            backdrop-filter:      blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border:               1px solid var(--li-unified-border);
+            border-radius:        20px;
           }
-          .li-cards-row::-webkit-scrollbar { display: none; }
+
           .li-card {
-            flex-shrink: 0;
-            width: 82%;
-            scroll-snap-align: start;
-            padding: 16px 20px 14px !important;
+            flex: 1;
+            border-radius: 0 !important;
+            background:    transparent !important;
+            border:        none !important;
+            border-right:  1px solid var(--li-divider) !important;
+            padding:       14px 8px 14px !important;
+            display:       flex;
+            flex-direction: column;
+            align-items:   center;
+            text-align:    center;
           }
-          .li-temp         { font-size: 36px !important; line-height: 1 !important; }
-          .li-season-title { font-size: 15px !important; }
-          .li-vis-label    { font-size: 16px !important; }
+          .li-card:last-child { border-right: none !important; }
+
+          /* Mobile type scale — scaled down to fit 3 equal columns */
+          .li-temp          { font-size: 26px !important; }
+          .li-deg           { font-size: 14px !important; }
+          .li-sub           { font-size: 10px !important; }
+          .li-season-title  { font-size: 13px !important; }
+          .li-season-window { font-size: 12px !important; }
+          .li-vis-label     { font-size: 15px !important; }
+          .li-label         { font-size: 9px !important; letter-spacing: 0.14em !important; margin-bottom: 6px !important; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .li-cards-row { animation: none; }
         }
       `}</style>
 
